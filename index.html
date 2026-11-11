@@ -158,47 +158,47 @@
 
       <!-- Action Buttons -->
       <div class="flex items-center gap-2 sm:gap-2.5">
-        <!-- Install on iPhone App Button -->
-        <button onclick="openInstallModal()" class="px-3 py-2 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="Install on iPhone Home Screen">
+        <!-- Install on iPhone App Button (Minimized to Apple Icon only) -->
+        <button onclick="openInstallModal()" class="px-2.5 py-2 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center justify-center shadow-sm" title="Install on iPhone Home Screen">
           <i class="fa-brands fa-apple text-sm text-cyan-400"></i>
-          <span class="hidden md:inline">iPhone App</span>
         </button>
 
-        <!-- Add Swimmer Button -->
+        <!-- Add Swimmer Button (Prominent) -->
         <button onclick="openAddSwimmerModal()" class="px-3 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-lg shadow-emerald-600/20">
           <i class="fa-solid fa-user-plus"></i>
           <span class="hidden sm:inline">Add Swimmer</span>
         </button>
 
-        <!-- Batch Screenshot Scanner Button -->
+        <!-- Batch Screenshot Scanner Button (Prominent) -->
         <button onclick="openScanModal()" class="px-3 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-midnight transition flex items-center gap-1.5 shadow-lg shadow-cyan-500/20">
           <i class="fa-solid fa-images"></i>
           <span class="hidden sm:inline">Screenshots</span>
         </button>
 
-        <!-- Video Upload Button -->
+        <!-- Video Upload Button (Prominent) -->
         <button onclick="openVideoModal()" class="px-3 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-midnight transition flex items-center gap-1.5 shadow-lg shadow-amber-500/20">
           <i class="fa-solid fa-video"></i>
           <span class="hidden lg:inline">Upload Video</span>
         </button>
 
-        <!-- Activity Tracker & Audit Log Button -->
-        <button onclick="openAuditModal()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600/30 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/40 transition flex items-center gap-1.5 shadow-sm" title="View Visitor & Change Activity Log">
+        <!-- Activity Tracker & Audit Log Button (Minimized with Hover Tooltip) -->
+        <button onclick="openAuditModal()" class="relative px-2.5 py-2 rounded-lg text-xs font-semibold bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 transition flex items-center justify-center shadow-sm" title="Activity Tracker & Audit Log: View page visits, OCR scans, and PB history">
           <i class="fa-solid fa-clock-rotate-left"></i>
-          <span class="hidden xl:inline">Activity Log</span>
-          <span id="audit-badge" class="px-1.5 py-0.2 rounded-full bg-indigo-500 text-white font-mono text-[9px] font-bold">0</span>
+          <span id="audit-badge" class="absolute -top-1 -right-1 px-1 rounded-full bg-indigo-500 text-white font-mono text-[8px] font-bold">0</span>
         </button>
 
-        <button onclick="openRosterModal()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="View Team & Family Roster">
+        <!-- Roster Button (Minimized with Hover Tooltip) -->
+        <button onclick="openRosterModal()" class="px-2.5 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center justify-center shadow-sm" title="TTS Club & Family Roster: Manage and edit registered swimmers">
           <i class="fa-solid fa-users"></i>
-          <span class="hidden xl:inline">Roster</span>
         </button>
 
-        <button onclick="openDataBackupModal()" class="px-2.5 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="Export / Import Data JSON">
+        <!-- Export/Import JSON (Minimized with Hover Tooltip) -->
+        <button onclick="openDataBackupModal()" class="px-2.5 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center justify-center shadow-sm" title="Data Backup & Restore: Export/Import complete club roster JSON">
           <i class="fa-solid fa-database"></i>
         </button>
 
-        <button onclick="window.print()" class="px-2.5 py-2 rounded-lg text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition flex items-center gap-1.5 shadow-sm">
+        <!-- Print/PDF Button (Minimized with Hover Tooltip) -->
+        <button onclick="window.print()" class="px-2.5 py-2 rounded-lg text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition flex items-center justify-center shadow-sm" title="Print Dashboard / Export PDF">
           <i class="fa-solid fa-print"></i>
         </button>
       </div>
@@ -248,99 +248,24 @@
             <i class="fa-brands fa-apple"></i>
           </div>
           <div>
-            <h3 class="text-white font-display font-bold text-base">Install on iPhone</h3>
-            <p class="text-xs text-slate-400">Run as a standalone native-style iPhone app</p>
-          </div>
-        </div>
-        <button onclick="closeInstallModal()" class="text-slate-400 hover:text-white text-lg">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="space-y-3.5 text-xs text-slate-300">
-        <p class="leading-relaxed">
-          The dashboard is configured with real-time bidirectional cloud sync. Adding it to your iPhone home screen launches it full-screen without Safari browser bars:
-        </p>
-
-        <div class="space-y-3">
-          <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800">
-            <div class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center shrink-0 text-xs">1</div>
-            <div>
-              <div class="font-bold text-white">Open in Safari</div>
-              <div class="text-[11px] text-slate-400 mt-0.5">Visit this GitHub Pages link on your iPhone using the Safari browser.</div>
-            </div>
-          </div>
-
-          <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800">
-            <div class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center shrink-0 text-xs">2</div>
-            <div>
-              <div class="font-bold text-white">Tap the Share Icon</div>
-              <div class="text-[11px] text-slate-400 mt-0.5">Tap the <strong>Share</strong> button (<i class="fa-solid fa-arrow-up-from-bracket text-cyan-400"></i>) at the bottom toolbar of Safari.</div>
-            </div>
-          </div>
-
-          <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800">
-            <div class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center shrink-0 text-xs">3</div>
-            <div>
-              <div class="font-bold text-white">Select "Add to Home Screen"</div>
-              <div class="text-[11px] text-slate-400 mt-0.5">Scroll down and tap <strong>"Add to Home Screen"</strong> (<i class="fa-regular fa-square-plus text-cyan-400"></i>), then tap <strong>Add</strong> in the top right.</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="p-3 bg-cyan-950/40 rounded-xl border border-cyan-800/60 text-[11px] text-cyan-200 flex items-center gap-2">
-          <i class="fa-solid fa-cloud text-cyan-400 text-sm"></i>
-          <span><strong>Real-Time Sync:</strong> Any screenshots scanned or times updated on iPhone instantly reflect on the web dashboard.</span>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Current Age</label>
+          <input type="number" id="new-swimmer-age" placeholder="e.g. 11" min="7" max="18" value="11" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-semibold">
         </div>
       </div>
 
-      <div class="pt-2 border-t border-slate-800">
-        <button onclick="closeInstallModal()" class="w-full py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-midnight font-bold text-xs transition">
-          Got It
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================================================= -->
-  <!-- MODAL: ADD NEW SWIMMER WIZARD                                             -->
-  <!-- ========================================================================= -->
-  <div id="add-swimmer-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="glass-card rounded-2xl max-w-xl w-full p-6 space-y-4 border border-emerald-500/40 shadow-2xl my-auto">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base font-bold">
-            <i class="fa-solid fa-user-plus"></i>
-          </div>
-          <div>
-            <h3 class="text-white font-display font-bold text-base">Add New Swimmer Profile</h3>
-            <p class="text-xs text-slate-400">Creates a personalized performance guide, benchmark matrix &amp; OCR link</p>
-          </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Date of Birth (Optional)</label>
+          <input type="date" id="new-swimmer-dob" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-semibold">
         </div>
-        <button onclick="closeAddSwimmerModal()" class="text-slate-400 hover:text-white text-lg">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Swim Team / Club</label>
+          <input type="text" id="new-swimmer-club" placeholder="e.g. Tanglin Merlions, ATS, SAC" value="Tanglin Merlions (TTS-VD)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-emerald-500">
+        </div>
       </div>
 
-      <div class="space-y-3.5 text-xs">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Full Name</label>
-            <input type="text" id="new-swimmer-name" placeholder="e.g. Maya Chen" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-semibold">
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Current Age</label>
-            <input type="number" id="new-swimmer-age" placeholder="e.g. 11" min="7" max="18" value="11" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-semibold">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Swim Team / Club</label>
-            <input type="text" id="new-swimmer-club" placeholder="e.g. Tanglin Merlions, ATS, SAC" value="Tanglin Merlions (TTS-VD)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-emerald-500">
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Primary Stroke Specialty</label>
+      <div>
+        <label class="block text-[11px] font-bold text-slate-400 mb-1">Primary Stroke Specialty</label>
             <select id="new-swimmer-specialty" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-emerald-500">
               <option value="free_sprint">Freestyle Sprint (50m/100m)</option>
               <option value="free_distance">Freestyle Mid/Distance (200m/400m)</option>
@@ -399,6 +324,104 @@
         <button onclick="saveNewSwimmer()" class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-midnight font-bold text-xs transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
           <i class="fa-solid fa-check"></i>
           Create Profile
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: EDIT SWIMMER PROFILE & DOB                                         -->
+  <!-- ========================================================================= -->
+  <div id="edit-swimmer-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-lg w-full p-6 space-y-4 border border-cyan-500/40 shadow-2xl my-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-base font-bold">
+            <i class="fa-solid fa-user-pen"></i>
+          </div>
+          <div>
+            <h3 class="text-white font-display font-bold text-base">Edit Swimmer Profile</h3>
+            <p class="text-xs text-slate-400">Update birthday, age, specialty and division</p>
+          </div>
+        </div>
+        <button onclick="closeEditSwimmerModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <input type="hidden" id="edit-swimmer-id">
+
+      <div class="space-y-3.5 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Full Name</label>
+            <input type="text" id="edit-swimmer-name" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white font-semibold focus:outline-none focus:border-cyan-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Club / Team</label>
+            <input type="text" id="edit-swimmer-club" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-cyan-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Date of Birth</label>
+            <input type="date" id="edit-swimmer-dob" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white font-semibold focus:outline-none focus:border-cyan-500" onchange="autoCalculateAgeFromDOB('edit')">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Current Age</label>
+            <input type="number" id="edit-swimmer-age" min="6" max="18" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-cyan-400 font-bold focus:outline-none focus:border-cyan-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Specialty Description</label>
+          <input type="text" id="edit-swimmer-specialty" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-slate-200 focus:outline-none focus:border-cyan-500">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Profile Accent Color</label>
+          <div class="flex items-center gap-3">
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="radio" name="edit-swimmer-color" value="#00d2ff" class="accent-cyan-400">
+              <span class="w-4 h-4 rounded-full bg-cyan-400 inline-block"></span>
+              <span class="text-slate-300">Cyan</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="radio" name="edit-swimmer-color" value="#f59e0b" class="accent-gold-500">
+              <span class="w-4 h-4 rounded-full bg-gold-500 inline-block"></span>
+              <span class="text-slate-300">Gold</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="radio" name="edit-swimmer-color" value="#10b981" class="accent-emerald-400">
+              <span class="w-4 h-4 rounded-full bg-emerald-400 inline-block"></span>
+              <span class="text-slate-300">Emerald</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="radio" name="edit-swimmer-color" value="#6366f1" class="accent-indigo-500">
+              <span class="w-4 h-4 rounded-full bg-indigo-500 inline-block"></span>
+              <span class="text-slate-300">Indigo</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="radio" name="edit-swimmer-color" value="#f43f5e" class="accent-rose-500">
+              <span class="w-4 h-4 rounded-full bg-rose-500 inline-block"></span>
+              <span class="text-slate-300">Rose</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-[11px] text-slate-400">
+          <i class="fa-solid fa-circle-info text-cyan-400 mr-1"></i> Saving updates the age narrative banner (e.g., <em>"Turned 12 in October 2026"</em>) and refreshes age-group standard benchmarks across the dashboard.
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+        <button onclick="closeEditSwimmerModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
+          Cancel
+        </button>
+        <button onclick="saveEditedSwimmer()" class="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-midnight font-bold text-xs transition flex items-center gap-1.5 shadow-lg shadow-cyan-500/20">
+          <i class="fa-solid fa-check"></i>
+          Save Changes
         </button>
       </div>
     </div>
@@ -829,6 +852,7 @@
       monty: {
         id: 'monty',
         name: 'Monty Day',
+        dob: '2014-10-14',
         age: 12,
         dobDetail: 'Turned 12 in October 2026',
         club: 'Tanglin Merlions (TTS-VD)',
@@ -925,6 +949,7 @@
       rupert: {
         id: 'rupert',
         name: 'Rupert Day',
+        dob: '2016-05-20',
         age: 10,
         dobDetail: 'Turned 10 in May 2026',
         club: 'Tanglin Merlions (TTS-VD)',
@@ -1008,8 +1033,9 @@
       rory: {
         id: 'rory',
         name: 'Rory Walker',
+        dob: '2014-04-12',
         age: 12,
-        dobDetail: 'Male | 12 Years Old',
+        dobDetail: 'Turned 12 in April 2026',
         club: 'Tanglin Merlions (TTS-VD)',
         division: 'M12–13 National Pathway',
         specialty: 'Backstroke & Individual Medley Specialist (Strong Breast/Free Sprint)',
@@ -1099,8 +1125,9 @@
       george: {
         id: 'george',
         name: 'George Hillman',
+        dob: '2015-08-18',
         age: 11,
-        dobDetail: 'Male | 11 Years Old',
+        dobDetail: 'Turned 11 in August 2026',
         club: 'Tanglin Merlions (TTS-VD)',
         division: 'M11–12 National Pathway',
         specialty: 'Sprint Freestyle & Versatile Breast/Fly (Explosive Front-End Power)',
@@ -1189,8 +1216,9 @@
       noah: {
         id: 'noah',
         name: 'Noah Caines',
+        dob: '2014-06-25',
         age: 12,
-        dobDetail: 'Male | 12 Years Old',
+        dobDetail: 'Turned 12 in June 2026',
         club: 'Tanglin Merlions (TTS-VD)',
         division: 'M12–13 National Pathway',
         specialty: 'Breaststroke Specialist & Sprint Freestyle Racer',
@@ -1283,15 +1311,16 @@
     // Load persisted state from localStorage if available
     function loadSavedState() {
       try {
-        const saved = localStorage.getItem('ttsSwimData_v8');
+        const saved = localStorage.getItem('ttsSwimData_v9');
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (!parsed.george || !parsed.noah || !parsed.rory || !parsed.rupert || parsed.rupert.quickStats.s2.val !== '32.82') {
+          if (!parsed.george || !parsed.noah || !parsed.rory || !parsed.rupert || !parsed.george.dob) {
             parsed.george = JSON.parse(JSON.stringify(defaultAthletesData.george));
             parsed.noah = JSON.parse(JSON.stringify(defaultAthletesData.noah));
             parsed.rory = JSON.parse(JSON.stringify(defaultAthletesData.rory));
             parsed.rupert = JSON.parse(JSON.stringify(defaultAthletesData.rupert));
-            localStorage.setItem('ttsSwimData_v8', JSON.stringify(parsed));
+            parsed.monty = JSON.parse(JSON.stringify(defaultAthletesData.monty));
+            localStorage.setItem('ttsSwimData_v9', JSON.stringify(parsed));
           }
           return parsed;
         }
@@ -1300,7 +1329,7 @@
       }
       const initial = JSON.parse(JSON.stringify(defaultAthletesData));
       try {
-        localStorage.setItem('ttsSwimData_v8', JSON.stringify(initial));
+        localStorage.setItem('ttsSwimData_v9', JSON.stringify(initial));
       } catch (e) {}
       return initial;
     }
@@ -1309,7 +1338,7 @@
 
     function persistState() {
       try {
-        localStorage.setItem('ttsSwimData_v8', JSON.stringify(athletesData));
+        localStorage.setItem('ttsSwimData_v9', JSON.stringify(athletesData));
       } catch (e) {
         console.warn('Could not persist swim data locally:', e);
       }
@@ -1317,33 +1346,47 @@
       syncToCloud();
     }
 
-    // ---------------------------------------------------------------------------
-    // REAL-TIME CLOUD BACKEND ENGINE (FIREBASE FIRESTORE SYNC)
-    // ---------------------------------------------------------------------------
-    let isCloudConnected = false;
-    let cloudSyncTimer = null;
+    // Helper: calculate exact age and narrative label from DOB
+    function calculateAgeAndNarrative(dobString, fallbackAge) {
+      if (!dobString) {
+        return {
+          age: fallbackAge || 11,
+          narrative: `${fallbackAge || 11} Years Old`
+        };
+      }
+      const birthDate = new Date(dobString);
+      if (isNaN(birthDate.getTime())) {
+        return {
+          age: fallbackAge || 11,
+          narrative: `${fallbackAge || 11} Years Old`
+        };
+      }
 
-    function updateCloudStatusUI(status, label) {
-      const dot = document.getElementById('cloud-status-dot');
-      const text = document.getElementById('cloud-status-text');
-      const pill = document.getElementById('cloud-status-pill');
-      if (!dot || !text || !pill) return;
+      // Today's date context (Nov 2026)
+      const now = new Date(2026, 10, 11);
+      let calculatedAge = now.getFullYear() - birthDate.getFullYear();
+      const monthDiff = now.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birthDate.getDate())) {
+        calculatedAge--;
+      }
 
-      pill.classList.remove('hidden');
-      if (status === 'connected') {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
-        text.className = 'text-emerald-400 font-bold';
-        text.textContent = 'Live Cloud Sync';
-        isCloudConnected = true;
-      } else if (status === 'syncing') {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-cyan-400';
-        text.className = 'text-cyan-300 font-medium';
-        text.textContent = 'Syncing...';
-      } else {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-slate-500';
-        text.className = 'text-slate-400';
-        text.textContent = label || 'Local Cache';
-        isCloudConnected = false;
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const birthMonth = monthNames[birthDate.getMonth()];
+      const birthYear = birthDate.getFullYear();
+      const turnYear = birthYear + calculatedAge;
+
+      return {
+        age: calculatedAge,
+        narrative: `Turned ${calculatedAge} in ${birthMonth} ${turnYear}`
+      };
+    }
+
+    function autoCalculateAgeFromDOB(mode) {
+      const dobInput = document.getElementById(mode === 'edit' ? 'edit-swimmer-dob' : 'new-swimmer-dob');
+      const ageInput = document.getElementById(mode === 'edit' ? 'edit-swimmer-age' : 'new-swimmer-age');
+      if (dobInput && ageInput && dobInput.value) {
+        const res = calculateAgeAndNarrative(dobInput.value);
+        ageInput.value = res.age;
       }
     }
 
@@ -1805,7 +1848,12 @@
               <i class="fa-solid fa-trophy text-amber-400"></i>
               <span>Official Personal Bests &amp; USA Swimming Standard Benchmark</span>
             </div>
-            <div class="text-xs text-slate-400">Verified Long Course &amp; Short Course</div>
+            <div class="flex items-center gap-2">
+              <button onclick="openScanModal()" class="px-2.5 py-1 rounded bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-xs font-semibold border border-cyan-500/30 flex items-center gap-1.5 transition shadow-sm">
+                <i class="fa-solid fa-camera"></i> Scan Screenshot
+              </button>
+              <span class="text-xs text-slate-400 hidden sm:inline">Verified LC &amp; SC</span>
+            </div>
           </div>
 
           <div class="overflow-x-auto">
@@ -2274,18 +2322,22 @@
         return `
           <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-slate-800">
             <div class="flex items-center gap-3">
-              <div class="w-3.5 h-3.5 rounded-full" style="background-color: ${ath.accentColor}"></div>
+              <div class="w-3.5 h-3.5 rounded-full shrink-0" style="background-color: ${ath.accentColor}"></div>
               <div>
                 <div class="font-bold text-white text-xs flex items-center gap-2">
                   <span>${ath.name}</span>
                   <span class="text-[10px] text-slate-400 font-normal">(${ath.age} yrs • ${ath.division})</span>
                 </div>
+                <div class="text-[11px] text-cyan-400 font-mono">${ath.dobDetail || ath.dob || 'DOB Not Set'}</div>
                 <div class="text-[11px] text-slate-400">${ath.specialty}</div>
               </div>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
               <button onclick="setSwimmerMode('${k}'); closeRosterModal();" class="px-2.5 py-1 rounded bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-semibold text-[11px] transition">
                 View
+              </button>
+              <button onclick="openEditSwimmerModal('${k}')" class="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-semibold text-[11px] transition" title="Edit Swimmer & DOB">
+                <i class="fa-solid fa-pen"></i>
               </button>
               ${!isCore ? `
                 <button onclick="deleteSwimmer('${k}')" class="px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-semibold text-[11px] transition" title="Delete Swimmer">
@@ -2296,6 +2348,83 @@
           </div>
         `;
       }).join('');
+    }
+
+    // Edit Swimmer Functions
+    function openEditSwimmerModal(swimmerId) {
+      const ath = athletesData[swimmerId];
+      if (!ath) return;
+
+      document.getElementById('edit-swimmer-id').value = swimmerId;
+      document.getElementById('edit-swimmer-name').value = ath.name || '';
+      document.getElementById('edit-swimmer-club').value = ath.club || '';
+      document.getElementById('edit-swimmer-dob').value = ath.dob || '';
+      document.getElementById('edit-swimmer-age').value = ath.age || 11;
+      document.getElementById('edit-swimmer-specialty').value = ath.specialty || '';
+
+      const colorRadios = document.querySelectorAll('input[name="edit-swimmer-color"]');
+      colorRadios.forEach(r => {
+        r.checked = (r.value === ath.accentColor);
+      });
+
+      document.getElementById('edit-swimmer-modal').classList.remove('hidden');
+    }
+
+    function closeEditSwimmerModal() {
+      document.getElementById('edit-swimmer-modal').classList.add('hidden');
+    }
+
+    function saveEditedSwimmer() {
+      const id = document.getElementById('edit-swimmer-id').value;
+      const ath = athletesData[id];
+      if (!ath) return;
+
+      const newName = document.getElementById('edit-swimmer-name').value.trim();
+      const newClub = document.getElementById('edit-swimmer-club').value.trim();
+      const newDob = document.getElementById('edit-swimmer-dob').value;
+      const newAge = parseInt(document.getElementById('edit-swimmer-age').value) || ath.age;
+      const newSpecialty = document.getElementById('edit-swimmer-specialty').value.trim();
+      const newColor = document.querySelector('input[name="edit-swimmer-color"]:checked')?.value || ath.accentColor;
+
+      if (!newName) {
+        alert('Please provide a name.');
+        return;
+      }
+
+      const ageAndNarrative = calculateAgeAndNarrative(newDob, newAge);
+
+      ath.name = newName;
+      ath.club = newClub;
+      ath.dob = newDob;
+      ath.age = ageAndNarrative.age;
+      ath.dobDetail = ageAndNarrative.narrative;
+      ath.specialty = newSpecialty;
+      ath.accentColor = newColor;
+      ath.division = ath.age <= 10 ? '10 & Under National Pathway' : (ath.age <= 12 ? 'M11–12 Pathway' : 'M13–14 Pathway');
+
+      // Update PBs and standards with newly calibrated age
+      if (ath.pbs && ath.pbs.length) {
+        ath.pbs.forEach(p => {
+          if (p.time && p.time !== '--') {
+            const reCal = calculateStandard(p.event, p.time, p.course, ath.age);
+            p.std = reCal.std;
+            p.pct = reCal.pct;
+          }
+        });
+      }
+
+      logActivity('Swimmer Updated', ath.name, `Updated profile details: Age ${ath.age} (${ath.dobDetail}), Club: ${ath.club}`);
+
+      persistState();
+      refreshSwimmerTabs();
+      updateScannerSwimmerDropdown();
+      renderRosterList();
+      closeEditSwimmerModal();
+
+      if (currentSwimmer === id) {
+        renderSwimmer(id);
+      }
+      alert(`Success! Updated ${ath.name}'s profile.`);
     }
 
     function deleteSwimmer(id) {
@@ -2311,7 +2440,8 @@
 
     function saveNewSwimmer() {
       const name = document.getElementById('new-swimmer-name').value.trim();
-      const age = parseInt(document.getElementById('new-swimmer-age').value) || 11;
+      const ageInput = parseInt(document.getElementById('new-swimmer-age').value) || 11;
+      const dob = document.getElementById('new-swimmer-dob').value;
       const club = document.getElementById('new-swimmer-club').value.trim() || 'TTS Merlions';
       const specialtyType = document.getElementById('new-swimmer-specialty').value;
       const color = document.querySelector('input[name="swimmer-color"]:checked')?.value || '#00d2ff';
@@ -2320,6 +2450,9 @@
         alert('Please enter a swimmer name.');
         return;
       }
+
+      const ageAndNarrative = calculateAgeAndNarrative(dob, ageInput);
+      const age = ageAndNarrative.age;
 
       const id = name.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Math.floor(Math.random()*1000);
 
@@ -2352,8 +2485,9 @@
       const newSwimmerObj = {
         id: id,
         name: name,
+        dob: dob || '',
         age: age,
-        dobDetail: `${age} Years Old`,
+        dobDetail: ageAndNarrative.narrative,
         club: club,
         division: age <= 10 ? '10 & Under National Pathway' : (age <= 12 ? 'M11–12 Pathway' : 'M13–14 Pathway'),
         specialty: specTitle,
@@ -3105,7 +3239,7 @@
               // Update if cloud is newer or local is missing data
               if (cloudUpdated > localUpdated) {
                 athletesData = cloudPayload.roster;
-                localStorage.setItem('ttsSwimData_v8', JSON.stringify(athletesData));
+                localStorage.setItem('ttsSwimData_v9', JSON.stringify(athletesData));
                 localStorage.setItem('ttsLastUpdatedTimestamp', cloudUpdated.toString());
 
                 if (cloudPayload.auditLog && Array.isArray(cloudPayload.auditLog)) {
