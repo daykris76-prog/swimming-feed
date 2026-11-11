@@ -11,6 +11,9 @@
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+  <!-- Tesseract.js CDN for in-browser OCR screenshot parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
   <!-- Font Awesome Icons CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -140,10 +143,22 @@
 
       <!-- Action Buttons -->
       <div class="flex items-center gap-2 sm:gap-3">
+        <!-- New Screenshot Scanner Button -->
+        <button onclick="openScanModal()" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-midnight transition flex items-center gap-2 shadow-lg shadow-cyan-500/20">
+          <i class="fa-solid fa-camera"></i>
+          <span>Scan Screenshot</span>
+        </button>
+
+        <button onclick="openDataBackupModal()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="Export / Import Data JSON">
+          <i class="fa-solid fa-database"></i>
+          <span class="hidden sm:inline">Data Backup</span>
+        </button>
+
         <button onclick="openGitHubModal()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
           <i class="fa-brands fa-github text-sm"></i>
-          <span class="hidden sm:inline">GitHub Pages Setup</span>
+          <span class="hidden sm:inline">GitHub Pages</span>
         </button>
+
         <button onclick="window.print()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition flex items-center gap-1.5 shadow-sm">
           <i class="fa-solid fa-print"></i>
           <span class="hidden sm:inline">Print / PDF</span>
@@ -703,13 +718,172 @@
   </div>
 
   <!-- ========================================================================= -->
+  <!-- MODAL: MEET MOBILE / SWIMCLOUD SCREENSHOT SCANNER (OCR)                   -->
+  <!-- ========================================================================= -->
+  <div id="scan-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-2xl w-full p-6 space-y-4 border border-cyan-500/40 shadow-2xl my-auto">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-base font-bold shadow-sm">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+          <div>
+            <h3 class="text-white font-display font-bold text-base flex items-center gap-2">
+              Meet Mobile &amp; SwimCloud Screenshot Scanner
+            </h3>
+            <p class="text-xs text-slate-400">Extracts race results, course, times, and lap splits automatically via OCR</p>
+          </div>
+        </div>
+        <button onclick="closeScanModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Drag & Drop Zone -->
+      <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-cyan-400 rounded-xl p-5 text-center transition cursor-pointer bg-slate-900/60 relative">
+        <input type="file" id="screenshot-input" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="handleFileSelect(event)">
+        <div class="space-y-1.5 pointer-events-none">
+          <div class="w-12 h-12 mx-auto rounded-full bg-slate-800 flex items-center justify-center text-cyan-400 text-xl">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+          </div>
+          <div class="text-xs font-bold text-white">Drop screenshot here or click to browse</div>
+          <div class="text-[11px] text-slate-400">Supports PNG, JPG, or screenshot clips from iPhone/Android Meet Mobile app</div>
+        </div>
+      </div>
+
+      <!-- Preview & Scanning Progress -->
+      <div id="scan-progress-box" class="hidden space-y-2">
+        <div class="flex items-center justify-between text-xs">
+          <span id="scan-status-text" class="text-cyan-400 font-semibold flex items-center gap-2">
+            <i class="fa-solid fa-circle-notch fa-spin"></i> Initializing OCR Engine...
+          </span>
+          <span id="scan-pct-text" class="text-slate-400 font-mono">0%</span>
+        </div>
+        <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+          <div id="scan-progress-bar" class="h-full bg-cyan-500 transition-all duration-200" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Image Preview Thumbnail (if uploaded) -->
+      <div id="scan-preview-thumb" class="hidden flex items-center gap-3 p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
+        <img id="thumb-img" src="" alt="Screenshot" class="w-16 h-16 object-cover rounded-lg border border-slate-700">
+        <div class="flex-1 min-w-0 text-xs">
+          <div id="thumb-name" class="font-bold text-white truncate">image.png</div>
+          <div class="text-[11px] text-emerald-400 flex items-center gap-1 mt-0.5">
+            <i class="fa-solid fa-check"></i> Image processed by OCR
+          </div>
+        </div>
+      </div>
+
+      <!-- Extracted Data Verification & Form -->
+      <div id="scan-form-box" class="space-y-3 pt-1 border-t border-slate-800">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Review &amp; Verify Parsed Result</span>
+          <span class="text-[10px] text-slate-500">Edit any field before committing</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Swimmer</label>
+            <select id="field-swimmer" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-cyan-500">
+              <option value="monty">Monty Day (Age 12 • Free/Fly)</option>
+              <option value="rupert">Rupert Day (Age 10 • Breast/Free)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Event Name</label>
+            <input type="text" id="field-event" placeholder="e.g. 200m Freestyle" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-cyan-500">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Course</label>
+            <select id="field-course" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-cyan-500">
+              <option value="25m SCM">25m SCM (Short Course Meters)</option>
+              <option value="50m LCM">50m LCM (Long Course Meters)</option>
+              <option value="25y SCY">25y SCY (Short Course Yards)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Final Time</label>
+            <input type="text" id="field-time" placeholder="e.g. 2:19.70 or 28.73" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-cyan-400 font-mono font-bold focus:outline-none focus:border-cyan-500">
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Lap Splits (Comma Separated)</label>
+            <input type="text" id="field-splits" placeholder="e.g. 31.09, 35.08, 35.96, 37.57" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 font-mono focus:outline-none focus:border-cyan-500">
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Meet Details / Notes</label>
+            <input type="text" id="field-notes" placeholder="e.g. 12th SNSC SCM • Dropped -4.19s" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-300 focus:outline-none focus:border-cyan-500">
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+        <button onclick="closeScanModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
+          Cancel
+        </button>
+        <button onclick="commitScannedTime()" class="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-midnight font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-cyan-500/20">
+          <i class="fa-solid fa-save"></i>
+          Save &amp; Update Dashboard
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: DATA BACKUP & RESTORE (JSON/CSV)                                   -->
+  <!-- ========================================================================= -->
+  <div id="backup-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-700 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2 text-white font-display font-bold text-base">
+          <i class="fa-solid fa-database text-cyan-400"></i>
+          Data Backup, Export &amp; Restore
+        </div>
+        <button onclick="closeDataBackupModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-300">
+        <p>Your uploaded screenshot data is stored directly in your browser's local cache. Use this tool to download a copy of the current state or sync it back to your GitHub repository.</p>
+        
+        <div class="flex gap-2">
+          <button onclick="downloadBackupJSON()" class="flex-1 py-2 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-midnight font-bold transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-download"></i> Export JSON
+          </button>
+          <button onclick="resetToDefaults()" class="py-2 px-3 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold transition">
+            Reset Defaults
+          </button>
+        </div>
+
+        <div class="pt-2 border-t border-slate-800">
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Restore from JSON</label>
+          <textarea id="import-json-area" rows="4" placeholder="Paste exported JSON here..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 font-mono text-[11px] focus:outline-none focus:border-cyan-500"></textarea>
+          <button onclick="importBackupJSON()" class="mt-2 w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition border border-slate-700">
+            Import &amp; Apply
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
   <!-- JAVASCRIPT DATA & LOGIC ENGINE                                            -->
   <!-- ========================================================================= -->
   <script>
     // ---------------------------------------------------------------------------
     // DATA MODEL FOR BOTH SWIMMERS
     // ---------------------------------------------------------------------------
-    const athletesData = {
+    const defaultAthletesData = {
       monty: {
         id: 'monty',
         name: 'Monty Day',
@@ -849,9 +1023,86 @@
       }
     };
 
+    // Load persisted state from localStorage if available
+    function loadSavedState() {
+      try {
+        const saved = localStorage.getItem('dayBrothersSwimData_v2');
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (e) {
+        console.warn('Could not read saved swim data, falling back to defaults:', e);
+      }
+      return JSON.parse(JSON.stringify(defaultAthletesData));
+    }
+
+    let athletesData = loadSavedState();
+
+    function persistState() {
+      try {
+        localStorage.setItem('dayBrothersSwimData_v2', JSON.stringify(athletesData));
+      } catch (e) {
+        console.warn('Could not persist swim data:', e);
+      }
+    }
+
     let currentSwimmer = 'monty';
     let splitChartInstance = null;
     let trajectoryChartInstance = null;
+
+    // ---------------------------------------------------------------------------
+    // USA SWIMMING STANDARD RE-CALCULATOR ENGINE
+    // ---------------------------------------------------------------------------
+    function calculateStandard(event, timeStr, course, age) {
+      const sec = parseTimeToSeconds(timeStr);
+      if (!sec) return { std: 'Official', pct: 'Recorded' };
+
+      const ev = event.toLowerCase();
+      // Monty (11-12 Boys) standards
+      if (age >= 11) {
+        if (ev.includes('200') && ev.includes('free')) {
+          if (sec <= 126.0) return { std: 'AAAA Standard', pct: 'Top 1-2%' };
+          if (sec <= 134.5) return { std: 'AAA Standard', pct: 'Top 5-8%' };
+          if (sec <= 143.0) return { std: 'AA Standard', pct: 'Top 10-12%' };
+          if (sec <= 151.5) return { std: 'A Standard', pct: 'Top 25%' };
+          return { std: 'BB Standard', pct: 'Top 50%' };
+        }
+        if (ev.includes('100') && ev.includes('free')) {
+          if (sec <= 58.5) return { std: 'AAAA Standard', pct: 'Top 1-2%' };
+          if (sec <= 61.5) return { std: 'AAA Standard', pct: 'Top 5-8%' };
+          if (sec <= 64.5) return { std: 'AA Standard', pct: 'Top 12-15%' };
+          return { std: 'A Standard', pct: 'Top 25%' };
+        }
+        if (ev.includes('50') && ev.includes('free')) {
+          if (sec <= 26.5) return { std: 'AAAA Standard', pct: 'Top 1-2%' };
+          if (sec <= 28.0) return { std: 'AAA Standard', pct: 'Top 5-8%' };
+          if (sec <= 29.5) return { std: 'AA Standard', pct: 'Top 10-15%' };
+          return { std: 'A Standard', pct: 'Top 25%' };
+        }
+        if (ev.includes('100') && ev.includes('fly')) {
+          if (sec <= 66.0) return { std: 'AAAA Standard', pct: 'Top 1-2%' };
+          if (sec <= 70.0) return { std: 'AAA Standard', pct: 'Top 5-8%' };
+          if (sec <= 74.0) return { std: 'AA Standard', pct: 'Top 12-15%' };
+          return { std: 'A Standard', pct: 'Top 25%' };
+        }
+      } else {
+        // Rupert (10 & Under Boys) standards
+        if (ev.includes('50') && ev.includes('breast')) {
+          if (sec <= 39.5) return { std: 'AAAA Standard', pct: 'Top 1-2%' };
+          if (sec <= 42.0) return { std: 'AAA Standard', pct: 'Top 5-8%' };
+          if (sec <= 45.0) return { std: 'AA Standard', pct: 'Top 12-15%' };
+          if (sec <= 48.0) return { std: 'A Standard', pct: 'Top 25%' };
+          return { std: 'BB Standard', pct: 'Top 50%' };
+        }
+        if (ev.includes('50') && ev.includes('free')) {
+          if (sec <= 30.5) return { std: 'AAAA Standard', pct: 'Top 1-2%' };
+          if (sec <= 32.0) return { std: 'AAA Standard', pct: 'Top 5-8%' };
+          if (sec <= 34.0) return { std: 'AA Standard', pct: 'Top 12-15%' };
+          return { std: 'A Standard', pct: 'Top 25%' };
+        }
+      }
+      return { std: 'A Standard', pct: 'Top 25%' };
+    }
 
     // ---------------------------------------------------------------------------
     // INITIALIZATION & TAB SWITCHING
@@ -1574,6 +1825,267 @@
     }
     function closeGitHubModal() {
       document.getElementById('github-modal').classList.add('hidden');
+    }
+
+    function openDataBackupModal() {
+      document.getElementById('backup-modal').classList.remove('hidden');
+    }
+    function closeDataBackupModal() {
+      document.getElementById('backup-modal').classList.add('hidden');
+    }
+
+    function openScanModal() {
+      document.getElementById('scan-modal').classList.remove('hidden');
+    }
+    function closeScanModal() {
+      document.getElementById('scan-modal').classList.add('hidden');
+      document.getElementById('scan-progress-box').classList.add('hidden');
+    }
+
+    // ---------------------------------------------------------------------------
+    // OCR SCREENSHOT SCANNING ENGINE (TESSERACT.JS)
+    // ---------------------------------------------------------------------------
+    function handleFileSelect(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imageUrl = e.target.result;
+        
+        // Show Thumbnail preview
+        const thumb = document.getElementById('scan-preview-thumb');
+        const thumbImg = document.getElementById('thumb-img');
+        const thumbName = document.getElementById('thumb-name');
+        thumbImg.src = imageUrl;
+        thumbName.textContent = file.name;
+        thumb.classList.remove('hidden');
+
+        // Run In-Browser OCR
+        runOCR(imageUrl);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function runOCR(imageUrl) {
+      const progressBox = document.getElementById('scan-progress-box');
+      const progressBar = document.getElementById('scan-progress-bar');
+      const statusText = document.getElementById('scan-status-text');
+      const pctText = document.getElementById('scan-pct-text');
+
+      progressBox.classList.remove('hidden');
+      progressBar.style.width = '10%';
+      pctText.textContent = '10%';
+      statusText.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Initializing OCR Worker...';
+
+      try {
+        const worker = await Tesseract.createWorker('eng');
+        
+        statusText.innerHTML = '<i class="fa-solid fa-eye fa-bounce"></i> Reading Text from Meet Mobile Screenshot...';
+        progressBar.style.width = '45%';
+        pctText.textContent = '45%';
+
+        const result = await worker.recognize(imageUrl);
+        await worker.terminate();
+
+        progressBar.style.width = '100%';
+        pctText.textContent = '100%';
+        statusText.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> Extraction Complete!';
+
+        parseExtractedText(result.data.text);
+
+      } catch (err) {
+        console.error('OCR Error:', err);
+        statusText.innerHTML = '<span class="text-rose-400"><i class="fa-solid fa-triangle-exclamation"></i> OCR parsing failed. Please enter details manually below.</span>';
+      }
+    }
+
+    // Intelligent Text Parsing for Meet Mobile & SwimCloud formats
+    function parseExtractedText(rawText) {
+      console.log('Extracted OCR Raw Text:', rawText);
+      const text = rawText.replace(/\r\n/g, '\n');
+
+      // 1. Swimmer Detection
+      if (/rupert/i.test(text)) {
+        document.getElementById('field-swimmer').value = 'rupert';
+      } else if (/monty/i.test(text)) {
+        document.getElementById('field-swimmer').value = 'monty';
+      }
+
+      // 2. Course Detection (SCM, LCM, SCY)
+      if (/scm|short course meters/i.test(text)) {
+        document.getElementById('field-course').value = '25m SCM';
+      } else if (/lcm|long course/i.test(text)) {
+        document.getElementById('field-course').value = '50m LCM';
+      } else if (/scy|yards/i.test(text)) {
+        document.getElementById('field-course').value = '25y SCY';
+      }
+
+      // 3. Event Detection (e.g. 200 Meter Free, 50 Free, 100 Breast)
+      let detectedEvent = '';
+      if (/200\s*(meter|m)?\s*free/i.test(text)) detectedEvent = '200m Freestyle';
+      else if (/100\s*(meter|m)?\s*free/i.test(text)) detectedEvent = '100m Freestyle';
+      else if (/50\s*(meter|m)?\s*free/i.test(text)) detectedEvent = '50m Freestyle';
+      else if (/400\s*(meter|m)?\s*free/i.test(text)) detectedEvent = '400m Freestyle';
+      else if (/50\s*(meter|m)?\s*breast/i.test(text)) detectedEvent = '50m Breaststroke';
+      else if (/100\s*(meter|m)?\s*breast/i.test(text)) detectedEvent = '100m Breaststroke';
+      else if (/50\s*(meter|m)?\s*fly|butterfly/i.test(text)) detectedEvent = '50m Butterfly';
+      else if (/100\s*(meter|m)?\s*fly|butterfly/i.test(text)) detectedEvent = '100m Butterfly';
+      else if (/200\s*(meter|m)?\s*fly|butterfly/i.test(text)) detectedEvent = '200m Butterfly';
+      else if (/50\s*(meter|m)?\s*back/i.test(text)) detectedEvent = '50m Backstroke';
+      else if (/100\s*(meter|m)?\s*back/i.test(text)) detectedEvent = '100m Backstroke';
+      else if (/200\s*(meter|m)?\s*im/i.test(text)) detectedEvent = '200m IM';
+      else if (/100\s*(meter|m)?\s*im/i.test(text)) detectedEvent = '100m IM';
+      
+      if (detectedEvent) {
+        document.getElementById('field-event').value = detectedEvent;
+      }
+
+      // 4. Final Time Detection
+      // Look for strings like 2:19.70 or 28.73 or 1:03.21
+      const timeMatches = text.match(/\b(?:\d{1,2}:)?\d{2}\.\d{2}\b/g);
+      if (timeMatches && timeMatches.length > 0) {
+        // Typically the official time appears near keywords like "PRELIMS", "FINALS", or "TOTAL"
+        let chosenTime = timeMatches[0];
+        const prelimsMatch = text.match(/prelims[\s\S]{0,30}(\b(?:\d{1,2}:)?\d{2}\.\d{2}\b)/i);
+        const totalMatch = text.match(/total[\s\S]{0,30}(\b(?:\d{1,2}:)?\d{2}\.\d{2}\b)/i);
+        
+        if (prelimsMatch && prelimsMatch[1]) chosenTime = prelimsMatch[1];
+        else if (totalMatch && totalMatch[1]) chosenTime = totalMatch[1];
+        
+        document.getElementById('field-time').value = chosenTime;
+      }
+
+      // 5. Lap Splits Detection (e.g. 31.09, 35.08, 35.96, 37.57)
+      const splitMatches = [];
+      const lines = text.split('\n');
+      lines.forEach(l => {
+        const m = l.match(/(\d{2}\.\d{2})/);
+        if (m && !splitMatches.includes(m[1])) {
+          // Avoid matching time drops or percentages
+          if (!l.includes('-') && !l.includes('+')) {
+            splitMatches.push(m[1]);
+          }
+        }
+      });
+      if (splitMatches.length > 1) {
+        document.getElementById('field-splits').value = splitMatches.slice(0, 4).join(', ');
+      }
+
+      // 6. Meet Name Detection
+      if (/snsc/i.test(text)) {
+        document.getElementById('field-notes').value = '12th Singapore National Swimming Championships (SNSC)';
+      } else if (/global school/i.test(text)) {
+        document.getElementById('field-notes').value = 'Global School Swimming Series';
+      }
+    }
+
+    // ---------------------------------------------------------------------------
+    // COMMIT SCANNED DATA & LIVE DASHBOARD RECALCULATION
+    // ---------------------------------------------------------------------------
+    function commitScannedTime() {
+      const swimmerKey = document.getElementById('field-swimmer').value;
+      const eventName = document.getElementById('field-event').value.trim();
+      const course = document.getElementById('field-course').value;
+      const finalTime = document.getElementById('field-time').value.trim();
+      const splitsRaw = document.getElementById('field-splits').value.trim();
+      const notes = document.getElementById('field-notes').value.trim();
+
+      if (!eventName || !finalTime) {
+        alert('Please provide at least an Event Name and a Final Time.');
+        return;
+      }
+
+      const athlete = athletesData[swimmerKey];
+      const parsedStandard = calculateStandard(eventName, finalTime, course, athlete.age);
+
+      // Check if event already exists in PBs list
+      const existingIdx = athlete.pbs.findIndex(p => p.event.toLowerCase() === eventName.toLowerCase() && p.course === course);
+      
+      const newEntry = {
+        event: eventName,
+        course: course,
+        time: finalTime,
+        std: parsedStandard.std,
+        pct: parsedStandard.pct,
+        note: notes || 'Live verified from screenshot'
+      };
+
+      if (existingIdx >= 0) {
+        athlete.pbs[existingIdx] = newEntry;
+      } else {
+        athlete.pbs.unshift(newEntry);
+      }
+
+      // If it's a 200m Free or 50m event, update Breakthrough Spotlight
+      if (eventName.toLowerCase().includes('200') && eventName.toLowerCase().includes('free')) {
+        athlete.quickStats.s2.val = finalTime;
+        athlete.quickStats.s2.sub = `Updated: ${parsedStandard.std}`;
+        athlete.breakthrough = {
+          title: `200m Free: ${finalTime} (${parsedStandard.std})`,
+          meet: notes || 'Updated via Meet Screenshot',
+          details: splitsRaw ? `Splits: ${splitsRaw}` : 'New verified personal best.',
+          badge: parsedStandard.std
+        };
+      } else if (eventName.toLowerCase().includes('100') && eventName.toLowerCase().includes('free')) {
+        athlete.quickStats.s1.val = finalTime;
+        athlete.quickStats.s1.sub = parsedStandard.std;
+      } else if (eventName.toLowerCase().includes('50') && eventName.toLowerCase().includes('free')) {
+        athlete.quickStats.s3.val = finalTime;
+        athlete.quickStats.s3.sub = parsedStandard.std;
+      }
+
+      // Persist to localStorage
+      persistState();
+
+      // Close modal and refresh active view
+      closeScanModal();
+      setSwimmerMode(swimmerKey);
+
+      // Show toast confirmation
+      alert(`Success! Updated ${athlete.name}'s ${eventName} (${finalTime}) with standard ${parsedStandard.std}. Dashboard updated in real time.`);
+    }
+
+    // ---------------------------------------------------------------------------
+    // BACKUP & RESTORE DATA HANDLERS
+    // ---------------------------------------------------------------------------
+    function downloadBackupJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(athletesData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `day_brothers_swim_data_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importBackupJSON() {
+      const raw = document.getElementById('import-json-area').value.trim();
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed.monty && parsed.rupert) {
+          athletesData = parsed;
+          persistState();
+          closeDataBackupModal();
+          renderSwimmer(currentSwimmer);
+          alert('Data imported and applied successfully!');
+        } else {
+          alert('Invalid JSON structure. Must contain monty and rupert athlete profiles.');
+        }
+      } catch (e) {
+        alert('Invalid JSON formatting: ' + e.message);
+      }
+    }
+
+    function resetToDefaults() {
+      if (confirm('Are you sure you want to reset all data back to factory defaults?')) {
+        localStorage.removeItem('dayBrothersSwimData_v2');
+        athletesData = JSON.parse(JSON.stringify(defaultAthletesData));
+        closeDataBackupModal();
+        renderSwimmer(currentSwimmer);
+        alert('Reset to default swim data.');
+      }
     }
   </script>
 </body>
