@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day Brothers Swimming Performance Dashboard | Monty & Rupert Day</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Font Awesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            midnight: '#070d17',
+            navy: {
+              800: '#0f172a',
+              850: '#0b1324',
+              900: '#060e1e',
+            },
+            cyan: {
+              400: '#22d3ee',
+              500: '#06b6d4',
+              DEFAULT: '#00d2ff',
+            },
+            gold: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              DEFAULT: '#f59e0b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background: radial-gradient(circle at 15% 15%, #0f233d 0%, #080f1d 45%, #040811 100%);
+      min-height: 100vh;
+      color: #f1f5f9;
+    }
+    
+    .glass-card {
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+    }
+
+    .glass-card-monty {
+      border-top: 3px solid #00d2ff;
+    }
+    .glass-card-rupert {
+      border-top: 3px solid #f59e0b;
+    }
+
+    .glow-cyan {
+      box-shadow: 0 0 25px -4px rgba(0, 210, 255, 0.35);
+    }
+    .glow-gold {
+      box-shadow: 0 0 25px -4px rgba(245, 158, 11, 0.35);
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #080f1d;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .glass-card {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="font-sans antialiased selection:bg-cyan-500 selection:text-black pb-16">
+
+  <!-- ========================================================================= -->
+  <!-- HEADER & NAVIGATION                                                       -->
+  <!-- ========================================================================= -->
+  <header class="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-midnight/90 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Logo & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20 font-display font-black text-xl tracking-tighter">
+          D<span class="text-gold-400">B</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs uppercase tracking-widest font-extrabold text-cyan-400">High Performance Lab</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">TTS-VD Merlions</span>
+          </div>
+          <h1 class="font-display font-bold text-lg sm:text-xl text-white tracking-tight flex items-center gap-2">
+            Day Brothers Swimming Dashboard
+          </h1>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button onclick="openGitHubModal()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+          <i class="fa-brands fa-github text-sm"></i>
+          <span class="hidden sm:inline">GitHub Pages Setup</span>
+        </button>
+        <button onclick="window.print()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-print"></i>
+          <span class="hidden sm:inline">Print / PDF</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Active Swimmer Tab Bar -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between border-t border-slate-800/40 gap-3">
+      
+      <!-- Swimmer Switcher Pills -->
+      <div class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+        <button id="btn-monty" onclick="setSwimmerMode('monty')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-200 bg-cyan-500 text-midnight shadow-md shadow-cyan-500/20">
+          <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+          Monty Day <span class="text-[10px] opacity-80">(Age 12 • Free/Fly)</span>
+        </button>
+
+        <button id="btn-rupert" onclick="setSwimmerMode('rupert')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-200 text-slate-400 hover:text-white">
+          <span class="w-2 h-2 rounded-full bg-gold-500"></span>
+          Rupert Day <span class="text-[10px] opacity-80">(Age 10 • Breast/Free)</span>
+        </button>
+
+        <button id="btn-dual" onclick="setSwimmerMode('dual')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition duration-200 text-slate-400 hover:text-white">
+          <i class="fa-solid fa-arrows-split-up-and-left text-[11px]"></i>
+          Dual Head-to-Head
+        </button>
+      </div>
+
+      <!-- Live Motivational Tiers Key -->
+      <div class="hidden md:flex items-center gap-1 text-[11px] text-slate-400">
+        <span class="font-semibold text-slate-300 mr-1">Standards:</span>
+        <span class="px-1.5 py-0.5 rounded font-mono font-bold text-[10px] bg-purple-950/80 text-purple-300 border border-purple-800/60" title="Top 1-2% National">AAAA (Top 2%)</span>
+        <span class="px-1.5 py-0.5 rounded font-mono font-bold text-[10px] bg-blue-950/80 text-cyan-300 border border-cyan-800/60" title="Top 5-8% State/Regional">AAA (Top 8%)</span>
+        <span class="px-1.5 py-0.5 rounded font-mono font-bold text-[10px] bg-emerald-950/80 text-emerald-300 border border-emerald-800/60" title="Top 12-15% Championship">AA (Top 15%)</span>
+        <span class="px-1.5 py-0.5 rounded font-mono font-bold text-[10px] bg-amber-950/80 text-amber-300 border border-amber-800/60" title="Top 25-30% Qualifying">A (Top 30%)</span>
+        <span class="px-1.5 py-0.5 rounded font-mono font-bold text-[10px] bg-slate-800 text-slate-300 border border-slate-700">BB (Top 50%)</span>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN CONTAINER                                                            -->
+  <!-- ========================================================================= -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+
+    <!-- HERO PROFILE BANNER (MONTY OR RUPERT OR DUAL) -->
+    <div id="hero-banner" class="glass-card rounded-2xl p-6 relative overflow-hidden transition-all duration-300">
+      <!-- Background Graphic Glow -->
+      <div id="hero-glow" class="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        
+        <div class="space-y-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="hero-badge" class="px-2.5 py-0.5 rounded-full text-xs font-black tracking-wide uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+              National Age Pathway
+            </span>
+            <span id="hero-age" class="text-xs text-slate-300 font-medium">
+              12 Years Old (Turned Oct 2026)
+            </span>
+            <span class="text-xs text-slate-500">•</span>
+            <span class="text-xs text-slate-300 font-medium">Tanglin Merlions (TTS-VD)</span>
+            <span class="text-xs text-slate-500">•</span>
+            <span id="hero-division" class="text-xs text-cyan-400 font-semibold">Division: M12-13</span>
+          </div>
+
+          <h2 id="hero-name" class="text-2xl sm:text-3xl font-display font-black text-white tracking-tight">
+            Monty Day
+          </h2>
+
+          <p id="hero-desc" class="text-sm text-slate-300 max-w-2xl leading-relaxed">
+            Freestyle &amp; Butterfly Specialist focusing on middle-distance endurance (100m–200m sweet spot, stretching to 400m Free and 200m Fly). Elite distance-per-stroke with early high-elbow catch mechanics and back-half racing strength.
+          </p>
+        </div>
+
+        <!-- Hero Stats Counters -->
+        <div id="hero-quick-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 min-w-[110px]">
+            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">100m Free</div>
+            <div id="stat-1-val" class="text-xl font-display font-black text-cyan-400 mt-0.5">1:03.21</div>
+            <div id="stat-1-sub" class="text-[10px] text-purple-400 font-bold">AAAA (11y) / AAA</div>
+          </div>
+
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 min-w-[110px]">
+            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">200m Free (SCM)</div>
+            <div id="stat-2-val" class="text-xl font-display font-black text-emerald-400 mt-0.5">2:19.70</div>
+            <div id="stat-2-sub" class="text-[10px] text-emerald-400 font-bold">Dropped -4.19s!</div>
+          </div>
+
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 min-w-[110px]">
+            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">50m Free</div>
+            <div id="stat-3-val" class="text-xl font-display font-black text-cyan-400 mt-0.5">28.73</div>
+            <div id="stat-3-sub" class="text-[10px] text-cyan-400 font-bold">AAA Standard</div>
+          </div>
+
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 min-w-[110px]">
+            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">100m Fly</div>
+            <div id="stat-4-val" class="text-xl font-display font-black text-cyan-400 mt-0.5">1:10.26</div>
+            <div id="stat-4-sub" class="text-[10px] text-purple-400 font-bold">AAA Standard</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- SECTION 1: COACH'S VIDEO ANALYSIS & TECHNICAL SYNOPSIS                  -->
+    <!-- ======================================================================= -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Video Observations (2 cols) -->
+      <div class="lg:col-span-2 glass-card rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm font-bold">
+              <i class="fa-solid fa-video"></i>
+            </div>
+            <div>
+              <h3 class="font-display font-bold text-base text-white">Coach's Technical Race Analysis</h3>
+              <p class="text-xs text-slate-400">Direct observations from Global School Swimming Series &amp; 12th SNSC footage</p>
+            </div>
+          </div>
+          <span id="badge-tech-specialty" class="text-[11px] px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+            Stroke Mechanics Profile
+          </span>
+        </div>
+
+        <div id="tech-content" class="space-y-3.5 text-sm leading-relaxed text-slate-300">
+          <!-- Dynamically populated based on active swimmer -->
+        </div>
+
+        <!-- Key Mechanical Pillars -->
+        <div id="tech-pillars" class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+          <!-- Pillars dynamically injected -->
+        </div>
+      </div>
+
+      <!-- Breakthrough Spotlight / Key Milestone Tracker (1 col) -->
+      <div class="glass-card rounded-2xl p-6 flex flex-col justify-between space-y-4">
+        <div>
+          <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">
+              <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div>
+              <h3 class="font-display font-bold text-base text-white">Latest Race Milestone</h3>
+              <p class="text-xs text-slate-400">Oct 31, 2026 • 12th SNSC (SCM)</p>
+            </div>
+          </div>
+
+          <div id="breakthrough-box" class="mt-4 p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3">
+            <!-- Dynamic breakthrough details -->
+          </div>
+        </div>
+
+        <!-- Geoff Huegill Quote Reminder -->
+        <div class="p-3.5 rounded-xl bg-slate-950/80 border-l-4 border-cyan-500 text-xs italic text-slate-300">
+          "A great race isn’t won in the first 25 meters. It is won by the swimmer whose technique refuses to fall apart when their lungs are burning."
+          <div class="text-[10px] text-cyan-400 font-bold not-italic mt-1">— Geoff "Skippy" Huegill</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- SECTION 2: INTERACTIVE PERSONAL BESTS & STANDARDS MATRIX                -->
+    <!-- ======================================================================= -->
+    <section class="glass-card rounded-2xl p-6 space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+        <div>
+          <h3 class="font-display font-bold text-lg text-white flex items-center gap-2">
+            <i class="fa-solid fa-stopwatch text-cyan-400"></i>
+            Personal Best Database &amp; USA Swimming Standard Benchmark
+          </h3>
+          <p class="text-xs text-slate-400">Verified official Short Course Meters (25m) and Long Course Meters (50m) marks</p>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
+          <button onclick="filterStrokeTable('all')" id="filter-all" class="px-2.5 py-1 rounded-lg font-bold bg-slate-800 text-white transition">All</button>
+          <button onclick="filterStrokeTable('free')" id="filter-free" class="px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white transition">Free</button>
+          <button onclick="filterStrokeTable('fly')" id="filter-fly" class="px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white transition">Fly</button>
+          <button onclick="filterStrokeTable('breast')" id="filter-breast" class="px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white transition">Breast</button>
+          <button onclick="filterStrokeTable('back')" id="filter-back" class="px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white transition">Back</button>
+          <button onclick="filterStrokeTable('im')" id="filter-im" class="px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white transition">IM</button>
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="overflow-x-auto rounded-xl border border-slate-800">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-slate-900/90 text-slate-400 uppercase tracking-wider text-[11px] border-b border-slate-800">
+              <th class="py-3 px-4 font-bold">Event &amp; Distance</th>
+              <th class="py-3 px-4 font-bold">Course</th>
+              <th class="py-3 px-4 font-bold">Official PB</th>
+              <th class="py-3 px-4 font-bold">USA Swimming Standard</th>
+              <th class="py-3 px-4 font-bold">National Percentile</th>
+              <th class="py-3 px-4 font-bold">Key Tactical Note</th>
+            </tr>
+          </thead>
+          <tbody id="pb-table-body" class="divide-y divide-slate-800/60 font-sans">
+            <!-- Dynamic rows inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- SECTION 3: PACING ARCHITECTURE & INTERACTIVE SPLIT CALCULATOR           -->
+    <!-- ======================================================================= -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Pacing Milestones Table (7 cols) -->
+      <div class="lg:col-span-7 glass-card rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-cyan-400 flex items-center justify-center text-sm font-bold">
+              <i class="fa-solid fa-route"></i>
+            </div>
+            <div>
+              <h3 class="font-display font-bold text-base text-white">Target Milestone Pacing Architecture</h3>
+              <p class="text-xs text-slate-400">Step-by-step split breakdowns aligned to medium-term goals</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold text-cyan-400 bg-cyan-950/60 px-2.5 py-1 rounded border border-cyan-800">Drop-Off Discipline</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead>
+              <tr class="text-slate-400 border-b border-slate-800 uppercase text-[10px] tracking-wider">
+                <th class="py-2.5 px-3">Event</th>
+                <th class="py-2.5 px-3">Baseline PB</th>
+                <th class="py-2.5 px-3">Target Milestone</th>
+                <th class="py-2.5 px-3">Split Architecture</th>
+                <th class="py-2.5 px-3">Technical Trigger</th>
+              </tr>
+            </thead>
+            <tbody id="pacing-table-body" class="divide-y divide-slate-800/60">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Interactive Split Planner & Calculator (5 cols) -->
+      <div class="lg:col-span-5 glass-card rounded-2xl p-6 flex flex-col justify-between space-y-4">
+        <div>
+          <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+            <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm font-bold">
+              <i class="fa-solid fa-calculator"></i>
+            </div>
+            <div>
+              <h3 class="font-display font-bold text-base text-white">Smart Split Calculator</h3>
+              <p class="text-xs text-slate-400">Calculate elite age-group pacing drop-offs</p>
+            </div>
+          </div>
+
+          <div class="mt-4 space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Select Event</label>
+                <select id="calc-event" onchange="runSplitCalculator()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                  <option value="100free">100m Freestyle</option>
+                  <option value="200free">200m Freestyle</option>
+                  <option value="100fly">100m Butterfly</option>
+                  <option value="50breast">50m Breaststroke</option>
+                  <option value="50free">50m Freestyle</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Target Time</label>
+                <input type="text" id="calc-target" value="1:01.80" oninput="runSplitCalculator()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-cyan-400 font-mono font-bold focus:outline-none focus:border-cyan-500" placeholder="e.g. 1:01.80">
+              </div>
+            </div>
+
+            <div id="calc-result" class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2.5">
+              <!-- Calculator output populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+          <i class="fa-solid fa-lightbulb text-gold-400 mr-1"></i>
+          <strong>Coach Rule of Thumb:</strong> For a 100m sprint, target a back-half drop-off between <strong>+2.8s and +3.2s</strong>. For a 200m swim, protect the 3rd 50m to avoid the common +4s wall!
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- SECTION 4: VISUAL PROGRESS CHARTS & SPLIT DEGRADATION                   -->
+    <!-- ======================================================================= -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- Chart 1: Monty 200m Split Degradation or Rupert Stroke Comparison -->
+      <div class="glass-card rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h3 id="chart-1-title" class="font-display font-bold text-base text-white">200m Freestyle Split Breakdown (12th SNSC)</h3>
+            <p id="chart-1-subtitle" class="text-xs text-slate-400">Comparing Lap Splits across Monty's 2:19.70 PB</p>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Lap Analysis</span>
+        </div>
+        <div class="h-64 w-full">
+          <canvas id="splitChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 2: Career Progression / Standard Trajectory -->
+      <div class="glass-card rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h3 id="chart-2-title" class="font-display font-bold text-base text-white">Freestyle &amp; Specialty Time Progression</h3>
+            <p id="chart-2-subtitle" class="text-xs text-slate-400">Recent trajectory toward medium-term milestones</p>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-950 text-cyan-400 border border-cyan-800">Milestone Path</span>
+        </div>
+        <div class="h-64 w-full">
+          <canvas id="trajectoryChart"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- SECTION 5: GEOFF HUEGILL PERFORMANCE LOOP & DAILY HABIT LAB             -->
+    <!-- ======================================================================= -->
+    <section class="glass-card rounded-2xl p-6 space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-gold-500/20 text-gold-400 border border-gold-500/30">The Performance Loop</span>
+            <span class="text-xs text-slate-400">Huegill Blueprint: Accept It • Own It • Conquer It</span>
+          </div>
+          <h3 class="font-display font-bold text-lg text-white mt-1">5-Step Habit Lab &amp; Daily Process Goals</h3>
+        </div>
+
+        <div class="text-xs text-slate-400 flex items-center gap-2">
+          <span>Click checkboxes to track daily execution:</span>
+          <button onclick="resetHabits()" class="text-[11px] underline text-cyan-400 hover:text-cyan-300">Reset</button>
+        </div>
+      </div>
+
+      <!-- The 5 Steps Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-3.5">
+        
+        <!-- Step 1: Vision -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">1</span>
+              <span class="text-[10px] uppercase font-bold text-slate-400">Vision</span>
+            </div>
+            <h4 class="font-bold text-sm text-white mb-1.5">Know Your Why</h4>
+            <div id="step-1-desc" class="text-xs text-slate-300 leading-snug">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-cyan-400 font-semibold">SMART Goals</div>
+        </div>
+
+        <!-- Step 2: Ownership -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">2</span>
+              <span class="text-[10px] uppercase font-bold text-slate-400">Ownership</span>
+            </div>
+            <h4 class="font-bold text-sm text-white mb-1.5">Control Controllables</h4>
+            <div id="step-2-desc" class="text-xs text-slate-300 leading-snug">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-cyan-400 font-semibold">No Excuses</div>
+        </div>
+
+        <!-- Step 3: Believe -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">3</span>
+              <span class="text-[10px] uppercase font-bold text-slate-400">Believe</span>
+            </div>
+            <h4 class="font-bold text-sm text-white mb-1.5">Brick by Brick</h4>
+            <div id="step-3-desc" class="text-xs text-slate-300 leading-snug">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-cyan-400 font-semibold">Daily Proof</div>
+        </div>
+
+        <!-- Step 4: Accountability -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">4</span>
+              <span class="text-[10px] uppercase font-bold text-slate-400">Accountability</span>
+            </div>
+            <h4 class="font-bold text-sm text-white mb-1.5">Logbook &amp; Routine</h4>
+            <div id="step-4-desc" class="text-xs text-slate-300 leading-snug">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-cyan-400 font-semibold">Track Weekly</div>
+        </div>
+
+        <!-- Step 5: Feedback -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">5</span>
+              <span class="text-[10px] uppercase font-bold text-slate-400">Feedback</span>
+            </div>
+            <h4 class="font-bold text-sm text-white mb-1.5">Never Failure</h4>
+            <div id="step-5-desc" class="text-xs text-slate-300 leading-snug">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-cyan-400 font-semibold">3 Good, 3 To Improve</div>
+        </div>
+
+      </div>
+
+      <!-- 3 Habit Bricks Interactive Checklist -->
+      <div class="pt-2">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-cubes text-cyan-400"></i>
+          The 3 Daily Habit Bricks (Click to check off today's execution)
+        </h4>
+
+        <div id="habit-bricks-container" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- SECTION 6: DRYLAND STRENGTH LAB & RACE DAY LOGISTICS                    -->
+    <!-- ======================================================================= -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <!-- Skills Lab (Starts, Turns, Finishes) -->
+      <div class="glass-card rounded-2xl p-5 space-y-3">
+        <div class="flex items-center gap-2 border-b border-slate-800 pb-2.5">
+          <i class="fa-solid fa-water text-cyan-400"></i>
+          <h4 class="font-display font-bold text-sm text-white">Skills Lab • The 3 Game Winners</h4>
+        </div>
+        <ul class="space-y-2.5 text-xs text-slate-300">
+          <li class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
+            <strong class="text-cyan-400 block mb-0.5">1. Starts (Arrow Entry)</strong>
+            Tight streamline, lock thumbs, head neutral. Enter through a single hole in the water.
+          </li>
+          <li class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
+            <strong class="text-cyan-400 block mb-0.5">2. Turns (7m Setup)</strong>
+            Accelerate into the wall. No breathing inside the flags; drive off in tight streamline.
+          </li>
+          <li class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
+            <strong class="text-cyan-400 block mb-0.5">3. Finishes (Touch First)</strong>
+            Head down, zero breaths over the final 5 meters. Hit the touchpad with full fingertip drive.
+          </li>
+        </ul>
+      </div>
+
+      <!-- Strength Lab (Dryland Core Circuit) -->
+      <div class="glass-card rounded-2xl p-5 space-y-3">
+        <div class="flex items-center gap-2 border-b border-slate-800 pb-2.5">
+          <i class="fa-solid fa-dumbbell text-emerald-400"></i>
+          <h4 class="font-display font-bold text-sm text-white">Strength Lab • Core &amp; Posture</h4>
+        </div>
+        <ul id="dryland-list" class="space-y-2 text-xs text-slate-300">
+          <!-- Dynamically populated -->
+        </ul>
+      </div>
+
+      <!-- Fuel & Race Day Checklist -->
+      <div class="glass-card rounded-2xl p-5 space-y-3">
+        <div class="flex items-center gap-2 border-b border-slate-800 pb-2.5">
+          <i class="fa-solid fa-apple-whole text-gold-400"></i>
+          <h4 class="font-display font-bold text-sm text-white">Fuelling &amp; Race Day Bag</h4>
+        </div>
+        <ul class="space-y-2 text-xs text-slate-300">
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-gold-400 mt-0.5"></i>
+            <span><strong>Pre-Race Fuel:</strong> Oats, banana &amp; honey 2–2.5 hrs before warm-up.</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-gold-400 mt-0.5"></i>
+            <span><strong>Deck Hydration:</strong> 1L water + electrolyte drink; sip between every race.</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-gold-400 mt-0.5"></i>
+            <span><strong>30-Min Post Race:</strong> Chocolate milk, protein shake, or banana within 20 mins.</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-check text-gold-400 mt-0.5"></i>
+            <span><strong>Deck Rest:</strong> Keep warm, stay off feet between prelims &amp; finals on yoga mat.</span>
+          </li>
+        </ul>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: GITHUB PAGES DEPLOYMENT GUIDE                                      -->
+  <!-- ========================================================================= -->
+  <div id="github-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-700 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2 text-white font-display font-bold text-base">
+          <i class="fa-brands fa-github text-cyan-400 text-lg"></i>
+          Publish to GitHub Pages in 3 Minutes
+        </div>
+        <button onclick="closeGitHubModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+        <p>This dashboard is already structured as a <strong>single-file static web application (<code class="text-cyan-400 font-mono">index.html</code>)</strong>, making it 100% ready for free instant hosting on GitHub Pages.</p>
+
+        <ol class="list-decimal pl-4 space-y-2">
+          <li>
+            <strong>Create a new repository</strong> on GitHub named <code class="text-cyan-400 font-mono">day-brothers-dashboard</code> (or any name you like). Make it <em>Public</em>.
+          </li>
+          <li>
+            <strong>Upload this file</strong> as <code class="text-cyan-400 font-mono">index.html</code> in the main branch (root directory).
+          </li>
+          <li>
+            Go to <strong>Settings</strong> &gt; <strong>Pages</strong> (in the left sidebar).
+          </li>
+          <li>
+            Under <em>Build and deployment &gt; Branch</em>, select <code class="text-cyan-400 font-mono">main</code> and folder <code class="text-cyan-400 font-mono">/ (root)</code>, then click <strong>Save</strong>.
+          </li>
+          <li>
+            Within 60 seconds, your site will be live at:
+            <div class="mt-1 p-2 rounded bg-slate-950 font-mono text-cyan-300 break-all select-all border border-slate-800">
+              https://&lt;your-username&gt;.github.io/day-brothers-dashboard/
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <div class="flex justify-end pt-2 border-t border-slate-800">
+        <button onclick="closeGitHubModal()" class="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-midnight font-bold text-xs transition">
+          Got It, Thanks!
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT DATA & LOGIC ENGINE                                            -->
+  <!-- ========================================================================= -->
+  <script>
+    // ---------------------------------------------------------------------------
+    // DATA MODEL FOR BOTH SWIMMERS
+    // ---------------------------------------------------------------------------
+    const athletesData = {
+      monty: {
+        id: 'monty',
+        name: 'Monty Day',
+        age: 12,
+        dobDetail: 'Turned 12 in October 2026',
+        club: 'Tanglin Merlions (TTS-VD)',
+        division: 'M12–13 National Pathway',
+        specialty: 'Freestyle & Butterfly Specialist (100m/200m Sweet Spot)',
+        badgeColor: 'teal',
+        accentColor: '#00d2ff',
+        quickStats: {
+          s1: { label: '100m Free (SCM)', val: '1:03.21', sub: 'AAAA (11y) / AAA (12y)' },
+          s2: { label: '200m Free (SCM)', val: '2:19.70', sub: 'Breakthrough: -4.19s' },
+          s3: { label: '50m Free (SCM)', val: '28.73', sub: 'AAA Standard' },
+          s4: { label: '100m Fly (SCM)', val: '1:10.26', sub: 'AAA Standard' }
+        },
+        technicalSynopsis: `
+          <p><strong>Race Video Observations &amp; Standout Strengths:</strong> Monty possesses an elite natural distance-per-stroke and exceptional aquatic sensitivity. In his 100m Freestyle (1:03.21) and 100m Butterfly (1:10.26), his catch mechanics are outstanding—he establishes an Early Vertical Forearm (EVF) that holds water long after muscular fatigue sets in. In sprint freestyle, his block reaction and opening 25m speed (14.35s at 12th SNSC, 14.89s in earlier heats) prove he has true national-caliber top-end speed, while his body line stays flat and elevated without lateral sway.</p>
+          <p><strong>Key Developmental Priorities as a 12-Year-Old:</strong> Monty's breakthrough 2:19.70 200m Free (-4.19s) confirms his middle-distance ceiling is expanding rapidly. The primary developmental focus is now <em>stroke count pacing</em> and <em>breakout kick discipline</em> on the 3rd and 4th laps. In the 200m Free, his 50m splits progressed from 31.09 &rarr; 35.08 &rarr; 35.96 to 37.57. By conditioning a strict 6-beat kick on the 3rd 50m and maintaining head-spine alignment on the final 25m, he will lower that 37.5s finish into 35-low, unlocking a sub-2:16 swim.</p>
+        `,
+        pillars: [
+          { title: 'EVF Catch Efficiency', desc: 'Fingertips point down early; holds clean paddle grip on water through full pull.', icon: 'fa-hand' },
+          { title: 'Front-End Sprint Power', desc: '14.35s 25m split speed provides easy speed reserve for 100m/200m events.', icon: 'fa-bolt' },
+          { title: 'Aerobic Middle-Distance Engine', desc: 'Extends from 50m sprint up to 400m Free (5:03.00) and 200m Fly (2:55.79).', icon: 'fa-heart-pulse' }
+        ],
+        breakthrough: {
+          title: '200m Free: 2:19.70 (-4.19s Drop)',
+          meet: '12th Singapore National Swimming Championships (SCM) • Oct 31, 2026',
+          details: 'Dropped from 2:23.89 seed down to 2:19.70 in Heat 5, Lane 5. Split: 31.09 / 35.08 / 35.96 / 37.57. First 100m in 1:06.17.',
+          badge: 'AA Standard (Top 10-12%)'
+        },
+        pbs: [
+          { event: '50m Freestyle', course: '25m SCM', time: '28.73', std: 'AAAA (11y) / AAA (12y)', pct: 'Top 3-5%', note: '29.82 LCM, 29.37 at SNSC fatigued' },
+          { event: '100m Freestyle', course: '25m SCM', time: '1:03.21', std: 'AAAA (11y) / AAA (12y)', pct: 'Top 3-5%', note: '1:04.79 LCM. Elite sweet spot.' },
+          { event: '200m Freestyle', course: '25m SCM', time: '2:19.70', std: 'AA Standard (near AAA)', pct: 'Top 10%', note: 'Major PR (-4.19s drop on Oct 31, 2026)' },
+          { event: '400m Freestyle', course: '25m SCM', time: '5:03.00', std: 'AA Standard', pct: 'Top 15%', note: '5:07.85 LCM. Aerobic endurance pillar.' },
+          { event: '50m Butterfly', course: '50m LCM', time: '31.77', std: 'AAA Standard', pct: 'Top 5-8%', note: '32.33 SCM. Front-half fly explosive speed.' },
+          { event: '100m Butterfly', course: '25m SCM', time: '1:10.26', std: 'AAA Standard', pct: 'Top 5-8%', note: '1:12.54 LCM. Outstanding fly rhythm.' },
+          { event: '200m Butterfly', course: '25m SCM', time: '2:55.79', std: 'A Standard', pct: 'Top 25%', note: 'Rare grit event for a 12yo swimmer.' },
+          { event: '50m Backstroke', course: '25m SCM', time: '35.41', std: 'AA Standard', pct: 'Top 15%', note: '17.75s 25m split in 50m pool.' },
+          { event: '100m Backstroke', course: '50m LCM', time: '1:37.77', std: 'B Standard', pct: 'Top 60%', note: 'Area with high upside potential.' },
+          { event: '50m Breaststroke', course: '25m SCM', time: '41.76', std: 'BB Standard', pct: 'Top 45%', note: '52.01 LCM; critical for IM development.' },
+          { event: '100m IM', course: '25m SCM', time: '1:16.00', std: 'AA Standard', pct: 'Top 15%', note: 'Balanced four-stroke sprint mark.' },
+          { event: '200m IM', course: '25m SCM', time: '2:46.53', std: 'AA Standard', pct: 'Top 15%', note: '2:46.74 LCM. Versatility benchmark.' },
+          { event: '400m IM', course: '50m LCM', time: '6:03.86', std: 'A Standard', pct: 'Top 25%', note: 'Demanding multi-stroke endurance foundation.' }
+        ],
+        pacing: [
+          { event: '100m Freestyle', pb: '1:03.21 SCM', target: '1:01.80', splits: '29.40 / 32.40 (+3.0s drop)', cue: 'Do not redline 1st 25m; settle into rhythm and surge kick at 60m.' },
+          { event: '200m Freestyle', pb: '2:19.70 SCM', target: '2:16.00', splits: '31.2 / 34.6 / 35.2 / 35.0', cue: 'Attack the 3rd 50m! Drive 5 dolphin kicks off turn 3 and hold 6-beat kick to pad.' },
+          { event: '100m Butterfly', pb: '1:10.26 SCM', target: '1:08.50', splits: '31.80 / 36.70 (+4.9s drop)', cue: 'Skim chin at waterline; double down-kick to maintain velocity over final 20m.' },
+          { event: '400m Freestyle', pb: '5:03.00 SCM', target: '4:52.00', splits: 'Hold 36.5s per 50m lap', cue: 'Metronome stroke rate; breathe 3/3 bilateral for even chest alignment.' }
+        ],
+        steps: {
+          s1: 'Long-term: National Open Age Finals (sub-54 100 Free, sub-59 100 Fly). Medium-term: sub-1:01.00 100 Free, sub-2:14.00 200 Free.',
+          s2: 'Own the pre-race routine. No panicking when opponents sprint early; trust the second-half aerobic reserve.',
+          s3: 'Belief built by holding 5 underwater dolphin kicks on every single turn in practice without cutting corners.',
+          s4: 'Log post-race splits, stroke counts, and hours of sleep before championship meets.',
+          s5: 'It is all feedback: 200m Free proved the engine works; 50m Free fatigue taught double-session fueling needs.'
+        },
+        habits: [
+          { id: 'm-brick-1', title: 'Brick 1: Negative Split Mastery', desc: 'Bring the back half of every aerobic interval faster than the front half.' },
+          { id: 'm-brick-2', title: 'Brick 2: Zero Breaths Inside Flags', desc: 'Lock head down and no breathing on breakout stroke #1 off every wall.' },
+          { id: 'm-brick-3', title: 'Brick 3: 5 Underwater Fly Kicks', desc: 'Hold minimum 5 powerful dolphin kicks off every flip turn in training.' }
+        ],
+        dryland: [
+          '<strong>Banded Y-T-W Scapular Series:</strong> 3 × 12 reps (rotator cuff & butterfly shoulder armor).',
+          '<strong>Plank with Alternating Arm/Leg Reach:</strong> 3 × 45s (anti-rotational core stability).',
+          '<strong>Streamline Squat Jumps:</strong> 3 × 8 reps (explosive drive off block and turns).',
+          '<strong>Glute Bridges with Band:</strong> 3 × 15 reps (high hip flotation on distance swims).'
+        ]
+      },
+      rupert: {
+        id: 'rupert',
+        name: 'Rupert Day',
+        age: 10,
+        dobDetail: 'Turned 10 in May 2026',
+        club: 'Tanglin Merlions (TTS-VD)',
+        division: '10 & Under National Pathway',
+        specialty: 'Natural Breaststroker & Explosive Sprint Freestyle Specialist',
+        badgeColor: 'gold',
+        accentColor: '#f59e0b',
+        quickStats: {
+          s1: { label: '50m Breast (SCM)', val: '44.58', sub: 'AA Standard (Top 12%)' },
+          s2: { label: '50m Free (SCM)', val: '33.25', sub: 'AA Standard (Top 15%)' },
+          s3: { label: '100m Free (SCM)', val: '1:14.84', sub: 'A Standard (Top 25%)' },
+          s4: { label: '50m Fly (SCM)', val: '42.98', sub: 'BB Standard' }
+        },
+        technicalSynopsis: `
+          <p><strong>Race Video Observations &amp; Standout Strengths:</strong> Rupert possesses unmistakable fast-twitch explosive power and strong competitive fire. In his 50m Breaststroke (44.58s SCM / 48.86s LCM), his kick mechanics are completely natural—he loads his heels tight to his hips and snaps them backward with sharp outward whip, maintaining high hip elevation throughout. In the 50m Freestyle (33.25s), his block reaction and turnover are aggressive, powering through the breakout and attacking the finish pad with tenacity.</p>
+          <p><strong>Key Developmental Priorities as a 10-Year-Old:</strong> Rupert's primary technical development lies in <em>learning to ride his glide</em> and <em>controlling his breathing posture</em>. In sprint breaststroke, his natural eagerness can lead to rushing the next arm pull before the kick surge has finished gliding. Giving the glide a fraction of a second longer post-kick will yield massive distance-per-stroke gains with less effort. In butterfly and backstroke, keeping the chin low during breaths will prevent his hips from dipping momentarily.</p>
+        `,
+        pillars: [
+          { title: 'Natural Breaststroke Whip', desc: 'Powerful heel snap and hip elevation that rivals older age-group competitors.', icon: 'fa-person-swimming' },
+          { title: 'Explosive Sprint Speed', desc: 'Sub-33.5s 50m Free puts him in the top 15% nationally for 10-year-olds.', icon: 'fa-bolt' },
+          { title: 'Racer Mindset & Courage', desc: 'Attacks the touch pad fearlessly in tight heats and thrives on sprint challenges.', icon: 'fa-fire' }
+        ],
+        breakthrough: {
+          title: '50m Breaststroke: 44.58s (AA Standard)',
+          meet: 'Global School Swimming Series 2026 (SCM) • Lane 7 Victory',
+          details: 'Recorded an opening 25m split of 23.96s, maintaining explosive kick whip through the wall. Firmly establishes him as a top-tier breaststroker.',
+          badge: 'USA Swimming AA Tier'
+        },
+        pbs: [
+          { event: '50m Breaststroke', course: '25m SCM', time: '44.58', std: 'AA Standard', pct: 'Top 12-15%', note: '48.86 LCM. Natural kick mechanics.' },
+          { event: '100m Breaststroke', course: '25m SCM', time: '1:47.53', std: 'BB Standard', pct: 'Top 45%', note: 'High upside as pacing matures.' },
+          { event: '50m Freestyle', course: '25m SCM', time: '33.25', std: 'AA Standard', pct: 'Top 15%', note: '17.07s 25m split. Fast turnover.' },
+          { event: '100m Freestyle', course: '25m SCM', time: '1:14.84', std: 'A Standard', pct: 'Top 25%', note: '1:18.24 LCM. Strong sprint baseline.' },
+          { event: '200m Freestyle', course: '50m LCM', time: '2:54.27', std: 'BB Standard', pct: 'Top 50%', note: '3:00.12 SCM. Building endurance.' },
+          { event: '50m Butterfly', course: '25m SCM', time: '42.98', std: 'BB Standard', pct: 'Top 50%', note: '44.39 LCM (Split 24.37s).' },
+          { event: '50m Backstroke', course: '50m LCM', time: '44.63', std: 'BB Standard', pct: 'Top 50%', note: '45.92 SCM (Split 24.32s).' },
+          { event: '100m IM', course: '25m SCM', time: '1:39.48', std: 'B Standard', pct: 'Top 65%', note: 'Breaststroke leg provides major weapon.' }
+        ],
+        pacing: [
+          { event: '50m Breaststroke', pb: '44.58 SCM', target: '42.50s', splits: '19.80 / 22.70', cue: 'Hold 3-second pullout streamline! Snap heels tight to hips and ride the surge.' },
+          { event: '50m Freestyle', pb: '33.25 SCM', target: '31.80s', splits: '15.20 / 16.60', cue: 'Explode off blocks; head down looking at black line; zero breaths inside final 10m.' },
+          { event: '100m Freestyle', pb: '1:14.84 SCM', target: '1:11.50', splits: '34.20 / 37.30', cue: 'Do not redline first 25m. Establish 6-beat kick by 40m to power home.' },
+          { event: '100m Breaststroke', pb: '1:47.53 SCM', target: '1:38.00', splits: '45.50 / 52.50', cue: 'Maintain distance-per-stroke; avoid shortening the pull when tired.' }
+        ],
+        steps: {
+          s1: 'Long-term: National Age qualification in 50m/100m Breast; become a sub-26s 50m Free sprinter. Medium-term: sub-41.00 Breast, sub-31.50 Free.',
+          s2: 'Own the start and turn. Stand like a statue on the block, listen for the beep, and explode into streamline.',
+          s3: 'Belief built by touching with two hands on every breaststroke turn in training without shortcutting.',
+          s4: 'Keep a fun post-meet journal: "What was super fun today? What felt great? What will I try next time?"',
+          s5: 'It is all feedback: If a race feels tough at the end, it just means my body is learning how to get stronger.'
+        },
+        habits: [
+          { id: 'r-brick-1', title: 'Brick 1: Two-Hand Touch Flat', desc: 'Simultaneous two-hand touch on every breaststroke turn and finish in training.' },
+          { id: 'r-brick-2', title: 'Brick 2: Streamline Missile', desc: 'Lock thumbs, squeeze ears between upper arms off every start and turn before kicking.' },
+          { id: 'r-brick-3', title: 'Brick 3: Heel Snap Whip', desc: 'Snap heels backward tight to hips rather than dropping knees down under stomach.' }
+        ],
+        dryland: [
+          '<strong>Frog Glute Bridges:</strong> 3 × 12 reps (targets adductors & breaststroke kick power).',
+          '<strong>Streamline Rocket Jumps:</strong> 3 × 8 reps (explosive takeoff power off blocks).',
+          '<strong>Bear Crawls & Crab Walks:</strong> 3 × 15m (shoulder stability & coordination).',
+          '<strong>Deadbug Hold:</strong> 3 × 30s (stabilizes core and neutral spine in water).'
+        ]
+      }
+    };
+
+    let currentSwimmer = 'monty';
+    let splitChartInstance = null;
+    let trajectoryChartInstance = null;
+
+    // ---------------------------------------------------------------------------
+    // INITIALIZATION & TAB SWITCHING
+    // ---------------------------------------------------------------------------
+    window.onload = function() {
+      renderSwimmer(currentSwimmer);
+      runSplitCalculator();
+    };
+
+    function setSwimmerMode(mode) {
+      currentSwimmer = mode;
+      
+      const btnMonty = document.getElementById('btn-monty');
+      const btnRupert = document.getElementById('btn-rupert');
+      const btnDual = document.getElementById('btn-dual');
+
+      btnMonty.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-200 text-slate-400 hover:text-white';
+      btnRupert.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-200 text-slate-400 hover:text-white';
+      btnDual.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition duration-200 text-slate-400 hover:text-white';
+
+      if (mode === 'monty') {
+        btnMonty.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-200 bg-cyan-500 text-midnight shadow-md shadow-cyan-500/20';
+        renderSwimmer('monty');
+      } else if (mode === 'rupert') {
+        btnRupert.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-200 bg-gold-500 text-midnight shadow-md shadow-gold-500/20';
+        renderSwimmer('rupert');
+      } else if (mode === 'dual') {
+        btnDual.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition duration-200 bg-purple-600 text-white shadow-md shadow-purple-600/20';
+        renderDualComparison();
+      }
+    }
+
+    // ---------------------------------------------------------------------------
+    // RENDER INDIVIDUAL SWIMMER PROFILE
+    // ---------------------------------------------------------------------------
+    function renderSwimmer(key) {
+      const athlete = athletesData[key];
+      const isMonty = (key === 'monty');
+
+      // Hero Card Updates
+      const banner = document.getElementById('hero-banner');
+      banner.className = `glass-card ${isMonty ? 'glass-card-monty' : 'glass-card-rupert'} rounded-2xl p-6 relative overflow-hidden transition-all duration-300`;
+
+      document.getElementById('hero-badge').textContent = athlete.division;
+      document.getElementById('hero-badge').className = `px-2.5 py-0.5 rounded-full text-xs font-black tracking-wide uppercase ${isMonty ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' : 'bg-gold-500/20 text-gold-300 border-gold-500/40'} border`;
+      document.getElementById('hero-age').textContent = `${athlete.age} Years Old (${athlete.dobDetail})`;
+      document.getElementById('hero-name').textContent = athlete.name;
+      document.getElementById('hero-division').textContent = athlete.club;
+      document.getElementById('hero-desc').textContent = athlete.specialty;
+
+      // Quick stats
+      document.getElementById('stat-1-val').textContent = athlete.quickStats.s1.val;
+      document.getElementById('stat-1-val').className = `text-xl font-display font-black mt-0.5 ${isMonty ? 'text-cyan-400' : 'text-gold-400'}`;
+      document.getElementById('stat-1-sub').textContent = athlete.quickStats.s1.sub;
+
+      document.getElementById('stat-2-val').textContent = athlete.quickStats.s2.val;
+      document.getElementById('stat-2-val').className = `text-xl font-display font-black mt-0.5 text-emerald-400`;
+      document.getElementById('stat-2-sub').textContent = athlete.quickStats.s2.sub;
+
+      document.getElementById('stat-3-val').textContent = athlete.quickStats.s3.val;
+      document.getElementById('stat-3-val').className = `text-xl font-display font-black mt-0.5 ${isMonty ? 'text-cyan-400' : 'text-gold-400'}`;
+      document.getElementById('stat-3-sub').textContent = athlete.quickStats.s3.sub;
+
+      document.getElementById('stat-4-val').textContent = athlete.quickStats.s4.val;
+      document.getElementById('stat-4-val').className = `text-xl font-display font-black mt-0.5 ${isMonty ? 'text-cyan-400' : 'text-gold-400'}`;
+      document.getElementById('stat-4-sub').textContent = athlete.quickStats.s4.sub;
+
+      // Technical Synopsis
+      document.getElementById('tech-content').innerHTML = athlete.technicalSynopsis;
+
+      // Pillars
+      const pillarHTML = athlete.pillars.map(p => `
+        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+          <div class="flex items-center gap-2 mb-1">
+            <i class="fa-solid ${p.icon} ${isMonty ? 'text-cyan-400' : 'text-gold-400'} text-xs"></i>
+            <span class="font-bold text-xs text-white">${p.title}</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-snug">${p.desc}</p>
+        </div>
+      `).join('');
+      document.getElementById('tech-pillars').innerHTML = pillarHTML;
+
+      // Breakthrough Spotlight
+      document.getElementById('breakthrough-box').innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Featured Highlight</span>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isMonty ? 'bg-cyan-950 text-cyan-300 border border-cyan-800' : 'bg-gold-950 text-gold-300 border border-gold-800'}">${athlete.breakthrough.badge}</span>
+        </div>
+        <div class="text-sm font-display font-bold text-white">${athlete.breakthrough.title}</div>
+        <p class="text-xs text-slate-400 leading-snug">${athlete.breakthrough.details}</p>
+        <div class="text-[10px] text-slate-500 font-semibold border-t border-slate-800/80 pt-1.5">${athlete.breakthrough.meet}</div>
+      `;
+
+      // Render PB Table
+      renderPBTable(athlete.pbs, isMonty);
+
+      // Render Pacing Table
+      renderPacingTable(athlete.pacing);
+
+      // Render Performance Loop Steps
+      document.getElementById('step-1-desc').textContent = athlete.steps.s1;
+      document.getElementById('step-2-desc').textContent = athlete.steps.s2;
+      document.getElementById('step-3-desc').textContent = athlete.steps.s3;
+      document.getElementById('step-4-desc').textContent = athlete.steps.s4;
+      document.getElementById('step-5-desc').textContent = athlete.steps.s5;
+
+      // Render Habit Bricks
+      renderHabitBricks(athlete.habits, isMonty);
+
+      // Render Dryland List
+      document.getElementById('dryland-list').innerHTML = athlete.dryland.map(item => `
+        <li class="p-2 rounded-lg bg-slate-900/80 border border-slate-800">${item}</li>
+      `).join('');
+
+      // Render Charts
+      renderCharts(key);
+
+      // Re-run split calculator with swimmer's primary event
+      document.getElementById('calc-event').value = isMonty ? '200free' : '50breast';
+      document.getElementById('calc-target').value = isMonty ? '2:16.00' : '42.50';
+      runSplitCalculator();
+    }
+
+    // ---------------------------------------------------------------------------
+    // RENDER PERSONAL BESTS TABLE
+    // ---------------------------------------------------------------------------
+    function renderPBTable(pbs, isMonty) {
+      const tbody = document.getElementById('pb-table-body');
+      tbody.innerHTML = pbs.map(pb => {
+        let badgeColor = 'bg-slate-800 text-slate-300 border-slate-700';
+        if (pb.std.includes('AAAA')) badgeColor = 'bg-purple-950 text-purple-300 border-purple-800';
+        else if (pb.std.includes('AAA')) badgeColor = 'bg-blue-950 text-cyan-300 border-cyan-800';
+        else if (pb.std.includes('AA')) badgeColor = 'bg-emerald-950 text-emerald-300 border-emerald-800';
+        else if (pb.std.includes('A')) badgeColor = 'bg-amber-950 text-amber-300 border-amber-800';
+
+        return `
+          <tr class="hover:bg-slate-800/30 transition">
+            <td class="py-2.5 px-4 font-bold text-white">${pb.event}</td>
+            <td class="py-2.5 px-4 font-mono text-slate-400">${pb.course}</td>
+            <td class="py-2.5 px-4 font-mono font-bold text-sm ${isMonty ? 'text-cyan-400' : 'text-gold-400'}">${pb.time}</td>
+            <td class="py-2.5 px-4">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeColor}">${pb.std}</span>
+            </td>
+            <td class="py-2.5 px-4 text-slate-300 font-semibold">${pb.pct}</td>
+            <td class="py-2.5 px-4 text-slate-400 text-[11px]">${pb.note}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterStrokeTable(filter) {
+      const athlete = athletesData[currentSwimmer === 'dual' ? 'monty' : currentSwimmer];
+      const isMonty = (currentSwimmer !== 'rupert');
+
+      const buttons = ['all', 'free', 'fly', 'breast', 'back', 'im'];
+      buttons.forEach(b => {
+        const btn = document.getElementById(`filter-${b}`);
+        if (btn) {
+          btn.className = (b === filter) 
+            ? 'px-2.5 py-1 rounded-lg font-bold bg-slate-800 text-white transition' 
+            : 'px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white transition';
+        }
+      });
+
+      if (filter === 'all') {
+        renderPBTable(athlete.pbs, isMonty);
+        return;
+      }
+
+      const filtered = athlete.pbs.filter(pb => {
+        const ev = pb.event.toLowerCase();
+        if (filter === 'free') return ev.includes('free');
+        if (filter === 'fly') return ev.includes('fly');
+        if (filter === 'breast') return ev.includes('breast');
+        if (filter === 'back') return ev.includes('back');
+        if (filter === 'im') return ev.includes('im');
+        return true;
+      });
+
+      renderPBTable(filtered, isMonty);
+    }
+
+    // ---------------------------------------------------------------------------
+    // RENDER PACING TABLE
+    // ---------------------------------------------------------------------------
+    function renderPacingTable(pacing) {
+      const tbody = document.getElementById('pacing-table-body');
+      tbody.innerHTML = pacing.map(row => `
+        <tr class="hover:bg-slate-800/20 transition">
+          <td class="py-2.5 px-3 font-bold text-white">${row.event}</td>
+          <td class="py-2.5 px-3 font-mono text-slate-400">${row.pb}</td>
+          <td class="py-2.5 px-3 font-mono font-bold text-cyan-400">${row.target}</td>
+          <td class="py-2.5 px-3 text-slate-300 font-mono text-[11px]">${row.splits}</td>
+          <td class="py-2.5 px-3 text-slate-400 text-[11px]">${row.cue}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ---------------------------------------------------------------------------
+    // RENDER HABIT BRICKS WITH LOCAL STORAGE
+    // ---------------------------------------------------------------------------
+    function renderHabitBricks(habits, isMonty) {
+      const container = document.getElementById('habit-bricks-container');
+      container.innerHTML = habits.map(h => {
+        const isChecked = localStorage.getItem(h.id) === 'true';
+        return `
+          <div onclick="toggleHabit('${h.id}')" class="cursor-pointer select-none p-3.5 rounded-xl border transition ${isChecked ? 'bg-cyan-950/40 border-cyan-500/60' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'} flex items-start gap-3">
+            <div class="mt-0.5 w-5 h-5 rounded flex items-center justify-center border ${isChecked ? 'bg-cyan-500 border-cyan-500 text-midnight font-bold' : 'border-slate-600 bg-slate-800'}">
+              ${isChecked ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+            </div>
+            <div>
+              <h5 class="font-bold text-xs ${isChecked ? 'text-cyan-300 line-through' : 'text-white'}">${h.title}</h5>
+              <p class="text-[11px] text-slate-400 leading-snug mt-0.5">${h.desc}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleHabit(id) {
+      const cur = localStorage.getItem(id) === 'true';
+      localStorage.setItem(id, (!cur).toString());
+      const athlete = athletesData[currentSwimmer === 'dual' ? 'monty' : currentSwimmer];
+      renderHabitBricks(athlete.habits, currentSwimmer !== 'rupert');
+    }
+
+    function resetHabits() {
+      ['m-brick-1', 'm-brick-2', 'm-brick-3', 'r-brick-1', 'r-brick-2', 'r-brick-3'].forEach(id => {
+        localStorage.removeItem(id);
+      });
+      const athlete = athletesData[currentSwimmer === 'dual' ? 'monty' : currentSwimmer];
+      renderHabitBricks(athlete.habits, currentSwimmer !== 'rupert');
+    }
+
+    // ---------------------------------------------------------------------------
+    // DUAL COMPARISON VIEW (HEAD-TO-HEAD)
+    // ---------------------------------------------------------------------------
+    function renderDualComparison() {
+      const banner = document.getElementById('hero-banner');
+      banner.className = `glass-card rounded-2xl p-6 relative overflow-hidden transition-all duration-300 border-top-4 border-purple-500`;
+
+      document.getElementById('hero-badge').textContent = 'Dual Profile View';
+      document.getElementById('hero-badge').className = 'px-2.5 py-0.5 rounded-full text-xs font-black tracking-wide uppercase bg-purple-500/20 text-purple-300 border-purple-500/40 border';
+      document.getElementById('hero-age').textContent = 'Monty (Age 12) & Rupert (Age 10)';
+      document.getElementById('hero-name').textContent = 'Day Brothers Head-to-Head Overview';
+      document.getElementById('hero-division').textContent = 'Tanglin Merlions (TTS-VD)';
+      document.getElementById('hero-desc').textContent = 'Dual athlete comparison showing complementary swimming profiles: Monty as the long-axis distance/pacing tactician (Free & Fly) and Rupert as the explosive short-axis sprinter (Breaststroke & Sprint Free).';
+
+      // Combined Stats
+      document.getElementById('stat-1-val').textContent = '28.73 / 33.25';
+      document.getElementById('stat-1-sub').textContent = '50m Free (Monty / Rupert)';
+
+      document.getElementById('stat-2-val').textContent = '1:03.21 / 1:14.84';
+      document.getElementById('stat-2-sub').textContent = '100m Free (Monty / Rupert)';
+
+      document.getElementById('stat-3-val').textContent = '41.76 / 44.58';
+      document.getElementById('stat-3-sub').textContent = '50m Breast (Monty / Rupert)';
+
+      document.getElementById('stat-4-val').textContent = '31.77 / 42.98';
+      document.getElementById('stat-4-sub').textContent = '50m Fly (Monty / Rupert)';
+
+      // Dual Synopsis
+      document.getElementById('tech-content').innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-cyan-500/30">
+            <span class="text-xs font-bold text-cyan-400 block mb-1">Monty Day (Age 12 • Free/Fly)</span>
+            <p class="text-xs text-slate-300 leading-relaxed">Excels in distance-per-stroke and holding high velocity through the back half of 100m, 200m, and 400m races. His breakthrough 2:19.70 200m Free highlights his expanding aerobic capacity.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-gold-500/30">
+            <span class="text-xs font-bold text-gold-400 block mb-1">Rupert Day (Age 10 • Breast/Free)</span>
+            <p class="text-xs text-slate-300 leading-relaxed">Fast-twitch explosive power. His 44.58s 50m Breaststroke is an elite foundation with natural heel snap whip, paired with aggressive 33.25s sprint freestyle turnover.</p>
+          </div>
+        </div>
+      `;
+
+      // Dual Pillars
+      document.getElementById('tech-pillars').innerHTML = `
+        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+          <span class="font-bold text-xs text-cyan-400 block mb-1">Monty's Sweet Spot</span>
+          <p class="text-[11px] text-slate-400">100m &amp; 200m Free &amp; Fly (Pacing &amp; Negative Splitting)</p>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+          <span class="font-bold text-xs text-gold-400 block mb-1">Rupert's Sweet Spot</span>
+          <p class="text-[11px] text-slate-400">50m Breaststroke &amp; 50m Freestyle (Power &amp; Reaction)</p>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+          <span class="font-bold text-xs text-purple-400 block mb-1">Shared Family Edge</span>
+          <p class="text-[11px] text-slate-400">Streamline breakouts, dedicated work ethic, and sportsmanship.</p>
+        </div>
+      `;
+
+      // Dual Table
+      const combinedPBs = [
+        ...athletesData.monty.pbs.slice(0, 6).map(p => ({ ...p, event: `[Monty] ${p.event}` })),
+        ...athletesData.rupert.pbs.slice(0, 5).map(p => ({ ...p, event: `[Rupert] ${p.event}` }))
+      ];
+      renderPBTable(combinedPBs, true);
+
+      // Render Charts for Dual
+      renderCharts('dual');
+    }
+
+    // ---------------------------------------------------------------------------
+    // INTERACTIVE SPLIT CALCULATOR LOGIC
+    // ---------------------------------------------------------------------------
+    function parseTimeToSeconds(str) {
+      if (!str) return 0;
+      const clean = str.trim();
+      if (clean.includes(':')) {
+        const parts = clean.split(':');
+        return parseFloat(parts[0]) * 60 + parseFloat(parts[1]);
+      }
+      return parseFloat(clean);
+    }
+
+    function formatSecondsToTime(sec) {
+      if (isNaN(sec) || sec <= 0) return '--';
+      if (sec >= 60) {
+        const m = Math.floor(sec / 60);
+        const s = (sec % 60).toFixed(2);
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+      }
+      return sec.toFixed(2);
+    }
+
+    function runSplitCalculator() {
+      const ev = document.getElementById('calc-event').value;
+      const rawTarget = document.getElementById('calc-target').value;
+      const totalSec = parseTimeToSeconds(rawTarget);
+      const resBox = document.getElementById('calc-result');
+
+      if (!totalSec || isNaN(totalSec)) {
+        resBox.innerHTML = '<span class="text-xs text-rose-400">Please enter a valid time (e.g. 1:01.80 or 31.80)</span>';
+        return;
+      }
+
+      if (ev === '100free') {
+        // Ideal elite age-group drop-off: +3.0s
+        // Let x + (x + 3.0) = totalSec => 2x = totalSec - 3.0 => x = (totalSec - 3.0)/2
+        const lap1 = (totalSec - 3.0) / 2;
+        const lap2 = lap1 + 3.0;
+        resBox.innerHTML = `
+          <div class="text-xs font-bold text-cyan-400 mb-1">Target 100m Free: ${formatSecondsToTime(totalSec)}</div>
+          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div class="bg-slate-950 p-2 rounded border border-slate-800">
+              <span class="text-[10px] text-slate-500 block">0-50m Split</span>
+              <strong class="text-white text-sm">${lap1.toFixed(2)}s</strong>
+              <span class="text-[10px] text-slate-400 block mt-0.5">Controlled easy speed</span>
+            </div>
+            <div class="bg-slate-950 p-2 rounded border border-slate-800">
+              <span class="text-[10px] text-slate-500 block">50-100m Split</span>
+              <strong class="text-white text-sm">${lap2.toFixed(2)}s</strong>
+              <span class="text-[10px] text-emerald-400 block mt-0.5">+3.00s drop-off</span>
+            </div>
+          </div>
+        `;
+      } else if (ev === '200free') {
+        // Target model: Lap 1 base, Lap 2 (+3.4), Lap 3 (+4.0), Lap 4 (+3.8)
+        // total = L1 + (L1+3.4) + (L1+4.0) + (L1+3.8) = 4*L1 + 11.2
+        const L1 = (totalSec - 11.2) / 4;
+        const L2 = L1 + 3.4;
+        const L3 = L1 + 4.0;
+        const L4 = L1 + 3.8;
+        resBox.innerHTML = `
+          <div class="text-xs font-bold text-cyan-400 mb-1">Target 200m Free: ${formatSecondsToTime(totalSec)}</div>
+          <div class="grid grid-cols-4 gap-1.5 text-xs font-mono text-center">
+            <div class="bg-slate-950 p-1.5 rounded border border-slate-800">
+              <span class="text-[9px] text-slate-500 block">Lap 1</span>
+              <strong class="text-white text-xs">${L1.toFixed(1)}s</strong>
+            </div>
+            <div class="bg-slate-950 p-1.5 rounded border border-slate-800">
+              <span class="text-[9px] text-slate-500 block">Lap 2</span>
+              <strong class="text-white text-xs">${L2.toFixed(1)}s</strong>
+            </div>
+            <div class="bg-slate-950 p-1.5 rounded border border-slate-800">
+              <span class="text-[9px] text-slate-500 block">Lap 3</span>
+              <strong class="text-cyan-300 text-xs">${L3.toFixed(1)}s</strong>
+            </div>
+            <div class="bg-slate-950 p-1.5 rounded border border-slate-800">
+              <span class="text-[9px] text-slate-500 block">Lap 4</span>
+              <strong class="text-emerald-400 text-xs">${L4.toFixed(1)}s</strong>
+            </div>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-1">1st 100m: <strong>${formatSecondsToTime(L1+L2)}</strong> | 2nd 100m: <strong>${formatSecondsToTime(L3+L4)}</strong> (+${(L3+L4 - (L1+L2)).toFixed(2)}s)</div>
+        `;
+      } else if (ev === '100fly') {
+        const lap1 = (totalSec - 4.8) / 2;
+        const lap2 = lap1 + 4.8;
+        resBox.innerHTML = `
+          <div class="text-xs font-bold text-cyan-400 mb-1">Target 100m Fly: ${formatSecondsToTime(totalSec)}</div>
+          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div class="bg-slate-950 p-2 rounded border border-slate-800">
+              <span class="text-[10px] text-slate-500 block">0-50m Split</span>
+              <strong class="text-white text-sm">${lap1.toFixed(2)}s</strong>
+            </div>
+            <div class="bg-slate-950 p-2 rounded border border-slate-800">
+              <span class="text-[10px] text-slate-500 block">50-100m Split</span>
+              <strong class="text-white text-sm">${lap2.toFixed(2)}s</strong>
+              <span class="text-[10px] text-emerald-400 block mt-0.5">+4.80s fly curve</span>
+            </div>
+          </div>
+        `;
+      } else if (ev === '50breast') {
+        const split1 = totalSec * 0.465;
+        const split2 = totalSec - split1;
+        resBox.innerHTML = `
+          <div class="text-xs font-bold text-gold-400 mb-1">Target 50m Breast: ${formatSecondsToTime(totalSec)}</div>
+          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div class="bg-slate-950 p-2 rounded border border-slate-800">
+              <span class="text-[10px] text-slate-500 block">0-25m (Pullout)</span>
+              <strong class="text-white text-sm">${split1.toFixed(2)}s</strong>
+            </div>
+            <div class="bg-slate-950 p-2 rounded border border-slate-800">
+              <span class="text-[10px] text-slate-500 block">25-50m (Home)</span>
+              <strong class="text-white text-sm">${split2.toFixed(2)}s</strong>
+            </div>
+          </div>
+        `;
+      } else if (ev === '50free') {
+        const split1 = totalSec * 0.475;
+        const split2 = totalSec - split1;
+        resBox.innerHTML = `
+          <div class="text-xs font-bold text-cyan-400 mb-1">Target 50m Free: ${formatSecondsToTime(totalSec)}</div>
+          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div class="bg-slate-950 p-2 rounded border border-slate-800">
+              <span class="text-[10px] text-slate-500 block">0-25m (Breakout)</span>
+              <strong class="text-white text-sm">${split1.toFixed(2)}s</strong>
+            </div>
+            <div class="bg-slate-950 p-2 rounded border border-slate-800">
+              <span class="text-[10px] text-slate-500 block">25-50m (Finish)</span>
+              <strong class="text-white text-sm">${split2.toFixed(2)}s</strong>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // ---------------------------------------------------------------------------
+    // CHART.JS VISUAL ENGINE
+    // ---------------------------------------------------------------------------
+    function renderCharts(mode) {
+      if (splitChartInstance) splitChartInstance.destroy();
+      if (trajectoryChartInstance) trajectoryChartInstance.destroy();
+
+      const ctx1 = document.getElementById('splitChart').getContext('2d');
+      const ctx2 = document.getElementById('trajectoryChart').getContext('2d');
+
+      if (mode === 'monty') {
+        document.getElementById('chart-1-title').textContent = '200m Free Split Breakdown (2:19.70 PB)';
+        document.getElementById('chart-1-subtitle').textContent = 'Lap splits from 12th SNSC (Oct 31, 2026) vs Target Milestone';
+
+        splitChartInstance = new Chart(ctx1, {
+          type: 'bar',
+          data: {
+            labels: ['Lap 1 (0-50m)', 'Lap 2 (50-100m)', 'Lap 3 (100-150m)', 'Lap 4 (150-200m)'],
+            datasets: [
+              {
+                label: 'Actual Splits (2:19.70)',
+                data: [31.09, 35.08, 35.96, 37.57],
+                backgroundColor: 'rgba(6, 182, 212, 0.7)',
+                borderColor: '#06b6d4',
+                borderWidth: 1.5,
+                borderRadius: 6
+              },
+              {
+                label: 'Ideal Milestone (2:16.00)',
+                data: [31.2, 34.6, 35.2, 35.0],
+                backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                borderColor: '#10b981',
+                borderWidth: 1.5,
+                borderRadius: 6
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                min: 28,
+                max: 40,
+                grid: { color: 'rgba(255,255,255,0.06)' },
+                ticks: { color: '#94a3b8' }
+              },
+              x: {
+                grid: { display: false },
+                ticks: { color: '#cbd5e1' }
+              }
+            },
+            plugins: {
+              legend: { labels: { color: '#f1f5f9', font: { size: 11 } } }
+            }
+          }
+        });
+
+        document.getElementById('chart-2-title').textContent = 'Monty Freestyle Performance Progression';
+        document.getElementById('chart-2-subtitle').textContent = 'PBs across 50m, 100m, 200m, and 400m Free';
+
+        trajectoryChartInstance = new Chart(ctx2, {
+          type: 'line',
+          data: {
+            labels: ['Entry Baseline', 'Global Series', '12th SNSC SCM', 'Target Milestone'],
+            datasets: [
+              {
+                label: '200m Free (Seconds)',
+                data: [143.89, 142.90, 139.70, 136.00], // 2:23.89 -> 2:22.90 -> 2:19.70 -> 2:16.00
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 5
+              },
+              {
+                label: '100m Free (Seconds)',
+                data: [65.20, 64.79, 63.21, 61.80], // 1:04.79 -> 1:03.21 -> 1:01.80
+                borderColor: '#00d2ff',
+                backgroundColor: 'rgba(0, 210, 255, 0.15)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 5
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                grid: { color: 'rgba(255,255,255,0.06)' },
+                ticks: { color: '#94a3b8' }
+              },
+              x: {
+                grid: { display: false },
+                ticks: { color: '#cbd5e1' }
+              }
+            },
+            plugins: {
+              legend: { labels: { color: '#f1f5f9', font: { size: 11 } } }
+            }
+          }
+        });
+
+      } else if (mode === 'rupert') {
+        document.getElementById('chart-1-title').textContent = 'Rupert 50m Stroke Comparison (SCM)';
+        document.getElementById('chart-1-subtitle').textContent = 'Times across all 4 competitive 50m events';
+
+        splitChartInstance = new Chart(ctx1, {
+          type: 'bar',
+          data: {
+            labels: ['50m Free', '50m Fly', '50m Breast', '50m Back'],
+            datasets: [
+              {
+                label: 'Current PB (Seconds)',
+                data: [33.25, 42.98, 44.58, 45.92],
+                backgroundColor: ['#00d2ff', '#a855f7', '#f59e0b', '#3b82f6'],
+                borderRadius: 6
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                min: 25,
+                max: 50,
+                grid: { color: 'rgba(255,255,255,0.06)' },
+                ticks: { color: '#94a3b8' }
+              },
+              x: {
+                grid: { display: false },
+                ticks: { color: '#cbd5e1' }
+              }
+            },
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+
+        document.getElementById('chart-2-title').textContent = 'Rupert Sprint Milestone Trajectory';
+        document.getElementById('chart-2-subtitle').textContent = 'Targeting sub-41.00 50m Breast & sub-31.50 50m Free';
+
+        trajectoryChartInstance = new Chart(ctx2, {
+          type: 'line',
+          data: {
+            labels: ['Club Baseline', 'Global Series (Current)', 'Mid-Term Goal', 'Long-Term Vision'],
+            datasets: [
+              {
+                label: '50m Breast (Seconds)',
+                data: [48.86, 44.58, 41.50, 36.50],
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 5
+              },
+              {
+                label: '50m Free (Seconds)',
+                data: [35.50, 33.25, 31.50, 27.50],
+                borderColor: '#00d2ff',
+                backgroundColor: 'rgba(0, 210, 255, 0.15)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 5
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                grid: { color: 'rgba(255,255,255,0.06)' },
+                ticks: { color: '#94a3b8' }
+              },
+              x: {
+                grid: { display: false },
+                ticks: { color: '#cbd5e1' }
+              }
+            },
+            plugins: {
+              legend: { labels: { color: '#f1f5f9', font: { size: 11 } } }
+            }
+          }
+        });
+
+      } else if (mode === 'dual') {
+        document.getElementById('chart-1-title').textContent = 'Brothers Comparative 50m PBs';
+        document.getElementById('chart-1-subtitle').textContent = 'Head-to-head sprint baseline comparison';
+
+        splitChartInstance = new Chart(ctx1, {
+          type: 'bar',
+          data: {
+            labels: ['50m Free', '50m Fly', '50m Back', '50m Breast'],
+            datasets: [
+              {
+                label: 'Monty (Age 12)',
+                data: [28.73, 31.77, 35.41, 41.76],
+                backgroundColor: 'rgba(0, 210, 255, 0.8)',
+                borderRadius: 6
+              },
+              {
+                label: 'Rupert (Age 10)',
+                data: [33.25, 42.98, 44.63, 44.58],
+                backgroundColor: 'rgba(245, 158, 11, 0.8)',
+                borderRadius: 6
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                min: 25,
+                max: 50,
+                grid: { color: 'rgba(255,255,255,0.06)' },
+                ticks: { color: '#94a3b8' }
+              },
+              x: {
+                grid: { display: false },
+                ticks: { color: '#cbd5e1' }
+              }
+            },
+            plugins: {
+              legend: { labels: { color: '#f1f5f9', font: { size: 11 } } }
+            }
+          }
+        });
+
+        document.getElementById('chart-2-title').textContent = 'Event Versatility Map';
+        document.getElementById('chart-2-subtitle').textContent = 'Specialty focus: Monty (Free/Fly) vs Rupert (Breast/Free)';
+
+        trajectoryChartInstance = new Chart(ctx2, {
+          type: 'radar',
+          data: {
+            labels: ['Sprint Free', 'Mid Free', 'Butterfly', 'Breaststroke', 'Backstroke', 'IM Versatility'],
+            datasets: [
+              {
+                label: 'Monty Day (12yo)',
+                data: [95, 98, 94, 65, 80, 85],
+                borderColor: '#00d2ff',
+                backgroundColor: 'rgba(0, 210, 255, 0.25)',
+                pointRadius: 4
+              },
+              {
+                label: 'Rupert Day (10yo)',
+                data: [88, 70, 65, 94, 68, 72],
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245, 158, 11, 0.25)',
+                pointRadius: 4
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              r: {
+                grid: { color: 'rgba(255,255,255,0.1)' },
+                angleLines: { color: 'rgba(255,255,255,0.1)' },
+                pointLabels: { color: '#cbd5e1', font: { size: 10 } },
+                ticks: { display: false }
+              }
+            },
+            plugins: {
+              legend: { labels: { color: '#f1f5f9', font: { size: 11 } } }
+            }
+          }
+        });
+      }
+    }
+
+    // ---------------------------------------------------------------------------
+    // MODAL HANDLERS
+    // ---------------------------------------------------------------------------
+    function openGitHubModal() {
+      document.getElementById('github-modal').classList.remove('hidden');
+    }
+    function closeGitHubModal() {
+      document.getElementById('github-modal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
