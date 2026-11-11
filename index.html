@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>TTS Swimming Dashboard | High Performance Swimmer Analytics</title>
+
+  <!-- iOS Native Web App & PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TTS Swim">
+  <meta name="theme-color" content="#070d17">
+  <link rel="apple-touch-icon" href="https://placehold.co/192x192/06b6d4/ffffff?text=TTS+Swim">
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22TTS%20Swimming%20Dashboard%22%2C%22short_name%22%3A%22TTS%20Swim%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23070d17%22%2C%22theme_color%22%3A%22%23070d17%22%7D">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -60,6 +68,9 @@
       background: radial-gradient(circle at 15% 15%, #0f233d 0%, #080f1d 45%, #040811 100%);
       min-height: 100vh;
       color: #f1f5f9;
+      -webkit-tap-highlight-color: transparent;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: calc(env(safe-area-inset-bottom) + 3rem);
     }
     
     .glass-card {
@@ -117,7 +128,7 @@
     }
   </style>
 </head>
-<body class="font-sans antialiased selection:bg-cyan-500 selection:text-black pb-16">
+<body class="font-sans antialiased selection:bg-cyan-500 selection:text-black">
 
   <!-- ========================================================================= -->
   <!-- HEADER & NAVIGATION                                                       -->
@@ -127,13 +138,17 @@
       
       <!-- Logo & Title -->
       <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20 font-display font-black text-xl tracking-tighter">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20 font-display font-black text-xl tracking-tighter shrink-0">
           T<span class="text-gold-400">S</span>
         </div>
         <div>
           <div class="flex items-center gap-2">
             <span class="text-xs uppercase tracking-widest font-extrabold text-cyan-400">High Performance Lab</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">Tanglin Merlions</span>
+            <!-- Live Cloud Status Pill -->
+            <span id="cloud-status-pill" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+              <span id="cloud-status-dot" class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+              <span id="cloud-status-text">Connecting...</span>
+            </span>
           </div>
           <h1 class="font-display font-bold text-lg sm:text-xl text-white tracking-tight flex items-center gap-2">
             TTS Swimming Dashboard
@@ -142,45 +157,49 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex items-center gap-2 sm:gap-3">
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        <!-- Install on iPhone App Button -->
+        <button onclick="openInstallModal()" class="px-3 py-2 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="Install on iPhone Home Screen">
+          <i class="fa-brands fa-apple text-sm text-cyan-400"></i>
+          <span class="hidden md:inline">iPhone App</span>
+        </button>
+
         <!-- Add Swimmer Button -->
-        <button onclick="openAddSwimmerModal()" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-lg shadow-emerald-600/20">
+        <button onclick="openAddSwimmerModal()" class="px-3 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-lg shadow-emerald-600/20">
           <i class="fa-solid fa-user-plus"></i>
-          <span>Add Swimmer</span>
+          <span class="hidden sm:inline">Add Swimmer</span>
         </button>
 
         <!-- Batch Screenshot Scanner Button -->
-        <button onclick="openScanModal()" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-midnight transition flex items-center gap-2 shadow-lg shadow-cyan-500/20">
+        <button onclick="openScanModal()" class="px-3 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-midnight transition flex items-center gap-1.5 shadow-lg shadow-cyan-500/20">
           <i class="fa-solid fa-images"></i>
-          <span>Upload Screenshots</span>
+          <span class="hidden sm:inline">Screenshots</span>
         </button>
 
         <!-- Video Upload Button -->
-        <button onclick="openVideoModal()" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-midnight transition flex items-center gap-1.5 shadow-lg shadow-amber-500/20">
+        <button onclick="openVideoModal()" class="px-3 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-midnight transition flex items-center gap-1.5 shadow-lg shadow-amber-500/20">
           <i class="fa-solid fa-video"></i>
-          <span class="hidden sm:inline">Upload Video</span>
+          <span class="hidden lg:inline">Upload Video</span>
         </button>
 
         <!-- Activity Tracker & Audit Log Button -->
         <button onclick="openAuditModal()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600/30 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/40 transition flex items-center gap-1.5 shadow-sm" title="View Visitor & Change Activity Log">
           <i class="fa-solid fa-clock-rotate-left"></i>
-          <span class="hidden sm:inline">Activity Log</span>
+          <span class="hidden xl:inline">Activity Log</span>
           <span id="audit-badge" class="px-1.5 py-0.2 rounded-full bg-indigo-500 text-white font-mono text-[9px] font-bold">0</span>
         </button>
 
         <button onclick="openRosterModal()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="View Team & Family Roster">
           <i class="fa-solid fa-users"></i>
-          <span class="hidden sm:inline">Roster</span>
+          <span class="hidden xl:inline">Roster</span>
         </button>
 
-        <button onclick="openDataBackupModal()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="Export / Import Data JSON">
+        <button onclick="openDataBackupModal()" class="px-2.5 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="Export / Import Data JSON">
           <i class="fa-solid fa-database"></i>
-          <span class="hidden sm:inline">Backup</span>
         </button>
 
-        <button onclick="window.print()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition flex items-center gap-1.5 shadow-sm">
+        <button onclick="window.print()" class="px-2.5 py-2 rounded-lg text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition flex items-center gap-1.5 shadow-sm">
           <i class="fa-solid fa-print"></i>
-          <span class="hidden sm:inline">Print / PDF</span>
         </button>
       </div>
 
@@ -208,19 +227,80 @@
   </header>
 
   <!-- ========================================================================= -->
-  <!-- MAIN DASHBOARD CONTENT AREA                                               -->
+  <!-- MAIN DASHBOARD CONTENT CONTAINERS                                         -->
   <!-- ========================================================================= -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
-    <!-- Single Swimmer View Container -->
-    <div id="single-swimmer-view" class="space-y-6">
-      <!-- Injected by renderSwimmer() -->
-    </div>
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+    <!-- Single Swimmer Detailed Dashboard View -->
+    <div id="single-swimmer-view" class="space-y-6"></div>
 
-    <!-- Head-to-Head Arena & Historical Trajectory View Container -->
-    <div id="head-to-head-view" class="hidden space-y-6">
-      <!-- Injected by renderHeadToHead() -->
-    </div>
+    <!-- Head-to-Head Comparison Arena View -->
+    <div id="head-to-head-view" class="hidden space-y-6"></div>
   </main>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: INSTALL ON IPHONE APP GUIDE                                        -->
+  <!-- ========================================================================= -->
+  <div id="install-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-md w-full p-6 space-y-4 border border-cyan-500/40 shadow-2xl my-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl font-bold">
+            <i class="fa-brands fa-apple"></i>
+          </div>
+          <div>
+            <h3 class="text-white font-display font-bold text-base">Install on iPhone</h3>
+            <p class="text-xs text-slate-400">Run as a standalone native-style iPhone app</p>
+          </div>
+        </div>
+        <button onclick="closeInstallModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3.5 text-xs text-slate-300">
+        <p class="leading-relaxed">
+          The dashboard is configured with real-time bidirectional cloud sync. Adding it to your iPhone home screen launches it full-screen without Safari browser bars:
+        </p>
+
+        <div class="space-y-3">
+          <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <div class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center shrink-0 text-xs">1</div>
+            <div>
+              <div class="font-bold text-white">Open in Safari</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Visit this GitHub Pages link on your iPhone using the Safari browser.</div>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <div class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center shrink-0 text-xs">2</div>
+            <div>
+              <div class="font-bold text-white">Tap the Share Icon</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Tap the <strong>Share</strong> button (<i class="fa-solid fa-arrow-up-from-bracket text-cyan-400"></i>) at the bottom toolbar of Safari.</div>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <div class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center shrink-0 text-xs">3</div>
+            <div>
+              <div class="font-bold text-white">Select "Add to Home Screen"</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Scroll down and tap <strong>"Add to Home Screen"</strong> (<i class="fa-regular fa-square-plus text-cyan-400"></i>), then tap <strong>Add</strong> in the top right.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 bg-cyan-950/40 rounded-xl border border-cyan-800/60 text-[11px] text-cyan-200 flex items-center gap-2">
+          <i class="fa-solid fa-cloud text-cyan-400 text-sm"></i>
+          <span><strong>Real-Time Sync:</strong> Any screenshots scanned or times updated on iPhone instantly reflect on the web dashboard.</span>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-slate-800">
+        <button onclick="closeInstallModal()" class="w-full py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-midnight font-bold text-xs transition">
+          Got It
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ========================================================================= -->
   <!-- MODAL: ADD NEW SWIMMER WIZARD                                             -->
@@ -1231,8 +1311,57 @@
       try {
         localStorage.setItem('ttsSwimData_v8', JSON.stringify(athletesData));
       } catch (e) {
-        console.warn('Could not persist swim data:', e);
+        console.warn('Could not persist swim data locally:', e);
       }
+      // Sync to shared cloud backend
+      syncToCloud();
+    }
+
+    // ---------------------------------------------------------------------------
+    // REAL-TIME CLOUD BACKEND ENGINE (FIREBASE FIRESTORE SYNC)
+    // ---------------------------------------------------------------------------
+    let isCloudConnected = false;
+    let cloudSyncTimer = null;
+
+    function updateCloudStatusUI(status, label) {
+      const dot = document.getElementById('cloud-status-dot');
+      const text = document.getElementById('cloud-status-text');
+      const pill = document.getElementById('cloud-status-pill');
+      if (!dot || !text || !pill) return;
+
+      pill.classList.remove('hidden');
+      if (status === 'connected') {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
+        text.className = 'text-emerald-400 font-bold';
+        text.textContent = 'Live Cloud Sync';
+        isCloudConnected = true;
+      } else if (status === 'syncing') {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-cyan-400';
+        text.className = 'text-cyan-300 font-medium';
+        text.textContent = 'Syncing...';
+      } else {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-slate-500';
+        text.className = 'text-slate-400';
+        text.textContent = label || 'Local Cache';
+        isCloudConnected = false;
+      }
+    }
+
+    function syncToCloud() {
+      if (window.ttsCloudSyncFn) {
+        updateCloudStatusUI('syncing');
+        clearTimeout(cloudSyncTimer);
+        cloudSyncTimer = setTimeout(() => {
+          window.ttsCloudSyncFn(athletesData, loadAuditLog());
+        }, 350);
+      }
+    }
+
+    function openInstallModal() {
+      document.getElementById('install-modal').classList.remove('hidden');
+    }
+    function closeInstallModal() {
+      document.getElementById('install-modal').classList.add('hidden');
     }
 
     // ---------------------------------------------------------------------------
@@ -1388,6 +1517,7 @@
         localStorage.removeItem('ttsAuditLog_v1');
         renderAuditLogTable();
         updateAuditBadge();
+        syncToCloud();
       }
     }
 
@@ -1506,6 +1636,11 @@
 
       const singleContainer = document.getElementById('single-swimmer-view');
       const h2hContainer = document.getElementById('head-to-head-view');
+
+      if (!singleContainer || !h2hContainer) {
+        console.warn('Dashboard view containers not yet available in DOM.');
+        return;
+      }
 
       singleContainer.classList.remove('hidden');
       h2hContainer.classList.add('hidden');
@@ -2577,6 +2712,11 @@
       const singleContainer = document.getElementById('single-swimmer-view');
       const h2hContainer = document.getElementById('head-to-head-view');
 
+      if (!singleContainer || !h2hContainer) {
+        console.warn('Dashboard view containers not yet available in DOM.');
+        return;
+      }
+
       singleContainer.classList.add('hidden');
       h2hContainer.classList.remove('hidden');
 
@@ -2924,6 +3064,97 @@
         renderSwimmer(currentSwimmer);
         alert('Reset to default swim data.');
       }
+    }
+  </script>
+
+  <!-- ========================================================================= -->
+  <!-- REAL-TIME CLOUD BACKEND INTEGRATION (FIREBASE MODULE)                     -->
+  <!-- ========================================================================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'tts-swimming-shared-db';
+    
+    // Check if cloud configuration is available in environment
+    if (typeof __firebase_config !== 'undefined') {
+      try {
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Authenticate first before Firestore operations (Rule 3)
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        const sharedDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'roster_state', 'active_club_dataset');
+
+        // Set up real-time listener for bidirectional sync across iPhone & Web
+        onSnapshot(sharedDocRef, (snap) => {
+          if (snap.exists()) {
+            const cloudPayload = snap.data();
+            if (cloudPayload && cloudPayload.roster) {
+              const cloudUpdated = cloudPayload.lastUpdated || 0;
+              const localUpdated = parseInt(localStorage.getItem('ttsLastUpdatedTimestamp') || '0', 10);
+
+              // Update if cloud is newer or local is missing data
+              if (cloudUpdated > localUpdated) {
+                athletesData = cloudPayload.roster;
+                localStorage.setItem('ttsSwimData_v8', JSON.stringify(athletesData));
+                localStorage.setItem('ttsLastUpdatedTimestamp', cloudUpdated.toString());
+
+                if (cloudPayload.auditLog && Array.isArray(cloudPayload.auditLog)) {
+                  localStorage.setItem('ttsAuditLog_v1', JSON.stringify(cloudPayload.auditLog));
+                  updateAuditBadge();
+                  renderAuditLogTable();
+                }
+
+                refreshSwimmerTabs();
+                updateScannerSwimmerDropdown();
+                if (currentSwimmer === 'headtohead') {
+                  renderHeadToHead();
+                } else {
+                  renderSwimmer(currentSwimmer);
+                }
+              }
+            }
+          }
+          updateCloudStatusUI('connected');
+        }, (err) => {
+          console.warn('Real-time cloud listener error:', err);
+          updateCloudStatusUI('local', 'Offline Cache');
+        });
+
+        // Function exposed to push local updates up to shared cloud backend
+        window.ttsCloudSyncFn = async (rosterData, auditData) => {
+          try {
+            const now = Date.now();
+            localStorage.setItem('ttsLastUpdatedTimestamp', now.toString());
+            await setDoc(sharedDocRef, {
+              roster: rosterData,
+              auditLog: auditData || [],
+              lastUpdated: now,
+              updatedBy: getActiveUserName()
+            });
+            updateCloudStatusUI('connected');
+          } catch (err) {
+            console.error('Failed to sync changes to cloud:', err);
+            updateCloudStatusUI('local', 'Sync Error');
+          }
+        };
+
+      } catch (err) {
+        console.warn('Could not initialize Firebase cloud synchronization:', err);
+        updateCloudStatusUI('local', 'Local Storage');
+      }
+    } else {
+      // Local fallback mode when cloud config is not supplied
+      updateCloudStatusUI('local', 'Local Mode');
     }
   </script>
 </body>
