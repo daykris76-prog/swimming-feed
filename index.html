@@ -553,6 +553,37 @@
             </label>
           </div>
         </div>
+
+        <!-- Optional: Synchronize Race Time with Video Analysis -->
+        <div class="p-3 bg-slate-950/90 rounded-xl border border-amber-500/30 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-gold-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-stopwatch"></i> Race Time in this Video (Auto-Update PB if Faster)
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono">Optional</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-0.5">Event</label>
+              <input type="text" id="video-race-event" placeholder="e.g. 50m Freestyle" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-white text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-0.5">Course</label>
+              <select id="video-race-course" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-white text-xs">
+                <option value="25m SCM">25m SCM</option>
+                <option value="50m LCM">50m LCM</option>
+                <option value="25y SCY">25y SCY</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-0.5">Recorded Time</label>
+              <input type="text" id="video-race-time" placeholder="e.g. 29.80" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-cyan-400 font-mono font-bold text-xs">
+            </div>
+          </div>
+          <div class="text-[10px] text-slate-400">
+            If this recorded time beats the swimmer's current PB, it will auto-update their PB tables, standards, and pacing targets immediately.
+          </div>
+        </div>
       </div>
 
       <div class="flex items-center justify-between pt-3 border-t border-slate-800">
@@ -703,96 +734,101 @@
           { id: 'm-brick-3', title: 'Brick 3: 5 Underwater Fly Kicks', desc: 'Hold minimum 5 powerful dolphin kicks off every flip turn in training.' }
         ],
         dryland: [
-          '<strong>Banded Y-T-W Scapular Series:</strong> 3 × 12 reps (rotator cuff & butterfly shoulder armor).',
-          '<strong>Plank with Alternating Arm/Leg Reach:</strong> 3 × 45s (anti-rotational core stability).',
-          '<strong>Streamline Squat Jumps:</strong> 3 × 8 reps (explosive drive off block and turns).',
-          '<strong>Glute Bridges with Band:</strong> 3 × 15 reps (high hip flotation on distance swims).'
+          '<strong>Frog Glute Bridges:</strong> 3 × 12 reps (targets adductors & breaststroke kick force).',
+          '<strong>Streamline Rocket Jumps:</strong> 3 × 8 reps (explosive takeoff power off the block).',
+          '<strong>Bear Crawls & Crab Walks:</strong> 3 × 15m (shoulder stability & athletic coordination).',
+          '<strong>Deadbug Hold:</strong> 3 × 30s (stabilizes lower back & core in water).'
         ]
       },
-      rupert: {
-        id: 'rupert',
-        name: 'Rupert Day',
-        age: 10,
-        dobDetail: 'Turned 10 in May 2026',
+      rory: {
+        id: 'rory',
+        name: 'Rory Walker',
+        age: 12,
+        dobDetail: 'Male | 12 Years Old',
         club: 'Tanglin Merlions (TTS-VD)',
-        division: '10 & Under National Pathway',
-        specialty: 'Natural Breaststroker & Explosive Sprint Freestyle Specialist',
-        badgeColor: 'gold',
-        accentColor: '#f59e0b',
+        division: 'M12–13 National Pathway',
+        specialty: 'Backstroke & Individual Medley Specialist (Strong Breast/Free Sprint)',
+        badgeColor: 'emerald',
+        accentColor: '#10b981',
         quickStats: {
-          s1: { label: '50m Breast (SCM)', val: '44.58', sub: 'AA Standard (Top 12%)' },
-          s2: { label: '50m Free (SCM)', val: '33.25', sub: 'AA Standard (Top 15%)' },
-          s3: { label: '100m Free (SCM)', val: '1:14.84', sub: 'A Standard (Top 25%)' },
-          s4: { label: '50m Fly (SCM)', val: '42.98', sub: 'BB Standard' }
+          s1: { label: '50m Back (SCM)', val: '34.19', sub: 'AA Standard' },
+          s2: { label: '200m IM (SCM)', val: '2:50.57', sub: 'Dropped -9.44s' },
+          s3: { label: '50m Free (SCM)', val: '30.49', sub: 'Dropped -1.85s' },
+          s4: { label: '100m Back (SCM)', val: '1:16.79', sub: 'A Standard' }
         },
         technicalSynopsis: `
-          <p><strong>Race Video Observations &amp; Standout Strengths:</strong> Rupert possesses unmistakable fast-twitch explosive power and strong competitive fire. In his 50m Breaststroke (44.58s SCM / 48.86s LCM), his kick mechanics are completely natural—he loads his heels tight to his hips and snaps them backward with sharp outward whip, maintaining high hip elevation throughout. In the 50m Freestyle (33.25s), his block reaction and turnover are aggressive, powering through the breakout and attacking the finish pad with tenacity.</p>
-          <p><strong>Key Developmental Priorities as a 10-Year-Old:</strong> Rupert's primary technical development lies in <em>learning to ride his glide</em> and <em>controlling his breathing posture</em>. In sprint breaststroke, his natural eagerness can lead to rushing the next arm pull before the kick surge has finished gliding. Giving the glide a fraction of a second longer post-kick will yield massive distance-per-stroke gains with less effort. In butterfly and backstroke, keeping the chin low during breaths will prevent his hips from dipping momentarily.</p>
+          <p><strong>Race Video Observations &amp; Standout Strengths:</strong> Rory demonstrates formidable versatility across all four strokes, with standout mechanics in Backstroke (34.19 SCM / 1:16.79 SCM) and the Individual Medley (2:50.57 SCM). In his 200m IM, he recorded a massive <strong>-9.44s drop</strong> (Heat 4, Lane 8), pacing his opening butterfly (15.88s first 25m) with smooth transitions into backstroke and breaststroke without overcooking his heart rate. In sprint freestyle, his -1.85s drop to 30.49 at the Global School Swimming Series highlights an accelerating turnover and great finishing power.</p>
+          <p><strong>Key Developmental Priorities as a 12-Year-Old:</strong> Rory's massive IM drop proves his race aerobic base is surging. His primary developmental targets are <em>streamline depth off backstroke-to-breaststroke turns</em> and <em>holding kick depth on the 100m Fly</em>. In the 100m Butterfly (1:28.54 SCM), maintaining an undulating hip kick rather than pulling flat will save his shoulders and unlock a sub-1:20 swim. In 50m Freestyle, tightening the breakout dolphin kick will easily push him under the 30.00s barrier.</p>
         `,
         videoLog: [
-          { title: '50m Breast Victory (44.58)', date: 'Sept 26, 2026', note: 'Terrific whip kick; practice holding streamline glide 0.3s longer off turn.' }
+          { title: '200m IM Breakthrough (2:50.57)', date: 'Nov 2026', note: 'Dropped 9.44 seconds; outstanding transition execution.' },
+          { title: '50m Free Final (30.49)', date: 'Sept 26, 2026', note: 'Dropped 1.85s in Heat 3; aggressive sprint finish.' }
         ],
         history: {
           '50m Freestyle': [
-            { meet: 'TTS Dual Meet', date: '2026-02-15', time: 35.80 },
-            { meet: 'Junior Sprints', date: '2026-06-20', time: 34.40 },
-            { meet: 'Global School Series', date: '2026-09-26', time: 33.25 }
+            { meet: 'Entry Seed', date: '2026-08-01', time: 33.05 },
+            { meet: 'Global School Series', date: '2026-09-26', time: 30.49 }
           ],
           '100m Freestyle': [
-            { meet: 'TTS Dual Meet', date: '2026-02-15', time: 81.20 },
-            { meet: 'Junior Sprints', date: '2026-06-20', time: 76.50 },
-            { meet: 'Global School Series', date: '2026-09-26', time: 74.84 }
+            { meet: 'LCM Performance', date: '2026-06-15', time: 72.55 },
+            { meet: 'SCM PB', date: '2026-10-15', time: 69.99 }
           ],
-          '50m Breaststroke': [
-            { meet: 'TTS Dual Meet', date: '2026-02-15', time: 48.50 },
-            { meet: 'Junior Sprints', date: '2026-06-20', time: 46.20 },
-            { meet: 'Global School Series', date: '2026-09-26', time: 44.58 }
+          '50m Backstroke': [
+            { meet: 'LCM Performance', date: '2026-06-15', time: 37.36 },
+            { meet: 'SCM PB', date: '2026-10-15', time: 34.19 }
+          ],
+          '200m IM': [
+            { meet: 'Entry Seed', date: '2026-09-01', time: 180.01 },
+            { meet: 'Prelims Drop (-9.44s)', date: '2026-10-31', time: 170.57 }
           ]
         },
         pillars: [
-          { title: 'Natural Breaststroke Whip', desc: 'Powerful heel snap and hip elevation that rivals older age-group competitors.', icon: 'fa-person-swimming' },
-          { title: 'Explosive Sprint Speed', desc: 'Sub-33.5s 50m Free puts him in the top 15% nationally for 10-year-olds.', icon: 'fa-bolt' },
-          { title: 'Racer Mindset & Courage', desc: 'Attacks the touch pad fearlessly in tight heats and thrives on sprint challenges.', icon: 'fa-fire' }
+          { title: 'Backstroke Cadence & Body Position', desc: 'High chin-up waterline and continuous head-back rotation driving clean arm entry.', icon: 'fa-water' },
+          { title: 'Versatile 4-Stroke IM Engine', desc: 'Seamless transition speed between strokes; massive -9.44s drop in 200m IM.', icon: 'fa-cubes-stacked' },
+          { title: 'Aggressive Sprint Turnover', desc: 'Sub-30.5s 50m Free and 34.79s LCM 50m Breast demonstrate explosive power.', icon: 'fa-bolt' }
         ],
         breakthrough: {
-          title: '50m Breaststroke: 44.58s (AA Standard)',
-          meet: 'Global School Swimming Series 2026 (SCM) • Lane 7 Victory',
-          details: 'Recorded an opening 25m split of 23.96s, maintaining explosive kick whip through the wall. Firmly establishes him as a top-tier breaststroker.',
-          badge: 'USA Swimming AA Tier'
+          title: '200m IM: 2:50.57 (-9.44s Drop)',
+          meet: '12th SNSC SCM • Heat 4, Lane 8 Victory',
+          details: 'Dropped nearly 10 seconds from a 3:00.01 entry time. Balanced execution across all four legs with an opening 15.88s fly split.',
+          badge: 'AA Standard'
         },
         pbs: [
-          { event: '50m Breaststroke', course: '25m SCM', time: '44.58', std: 'AA Standard', pct: 'Top 12-15%', note: '48.86 LCM. Natural kick mechanics.' },
-          { event: '100m Breaststroke', course: '25m SCM', time: '1:47.53', std: 'BB Standard', pct: 'Top 45%', note: 'High upside as pacing matures.' },
-          { event: '50m Freestyle', course: '25m SCM', time: '33.25', std: 'AA Standard', pct: 'Top 15%', note: '17.07s 25m split. Fast turnover.' },
-          { event: '100m Freestyle', course: '25m SCM', time: '1:14.84', std: 'A Standard', pct: 'Top 25%', note: '1:18.24 LCM. Strong sprint baseline.' },
-          { event: '200m Freestyle', course: '50m LCM', time: '2:54.27', std: 'BB Standard', pct: 'Top 50%', note: '3:00.12 SCM. Building endurance.' },
-          { event: '50m Butterfly', course: '25m SCM', time: '42.98', std: 'BB Standard', pct: 'Top 50%', note: '44.39 LCM (Split 24.37s).' },
-          { event: '50m Backstroke', course: '50m LCM', time: '44.63', std: 'BB Standard', pct: 'Top 50%', note: '45.92 SCM (Split 24.32s).' },
-          { event: '100m IM', course: '25m SCM', time: '1:39.48', std: 'B Standard', pct: 'Top 65%', note: 'Breaststroke leg provides major weapon.' }
+          { event: '50m Backstroke', course: '25m SCM', time: '34.19', std: 'AA Standard', pct: 'Top 15%', note: '37.36 LCM (5 perfs). Elite stroke weapon.' },
+          { event: '100m Backstroke', course: '25m SCM', time: '1:16.79', std: 'A Standard', pct: 'Top 25%', note: '1:25.21 LCM (5 perfs). Strong endurance hold.' },
+          { event: '50m Breaststroke', course: '50m LCM', time: '34.79', std: 'AAA Standard', pct: 'Top 5-8%', note: '42.10 SCM. Exceptional long-course kick.' },
+          { event: '100m Breaststroke', course: '50m LCM', time: '1:34.67', std: 'BB Standard', pct: 'Top 45%', note: '1:36.69 SCM (2 perfs).' },
+          { event: '50m Freestyle', course: '25m SCM', time: '30.49', std: 'A Standard', pct: 'Top 25%', note: 'Dropped -1.85s from 32.34; 33.05 LCM.' },
+          { event: '100m Freestyle', course: '25m SCM', time: '1:09.99', std: 'A Standard', pct: 'Top 25%', note: '1:12.55 LCM (8 perfs). Sub-1:10 barrier broken.' },
+          { event: '200m Freestyle', course: '50m LCM', time: '2:36.37', std: 'BB Standard', pct: 'Top 50%', note: '2 performances recorded.' },
+          { event: '50m Butterfly', course: '25m SCM', time: '34.65', std: 'A Standard', pct: 'Top 25%', note: '37.68 LCM (6 perfs).' },
+          { event: '100m Butterfly', course: '25m SCM', time: '1:28.54', std: 'B Standard', pct: 'Top 65%', note: 'Key upside growth area.' },
+          { event: '100m IM', course: '25m SCM', time: '1:21.62', std: 'BB Standard', pct: 'Top 45%', note: '4 performances recorded.' },
+          { event: '200m IM', course: '25m SCM', time: '2:50.57', std: 'AA Standard', pct: 'Top 15%', note: 'Huge -9.44s drop! (3:05.69 LCM).' }
         ],
         pacing: [
-          { event: '50m Breaststroke', pb: '44.58 SCM', target: '42.50s', splits: '19.80 / 22.70', actualArr: [21.10, 23.48], targetArr: [19.80, 22.70], labels: ['0-25m', '25-50m'], cue: 'Hold 3-second pullout streamline! Snap heels tight to hips and ride the surge.' },
-          { event: '50m Freestyle', pb: '33.25 SCM', target: '31.80s', splits: '15.20 / 16.60', actualArr: [16.20, 17.05], targetArr: [15.20, 16.60], labels: ['0-25m', '25-50m'], cue: 'Explode off blocks; head down looking at black line; zero breaths inside final 10m.' },
-          { event: '100m Freestyle', pb: '1:14.84 SCM', target: '1:11.50', splits: '34.20 / 37.30', actualArr: [35.80, 39.04], targetArr: [34.20, 37.30], labels: ['0-50m', '50-100m'], cue: 'Do not redline first 25m. Establish 6-beat kick by 40m to power home.' },
-          { event: '100m Breaststroke', pb: '1:47.53 SCM', target: '1:38.00', splits: '45.50 / 52.50', actualArr: [50.20, 57.33], targetArr: [45.50, 52.50], labels: ['0-50m', '50-100m'], cue: 'Maintain distance-per-stroke; avoid shortening the pull when tired.' }
+          { event: '200m IM', pb: '2:50.57 SCM', target: '2:44.00', splits: '35.0 / 41.5 / 49.5 / 38.0', actualArr: [36.5, 43.5, 51.5, 39.07], targetArr: [35.0, 41.5, 49.5, 38.0], labels: ['Fly (50m)', 'Back (100m)', 'Breast (150m)', 'Free (200m)'], cue: 'Attack the back-to-breast transition. Keep breaststroke kick compact and surge home on free.' },
+          { event: '50m Freestyle', pb: '30.49 SCM', target: '29.50s', splits: '14.50 / 15.00', actualArr: [14.95, 15.54], targetArr: [14.50, 15.00], labels: ['0-25m', '25-50m'], cue: 'Break sub-30! Hold breath off breakout; lock head down looking at black line to the touch pad.' },
+          { event: '100m Backstroke', pb: '1:16.79 SCM', target: '1:13.50', splits: '35.50 / 38.00', actualArr: [37.0, 39.79], targetArr: [35.50, 38.00], labels: ['0-50m', '50-100m'], cue: 'High tempo rotation; keep head perfectly still and kick continuously off turns.' },
+          { event: '100m Freestyle', pb: '1:09.99 SCM', target: '1:06.50', splits: '32.00 / 34.50 (+2.5s drop)', actualArr: [33.5, 36.49], targetArr: [32.0, 34.5], labels: ['0-50m', '50-100m'], cue: 'Easy speed on first 50m; avoid redlining early so second lap stays strong.' }
         ],
         steps: {
-          s1: 'Long-term: National Age qualification in 50m/100m Breast; become a sub-26s 50m Free sprinter. Medium-term: sub-41.00 Breast, sub-31.50 Free.',
-          s2: 'Own the start and turn. Stand like a statue on the block, listen for the beep, and explode into streamline.',
-          s3: 'Belief built by touching with two hands on every breaststroke turn in training without shortcutting.',
-          s4: 'Keep a fun post-meet journal: "What was super fun today? What felt great? What will I try next time?"',
-          s5: 'It is all feedback: If a race feels tough at the end, it just means my body is learning how to get stronger.'
+          s1: 'Long-term: Sub-2:35 in 200m IM and sub-1:08 in 100m Backstroke; qualify for National Age Finals. Medium-term: sub-2:45 200 IM, sub-29.8s 50 Free.',
+          s2: 'Own the multi-stroke transitions. Master the crossover turn in IM and the underwater pullout on breaststroke.',
+          s3: 'Belief built by holding full 6-beat kick throughout all backstroke sets in practice.',
+          s4: 'Log split progression across all 4 strokes after every meet.',
+          s5: 'It is all feedback: The 9.44s drop shows massive aerobic adaptation; target butterfly stamina next.'
         },
         habits: [
-          { id: 'r-brick-1', title: 'Brick 1: Two-Hand Touch Flat', desc: 'Simultaneous two-hand touch on every breaststroke turn and finish in training.' },
-          { id: 'r-brick-2', title: 'Brick 2: Streamline Missile', desc: 'Lock thumbs, squeeze ears between upper arms off every start and turn before kicking.' },
-          { id: 'r-brick-3', title: 'Brick 3: Heel Snap Whip', desc: 'Snap heels backward tight to hips rather than dropping knees down under stomach.' }
+          { id: 'rw-brick-1', title: 'Brick 1: Head Still on Backstroke', desc: 'Keep head completely still like a book is balanced on the forehead during backstroke.' },
+          { id: 'rw-brick-2', title: 'Brick 2: IM Transition Speed', desc: 'Explosive drive off walls on all stroke changes without pausing on the wall.' },
+          { id: 'rw-brick-3', title: 'Brick 3: Sub-30 Sprint Kick', desc: 'No breathing from 10m flags into the wall pad on sprint freestyle.' }
         ],
         dryland: [
-          '<strong>Frog Glute Bridges:</strong> 3 × 12 reps (targets adductors & breaststroke kick power).',
-          '<strong>Streamline Rocket Jumps:</strong> 3 × 8 reps (explosive takeoff power off blocks).',
-          '<strong>Bear Crawls & Crab Walks:</strong> 3 × 15m (shoulder stability & coordination).',
-          '<strong>Deadbug Hold:</strong> 3 × 30s (stabilizes core and neutral spine in water).'
+          '<strong>Rotational Med Ball Slams:</strong> 3 × 10 reps (rotational core strength for backstroke & freestyle).',
+          '<strong>Glute Bridges with Extension:</strong> 3 × 12 reps (hip elevation for backstroke & breaststroke).',
+          '<strong>Streamline Plank with Flutter Kick:</strong> 3 × 40s (core endurance and streamlined body line).',
+          '<strong>Scapular Wall Slides:</strong> 3 × 12 reps (shoulder mobility for backstroke and butterfly).'
         ]
       }
     };
@@ -1642,112 +1678,17 @@
       progressBar.style.width = '100%';
       pctText.textContent = '100%';
       statusText.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> All ${batchQueue.length} screenshots processed!`;
-
-      renderBatchThumbnails();
-      populateFormFromBatchItem(0);
-    }
-
-    function selectBatchItem(idx) {
-      currentBatchIndex = idx;
-      renderBatchThumbnails();
-      populateFormFromBatchItem(idx);
-    }
-
-    function populateFormFromBatchItem(idx) {
-      const item = batchQueue[idx];
-      if (!item || !item.parsedData) return;
-
-      const p = item.parsedData;
-      document.getElementById('batch-counter-badge').textContent = `${idx + 1} of ${batchQueue.length}`;
-
-      if (p.swimmer) document.getElementById('field-swimmer').value = p.swimmer;
-      if (p.event) document.getElementById('field-event').value = p.event;
-      if (p.course) document.getElementById('field-course').value = p.course;
-      if (p.time) document.getElementById('field-time').value = p.time;
-      if (p.splits) document.getElementById('field-splits').value = p.splits;
-      if (p.notes) document.getElementById('field-notes').value = p.notes;
-    }
-
-    function commitCurrentBatchItem(closeAfter) {
-      const swimmerKey = document.getElementById('field-swimmer').value;
-      const eventName = document.getElementById('field-event').value.trim();
-      const course = document.getElementById('field-course').value;
-      const finalTime = document.getElementById('field-time').value.trim();
-      const splitsRaw = document.getElementById('field-splits').value.trim();
-      const notes = document.getElementById('field-notes').value.trim();
-
-      if (!eventName || !finalTime) {
-        alert('Please provide an Event Name and a Final Time.');
-        return;
-      }
-
-      const athlete = athletesData[swimmerKey];
-      const parsedStandard = calculateStandard(eventName, finalTime, course, athlete.age);
-
-      const newEntry = {
-        event: eventName,
-        course: course,
-        time: finalTime,
-        std: parsedStandard.std,
-        pct: parsedStandard.pct,
-        note: notes || 'Batch screenshot verified'
-      };
-
-      const existingIdx = athlete.pbs.findIndex(p => p.event.toLowerCase() === eventName.toLowerCase() && p.course === course);
-      if (existingIdx >= 0) {
-        athlete.pbs[existingIdx] = newEntry;
-      } else {
-        athlete.pbs.unshift(newEntry);
-      }
-
-      // Append to history for trajectory tracking
-      const secVal = parseTimeToSeconds(finalTime);
-      if (secVal) {
-        if (!athlete.history) athlete.history = {};
-        if (!athlete.history[eventName]) athlete.history[eventName] = [];
-        athlete.history[eventName].push({
-          meet: notes ? notes.split('•')[0].trim() : 'Sanctioned Meet',
-          date: new Date().toISOString().slice(0, 10),
-          time: secVal
-        });
-      }
-
-      persistState();
-
-      if (closeAfter || currentBatchIndex >= batchQueue.length - 1) {
-        closeScanModal();
-        setSwimmerMode(swimmerKey);
-        alert(`Success! Updated ${athlete.name}'s records with ${eventName} (${finalTime}).`);
-      } else {
-        currentBatchIndex++;
-        selectBatchItem(currentBatchIndex);
-      }
-    }
-
-    function extractSwimFields(rawText) {
-      const text = rawText.replace(/\r\n/g, '\n');
-      const swimmerKeys = Object.keys(athletesData);
-      let matchedSwimmer = swimmerKeys[0];
-
-      for (let k of swimmerKeys) {
-        const ath = athletesData[k];
-        const firstName = ath.name.split(' ')[0].toLowerCase();
-        const lastName = ath.name.split(' ').slice(1).join(' ').toLowerCase();
-
-        const regex1 = new RegExp(ath.name, 'i');
-        const regex2 = new RegExp(`${lastName},\\s*${firstName}`, 'i');
-        const regex3 = new RegExp(`\\b${firstName}\\b`, 'i');
-
-        if (regex1.test(text) || regex2.test(text) || regex3.test(text)) {
-          matchedSwimmer = k;
-          break;
-        }
-      }
-
+      const regexCourse = /(?:LCM|SCM|SCY)/gi;
       let course = '25m SCM';
       if (/scm|short course meters/i.test(text)) course = '25m SCM';
       else if (/lcm|long course/i.test(text)) course = '50m LCM';
       else if (/scy|yards/i.test(text)) course = '25y SCY';
+
+      // Check if text is a multi-race listing (e.g. Swimmer History list)
+      const multiRaces = parseMultiRaceText(text, matchedSwimmer);
+      if (multiRaces.length > 0) {
+        return multiRaces[0]; // return first, while multiRaces are queued
+      }
 
       let event = '50m Freestyle';
       if (/400\s*(meter|m)?\s*free/i.test(text)) event = '400m Freestyle';
@@ -1760,16 +1701,18 @@
       else if (/100\s*(meter|m)?\s*fly|butterfly/i.test(text)) event = '100m Butterfly';
       else if (/50\s*(meter|m)?\s*back/i.test(text)) event = '50m Backstroke';
       else if (/100\s*(meter|m)?\s*back/i.test(text)) event = '100m Backstroke';
-      else if (/200\s*(meter|m)?\s*im/i.test(text)) event = '200m IM';
-      else if (/100\s*(meter|m)?\s*im/i.test(text)) event = '100m IM';
+      else if (/200\s*(meter|m)?\s*medley|200\s*(meter|m)?\s*im/i.test(text)) event = '200m IM';
+      else if (/100\s*(meter|m)?\s*medley|100\s*(meter|m)?\s*im/i.test(text)) event = '100m IM';
 
       let finalTime = '';
       const timeMatches = text.match(/\b(?:\d{1,2}:)?\d{2}\.\d{2}\b/g);
       if (timeMatches && timeMatches.length > 0) {
         finalTime = timeMatches[0];
         const prelimsMatch = text.match(/prelims[\s\S]{0,30}(\b(?:\d{1,2}:)?\d{2}\.\d{2}\b)/i);
+        const finalsMatch = text.match(/finals[\s\S]{0,30}(\b(?:\d{1,2}:)?\d{2}\.\d{2}\b)/i);
         const totalMatch = text.match(/total[\s\S]{0,30}(\b(?:\d{1,2}:)?\d{2}\.\d{2}\b)/i);
-        if (prelimsMatch && prelimsMatch[1]) finalTime = prelimsMatch[1];
+        if (finalsMatch && finalsMatch[1]) finalTime = finalsMatch[1];
+        else if (prelimsMatch && prelimsMatch[1]) finalTime = prelimsMatch[1];
         else if (totalMatch && totalMatch[1]) finalTime = totalMatch[1];
       }
 
@@ -1784,7 +1727,7 @@
 
       let notes = 'Sanctioned Meet Result';
       if (/snsc/i.test(text)) notes = '12th Singapore National Swimming Championships (SNSC)';
-      else if (/global school/i.test(text)) notes = 'Global School Swimming Series';
+      else if (/global school/i.test(text)) notes = 'Global School Swimming Series 2026';
 
       return {
         swimmer: matchedSwimmer,
@@ -1794,6 +1737,52 @@
         splits: splitMatches.slice(0, 4).join(', '),
         notes: notes
       };
+    }
+
+    // Helper: Parses multiple race listings from "Swimmer History" screenshots
+    function parseMultiRaceText(text, defaultSwimmer) {
+      const results = [];
+      const lines = text.split('\n');
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const matchCourseDist = line.match(/(LCM|SCM|SCY)\s*(\d{2,3})\s*(Back|Breast|Fly|Free|Medley|IM)/i);
+        if (matchCourseDist) {
+          const courseStr = matchCourseDist[1].toUpperCase() === 'LCM' ? '50m LCM' : '25m SCM';
+          const dist = matchCourseDist[2];
+          let stroke = matchCourseDist[3].toLowerCase();
+          if (stroke === 'back') stroke = 'Backstroke';
+          else if (stroke === 'breast') stroke = 'Breaststroke';
+          else if (stroke === 'fly') stroke = 'Butterfly';
+          else if (stroke === 'free') stroke = 'Freestyle';
+          else if (stroke === 'medley' || stroke === 'im') stroke = 'IM';
+
+          const evName = `${dist}m ${stroke}`;
+
+          // Look ahead up to 3 lines for a time pattern
+          let foundTime = '';
+          for (let j = i; j <= Math.min(i + 3, lines.length - 1); j++) {
+            const tm = lines[j].match(/\b(?:\d{1,2}:)?\d{2}\.\d{2}\b/);
+            if (tm) {
+              foundTime = tm[0];
+              break;
+            }
+          }
+
+          if (foundTime) {
+            results.push({
+              swimmer: defaultSwimmer,
+              course: courseStr,
+              event: evName,
+              time: foundTime,
+              splits: '',
+              notes: 'Meet Mobile Swimmer History'
+            });
+          }
+        }
+      }
+
+      return results;
     }
 
     // ---------------------------------------------------------------------------
@@ -1835,7 +1824,53 @@
       const checkBreathing = document.getElementById('cue-breathing').checked;
       const checkKick = document.getElementById('cue-kick').checked;
 
-      // Generate dynamic technical synopsis based on swimmer archetype and observed cues
+      // Check if user supplied a race time to compare/update PB
+      const inputEvent = document.getElementById('video-race-event')?.value.trim();
+      const inputCourse = document.getElementById('video-race-course')?.value || '25m SCM';
+      const inputTime = document.getElementById('video-race-time')?.value.trim();
+
+      let pbUpdateNote = '';
+      if (inputEvent && inputTime) {
+        const newSec = parseTimeToSeconds(inputTime);
+        if (newSec) {
+          const existingPB = ath.pbs.find(p => p.event.toLowerCase() === inputEvent.toLowerCase() && p.course === inputCourse);
+          const oldSec = existingPB ? parseTimeToSeconds(existingPB.time) : null;
+
+          if (!oldSec || newSec < oldSec) {
+            const timeDrop = oldSec ? (oldSec - newSec).toFixed(2) : null;
+            const stdObj = calculateStandard(inputEvent, inputTime, inputCourse, ath.age);
+
+            const updatedPB = {
+              event: inputEvent,
+              course: inputCourse,
+              time: inputTime,
+              std: stdObj.std,
+              pct: stdObj.pct,
+              note: timeDrop ? `New PB! Dropped -${timeDrop}s in video analysis meet` : 'New PB verified from video'
+            };
+
+            if (existingPB) {
+              const idx = ath.pbs.indexOf(existingPB);
+              ath.pbs[idx] = updatedPB;
+            } else {
+              ath.pbs.unshift(updatedPB);
+            }
+
+            // Append to history
+            if (!ath.history) ath.history = {};
+            if (!ath.history[inputEvent]) ath.history[inputEvent] = [];
+            ath.history[inputEvent].push({
+              meet: context || 'Video Verified Race',
+              date: new Date().toISOString().slice(0, 10),
+              time: newSec
+            });
+
+            pbUpdateNote = `<p><strong>⚡ Personal Best Upgrade:</strong> New PB recorded in <strong>${inputEvent} (${inputCourse}): ${inputTime}</strong>${timeDrop ? ` (-${timeDrop}s drop)` : ''}! USA Swimming Standard re-calculated to <strong>${stdObj.std}</strong>.</p>`;
+          }
+        }
+      }
+
+      // Generate dynamic technical synopsis based on swimmer archetype, observed cues and any PB updates
       let updatedSynopsis = `
         <p><strong>Updated Race Video Observations (${context}):</strong> Detailed video playback reveals strong athletic body alignment on the surface. ${
           checkCatch ? 'The catch phase demonstrates active early forearm engagement (EVF), anchoring solid water hold without elbow drop.' : 'Working toward earlier vertical forearm engagement to avoid slipping water during high fatigue.'
@@ -1847,6 +1882,7 @@
         } ${
           checkKick ? 'Kick tempo remains aggressive into the finish wall; holding a consistent 6-beat tempo will prevent late-lap split degradation.' : 'Protect kick cadence on lap 3 & 4 to support distance-per-stroke.'
         }</p>
+        ${pbUpdateNote}
       `;
 
       ath.technicalSynopsis = updatedSynopsis;
@@ -1854,13 +1890,13 @@
       ath.videoLog.unshift({
         title: context,
         date: new Date().toISOString().slice(0, 10),
-        note: 'Biomechanical video analysis applied.'
+        note: inputTime ? `Biomechanical video analysis applied (${inputTime}).` : 'Biomechanical video analysis applied.'
       });
 
       persistState();
       closeVideoModal();
       setSwimmerMode(swimmerId);
-      alert(`Success! Updated Coach's Video Analysis & Technical Synopsis for ${ath.name}.`);
+      alert(`Success! Updated Coach's Video Analysis & Technical Synopsis for ${ath.name}${pbUpdateNote ? ' with a NEW Personal Best!' : '.'}`);
     }
 
     // ---------------------------------------------------------------------------
