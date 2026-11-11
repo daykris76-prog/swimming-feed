@@ -143,20 +143,31 @@
 
       <!-- Action Buttons -->
       <div class="flex items-center gap-2 sm:gap-3">
-        <!-- New Screenshot Scanner Button -->
+        <!-- Add Swimmer Button -->
+        <button onclick="openAddSwimmerModal()" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-lg shadow-emerald-600/20">
+          <i class="fa-solid fa-user-plus"></i>
+          <span>Add Swimmer</span>
+        </button>
+
+        <!-- Screenshot Scanner Button -->
         <button onclick="openScanModal()" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-midnight transition flex items-center gap-2 shadow-lg shadow-cyan-500/20">
           <i class="fa-solid fa-camera"></i>
           <span>Scan Screenshot</span>
         </button>
 
+        <button onclick="openRosterModal()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="View Team & Family Roster">
+          <i class="fa-solid fa-users"></i>
+          <span class="hidden sm:inline">Roster</span>
+        </button>
+
         <button onclick="openDataBackupModal()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="Export / Import Data JSON">
           <i class="fa-solid fa-database"></i>
-          <span class="hidden sm:inline">Data Backup</span>
+          <span class="hidden sm:inline">Backup</span>
         </button>
 
         <button onclick="openGitHubModal()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
           <i class="fa-brands fa-github text-sm"></i>
-          <span class="hidden sm:inline">GitHub Pages</span>
+          <span class="hidden sm:inline">GitHub</span>
         </button>
 
         <button onclick="window.print()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition flex items-center gap-1.5 shadow-sm">
@@ -171,21 +182,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between border-t border-slate-800/40 gap-3">
       
       <!-- Swimmer Switcher Pills -->
-      <div class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800">
-        <button id="btn-monty" onclick="setSwimmerMode('monty')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-200 bg-cyan-500 text-midnight shadow-md shadow-cyan-500/20">
-          <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-          Monty Day <span class="text-[10px] opacity-80">(Age 12 • Free/Fly)</span>
-        </button>
-
-        <button id="btn-rupert" onclick="setSwimmerMode('rupert')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-200 text-slate-400 hover:text-white">
-          <span class="w-2 h-2 rounded-full bg-gold-500"></span>
-          Rupert Day <span class="text-[10px] opacity-80">(Age 10 • Breast/Free)</span>
-        </button>
-
-        <button id="btn-dual" onclick="setSwimmerMode('dual')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition duration-200 text-slate-400 hover:text-white">
-          <i class="fa-solid fa-arrows-split-up-and-left text-[11px]"></i>
-          Dual Head-to-Head
-        </button>
+      <div id="swimmer-tabs-container" class="flex flex-wrap items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800 gap-1">
+        <!-- Dynamically populated swimmer buttons -->
       </div>
 
       <!-- Live Motivational Tiers Key -->
@@ -202,516 +200,152 @@
   </header>
 
   <!-- ========================================================================= -->
-  <!-- MAIN CONTAINER                                                            -->
+  <!-- MAIN DASHBOARD CONTENT AREA                                               -->
   <!-- ========================================================================= -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
-
-    <!-- HERO PROFILE BANNER (MONTY OR RUPERT OR DUAL) -->
-    <div id="hero-banner" class="glass-card rounded-2xl p-6 relative overflow-hidden transition-all duration-300">
-      <!-- Background Graphic Glow -->
-      <div id="hero-glow" class="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none"></div>
-
-      <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        
-        <div class="space-y-2">
-          <div class="flex flex-wrap items-center gap-2">
-            <span id="hero-badge" class="px-2.5 py-0.5 rounded-full text-xs font-black tracking-wide uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-              National Age Pathway
-            </span>
-            <span id="hero-age" class="text-xs text-slate-300 font-medium">
-              12 Years Old (Turned Oct 2026)
-            </span>
-            <span class="text-xs text-slate-500">•</span>
-            <span class="text-xs text-slate-300 font-medium">Tanglin Merlions (TTS-VD)</span>
-            <span class="text-xs text-slate-500">•</span>
-            <span id="hero-division" class="text-xs text-cyan-400 font-semibold">Division: M12-13</span>
-          </div>
-
-          <h2 id="hero-name" class="text-2xl sm:text-3xl font-display font-black text-white tracking-tight">
-            Monty Day
-          </h2>
-
-          <p id="hero-desc" class="text-sm text-slate-300 max-w-2xl leading-relaxed">
-            Freestyle &amp; Butterfly Specialist focusing on middle-distance endurance (100m–200m sweet spot, stretching to 400m Free and 200m Fly). Elite distance-per-stroke with early high-elbow catch mechanics and back-half racing strength.
-          </p>
-        </div>
-
-        <!-- Hero Stats Counters -->
-        <div id="hero-quick-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 min-w-[110px]">
-            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">100m Free</div>
-            <div id="stat-1-val" class="text-xl font-display font-black text-cyan-400 mt-0.5">1:03.21</div>
-            <div id="stat-1-sub" class="text-[10px] text-purple-400 font-bold">AAAA (11y) / AAA</div>
-          </div>
-
-          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 min-w-[110px]">
-            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">200m Free (SCM)</div>
-            <div id="stat-2-val" class="text-xl font-display font-black text-emerald-400 mt-0.5">2:19.70</div>
-            <div id="stat-2-sub" class="text-[10px] text-emerald-400 font-bold">Dropped -4.19s!</div>
-          </div>
-
-          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 min-w-[110px]">
-            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">50m Free</div>
-            <div id="stat-3-val" class="text-xl font-display font-black text-cyan-400 mt-0.5">28.73</div>
-            <div id="stat-3-sub" class="text-[10px] text-cyan-400 font-bold">AAA Standard</div>
-          </div>
-
-          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 min-w-[110px]">
-            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">100m Fly</div>
-            <div id="stat-4-val" class="text-xl font-display font-black text-cyan-400 mt-0.5">1:10.26</div>
-            <div id="stat-4-sub" class="text-[10px] text-purple-400 font-bold">AAA Standard</div>
-          </div>
-        </div>
-
-      </div>
+    <!-- Single Swimmer View Container -->
+    <div id="single-swimmer-view" class="space-y-6">
+      <!-- Injected by renderSwimmer() -->
     </div>
 
-    <!-- ======================================================================= -->
-    <!-- SECTION 1: COACH'S VIDEO ANALYSIS & TECHNICAL SYNOPSIS                  -->
-    <!-- ======================================================================= -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
-      <!-- Video Observations (2 cols) -->
-      <div class="lg:col-span-2 glass-card rounded-2xl p-6 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm font-bold">
-              <i class="fa-solid fa-video"></i>
-            </div>
-            <div>
-              <h3 class="font-display font-bold text-base text-white">Coach's Technical Race Analysis</h3>
-              <p class="text-xs text-slate-400">Direct observations from Global School Swimming Series &amp; 12th SNSC footage</p>
-            </div>
-          </div>
-          <span id="badge-tech-specialty" class="text-[11px] px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
-            Stroke Mechanics Profile
-          </span>
-        </div>
-
-        <div id="tech-content" class="space-y-3.5 text-sm leading-relaxed text-slate-300">
-          <!-- Dynamically populated based on active swimmer -->
-        </div>
-
-        <!-- Key Mechanical Pillars -->
-        <div id="tech-pillars" class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-          <!-- Pillars dynamically injected -->
-        </div>
-      </div>
-
-      <!-- Breakthrough Spotlight / Key Milestone Tracker (1 col) -->
-      <div class="glass-card rounded-2xl p-6 flex flex-col justify-between space-y-4">
-        <div>
-          <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
-            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">
-              <i class="fa-solid fa-trophy"></i>
-            </div>
-            <div>
-              <h3 class="font-display font-bold text-base text-white">Latest Race Milestone</h3>
-              <p class="text-xs text-slate-400">Oct 31, 2026 • 12th SNSC (SCM)</p>
-            </div>
-          </div>
-
-          <div id="breakthrough-box" class="mt-4 p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3">
-            <!-- Dynamic breakthrough details -->
-          </div>
-        </div>
-
-        <!-- Geoff Huegill Quote Reminder -->
-        <div class="p-3.5 rounded-xl bg-slate-950/80 border-l-4 border-cyan-500 text-xs italic text-slate-300">
-          "A great race isn’t won in the first 25 meters. It is won by the swimmer whose technique refuses to fall apart when their lungs are burning."
-          <div class="text-[10px] text-cyan-400 font-bold not-italic mt-1">— Geoff "Skippy" Huegill</div>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- ======================================================================= -->
-    <!-- SECTION 2: INTERACTIVE PERSONAL BESTS & STANDARDS MATRIX                -->
-    <!-- ======================================================================= -->
-    <section class="glass-card rounded-2xl p-6 space-y-5">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-        <div>
-          <h3 class="font-display font-bold text-lg text-white flex items-center gap-2">
-            <i class="fa-solid fa-stopwatch text-cyan-400"></i>
-            Personal Best Database &amp; USA Swimming Standard Benchmark
-          </h3>
-          <p class="text-xs text-slate-400">Verified official Short Course Meters (25m) and Long Course Meters (50m) marks</p>
-        </div>
-
-        <!-- Filter Buttons -->
-        <div class="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
-          <button onclick="filterStrokeTable('all')" id="filter-all" class="px-2.5 py-1 rounded-lg font-bold bg-slate-800 text-white transition">All</button>
-          <button onclick="filterStrokeTable('free')" id="filter-free" class="px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white transition">Free</button>
-          <button onclick="filterStrokeTable('fly')" id="filter-fly" class="px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white transition">Fly</button>
-          <button onclick="filterStrokeTable('breast')" id="filter-breast" class="px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white transition">Breast</button>
-          <button onclick="filterStrokeTable('back')" id="filter-back" class="px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white transition">Back</button>
-          <button onclick="filterStrokeTable('im')" id="filter-im" class="px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white transition">IM</button>
-        </div>
-      </div>
-
-      <!-- Table Container -->
-      <div class="overflow-x-auto rounded-xl border border-slate-800">
-        <table class="w-full text-left text-xs border-collapse">
-          <thead>
-            <tr class="bg-slate-900/90 text-slate-400 uppercase tracking-wider text-[11px] border-b border-slate-800">
-              <th class="py-3 px-4 font-bold">Event &amp; Distance</th>
-              <th class="py-3 px-4 font-bold">Course</th>
-              <th class="py-3 px-4 font-bold">Official PB</th>
-              <th class="py-3 px-4 font-bold">USA Swimming Standard</th>
-              <th class="py-3 px-4 font-bold">National Percentile</th>
-              <th class="py-3 px-4 font-bold">Key Tactical Note</th>
-            </tr>
-          </thead>
-          <tbody id="pb-table-body" class="divide-y divide-slate-800/60 font-sans">
-            <!-- Dynamic rows inserted here -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- ======================================================================= -->
-    <!-- SECTION 3: PACING ARCHITECTURE & INTERACTIVE SPLIT CALCULATOR           -->
-    <!-- ======================================================================= -->
-    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      
-      <!-- Pacing Milestones Table (7 cols) -->
-      <div class="lg:col-span-7 glass-card rounded-2xl p-6 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-cyan-400 flex items-center justify-center text-sm font-bold">
-              <i class="fa-solid fa-route"></i>
-            </div>
-            <div>
-              <h3 class="font-display font-bold text-base text-white">Target Milestone Pacing Architecture</h3>
-              <p class="text-xs text-slate-400">Step-by-step split breakdowns aligned to medium-term goals</p>
-            </div>
-          </div>
-          <span class="text-[10px] font-bold text-cyan-400 bg-cyan-950/60 px-2.5 py-1 rounded border border-cyan-800">Drop-Off Discipline</span>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead>
-              <tr class="text-slate-400 border-b border-slate-800 uppercase text-[10px] tracking-wider">
-                <th class="py-2.5 px-3">Event</th>
-                <th class="py-2.5 px-3">Baseline PB</th>
-                <th class="py-2.5 px-3">Target Milestone</th>
-                <th class="py-2.5 px-3">Split Architecture</th>
-                <th class="py-2.5 px-3">Technical Trigger</th>
-              </tr>
-            </thead>
-            <tbody id="pacing-table-body" class="divide-y divide-slate-800/60">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Interactive Split Planner & Calculator (5 cols) -->
-      <div class="lg:col-span-5 glass-card rounded-2xl p-6 flex flex-col justify-between space-y-4">
-        <div>
-          <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
-            <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm font-bold">
-              <i class="fa-solid fa-calculator"></i>
-            </div>
-            <div>
-              <h3 class="font-display font-bold text-base text-white">Smart Split Calculator</h3>
-              <p class="text-xs text-slate-400">Calculate elite age-group pacing drop-offs</p>
-            </div>
-          </div>
-
-          <div class="mt-4 space-y-3">
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Select Event</label>
-                <select id="calc-event" onchange="runSplitCalculator()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
-                  <option value="100free">100m Freestyle</option>
-                  <option value="200free">200m Freestyle</option>
-                  <option value="100fly">100m Butterfly</option>
-                  <option value="50breast">50m Breaststroke</option>
-                  <option value="50free">50m Freestyle</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Target Time</label>
-                <input type="text" id="calc-target" value="1:01.80" oninput="runSplitCalculator()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-cyan-400 font-mono font-bold focus:outline-none focus:border-cyan-500" placeholder="e.g. 1:01.80">
-              </div>
-            </div>
-
-            <div id="calc-result" class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2.5">
-              <!-- Calculator output populated by JS -->
-            </div>
-          </div>
-        </div>
-
-        <div class="text-[11px] text-slate-400 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
-          <i class="fa-solid fa-lightbulb text-gold-400 mr-1"></i>
-          <strong>Coach Rule of Thumb:</strong> For a 100m sprint, target a back-half drop-off between <strong>+2.8s and +3.2s</strong>. For a 200m swim, protect the 3rd 50m to avoid the common +4s wall!
-        </div>
-      </div>
-
-    </section>
-
-    <!-- ======================================================================= -->
-    <!-- SECTION 4: VISUAL PROGRESS CHARTS & SPLIT DEGRADATION                   -->
-    <!-- ======================================================================= -->
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      
-      <!-- Chart 1: Monty 200m Split Degradation or Rupert Stroke Comparison -->
-      <div class="glass-card rounded-2xl p-6 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-          <div>
-            <h3 id="chart-1-title" class="font-display font-bold text-base text-white">200m Freestyle Split Breakdown (12th SNSC)</h3>
-            <p id="chart-1-subtitle" class="text-xs text-slate-400">Comparing Lap Splits across Monty's 2:19.70 PB</p>
-          </div>
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Lap Analysis</span>
-        </div>
-        <div class="h-64 w-full">
-          <canvas id="splitChart"></canvas>
-        </div>
-      </div>
-
-      <!-- Chart 2: Career Progression / Standard Trajectory -->
-      <div class="glass-card rounded-2xl p-6 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-          <div>
-            <h3 id="chart-2-title" class="font-display font-bold text-base text-white">Freestyle &amp; Specialty Time Progression</h3>
-            <p id="chart-2-subtitle" class="text-xs text-slate-400">Recent trajectory toward medium-term milestones</p>
-          </div>
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-950 text-cyan-400 border border-cyan-800">Milestone Path</span>
-        </div>
-        <div class="h-64 w-full">
-          <canvas id="trajectoryChart"></canvas>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- ======================================================================= -->
-    <!-- SECTION 5: GEOFF HUEGILL PERFORMANCE LOOP & DAILY HABIT LAB             -->
-    <!-- ======================================================================= -->
-    <section class="glass-card rounded-2xl p-6 space-y-6">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-gold-500/20 text-gold-400 border border-gold-500/30">The Performance Loop</span>
-            <span class="text-xs text-slate-400">Huegill Blueprint: Accept It • Own It • Conquer It</span>
-          </div>
-          <h3 class="font-display font-bold text-lg text-white mt-1">5-Step Habit Lab &amp; Daily Process Goals</h3>
-        </div>
-
-        <div class="text-xs text-slate-400 flex items-center gap-2">
-          <span>Click checkboxes to track daily execution:</span>
-          <button onclick="resetHabits()" class="text-[11px] underline text-cyan-400 hover:text-cyan-300">Reset</button>
-        </div>
-      </div>
-
-      <!-- The 5 Steps Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-3.5">
-        
-        <!-- Step 1: Vision -->
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">1</span>
-              <span class="text-[10px] uppercase font-bold text-slate-400">Vision</span>
-            </div>
-            <h4 class="font-bold text-sm text-white mb-1.5">Know Your Why</h4>
-            <div id="step-1-desc" class="text-xs text-slate-300 leading-snug">
-              <!-- Injected by JS -->
-            </div>
-          </div>
-          <div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-cyan-400 font-semibold">SMART Goals</div>
-        </div>
-
-        <!-- Step 2: Ownership -->
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">2</span>
-              <span class="text-[10px] uppercase font-bold text-slate-400">Ownership</span>
-            </div>
-            <h4 class="font-bold text-sm text-white mb-1.5">Control Controllables</h4>
-            <div id="step-2-desc" class="text-xs text-slate-300 leading-snug">
-              <!-- Injected by JS -->
-            </div>
-          </div>
-          <div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-cyan-400 font-semibold">No Excuses</div>
-        </div>
-
-        <!-- Step 3: Believe -->
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">3</span>
-              <span class="text-[10px] uppercase font-bold text-slate-400">Believe</span>
-            </div>
-            <h4 class="font-bold text-sm text-white mb-1.5">Brick by Brick</h4>
-            <div id="step-3-desc" class="text-xs text-slate-300 leading-snug">
-              <!-- Injected by JS -->
-            </div>
-          </div>
-          <div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-cyan-400 font-semibold">Daily Proof</div>
-        </div>
-
-        <!-- Step 4: Accountability -->
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">4</span>
-              <span class="text-[10px] uppercase font-bold text-slate-400">Accountability</span>
-            </div>
-            <h4 class="font-bold text-sm text-white mb-1.5">Logbook &amp; Routine</h4>
-            <div id="step-4-desc" class="text-xs text-slate-300 leading-snug">
-              <!-- Injected by JS -->
-            </div>
-          </div>
-          <div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-cyan-400 font-semibold">Track Weekly</div>
-        </div>
-
-        <!-- Step 5: Feedback -->
-        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">5</span>
-              <span class="text-[10px] uppercase font-bold text-slate-400">Feedback</span>
-            </div>
-            <h4 class="font-bold text-sm text-white mb-1.5">Never Failure</h4>
-            <div id="step-5-desc" class="text-xs text-slate-300 leading-snug">
-              <!-- Injected by JS -->
-            </div>
-          </div>
-          <div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-cyan-400 font-semibold">3 Good, 3 To Improve</div>
-        </div>
-
-      </div>
-
-      <!-- 3 Habit Bricks Interactive Checklist -->
-      <div class="pt-2">
-        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
-          <i class="fa-solid fa-cubes text-cyan-400"></i>
-          The 3 Daily Habit Bricks (Click to check off today's execution)
-        </h4>
-
-        <div id="habit-bricks-container" class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <!-- Populated by JS -->
-        </div>
-      </div>
-
-    </section>
-
-    <!-- ======================================================================= -->
-    <!-- SECTION 6: DRYLAND STRENGTH LAB & RACE DAY LOGISTICS                    -->
-    <!-- ======================================================================= -->
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      
-      <!-- Skills Lab (Starts, Turns, Finishes) -->
-      <div class="glass-card rounded-2xl p-5 space-y-3">
-        <div class="flex items-center gap-2 border-b border-slate-800 pb-2.5">
-          <i class="fa-solid fa-water text-cyan-400"></i>
-          <h4 class="font-display font-bold text-sm text-white">Skills Lab • The 3 Game Winners</h4>
-        </div>
-        <ul class="space-y-2.5 text-xs text-slate-300">
-          <li class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
-            <strong class="text-cyan-400 block mb-0.5">1. Starts (Arrow Entry)</strong>
-            Tight streamline, lock thumbs, head neutral. Enter through a single hole in the water.
-          </li>
-          <li class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
-            <strong class="text-cyan-400 block mb-0.5">2. Turns (7m Setup)</strong>
-            Accelerate into the wall. No breathing inside the flags; drive off in tight streamline.
-          </li>
-          <li class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
-            <strong class="text-cyan-400 block mb-0.5">3. Finishes (Touch First)</strong>
-            Head down, zero breaths over the final 5 meters. Hit the touchpad with full fingertip drive.
-          </li>
-        </ul>
-      </div>
-
-      <!-- Strength Lab (Dryland Core Circuit) -->
-      <div class="glass-card rounded-2xl p-5 space-y-3">
-        <div class="flex items-center gap-2 border-b border-slate-800 pb-2.5">
-          <i class="fa-solid fa-dumbbell text-emerald-400"></i>
-          <h4 class="font-display font-bold text-sm text-white">Strength Lab • Core &amp; Posture</h4>
-        </div>
-        <ul id="dryland-list" class="space-y-2 text-xs text-slate-300">
-          <!-- Dynamically populated -->
-        </ul>
-      </div>
-
-      <!-- Fuel & Race Day Checklist -->
-      <div class="glass-card rounded-2xl p-5 space-y-3">
-        <div class="flex items-center gap-2 border-b border-slate-800 pb-2.5">
-          <i class="fa-solid fa-apple-whole text-gold-400"></i>
-          <h4 class="font-display font-bold text-sm text-white">Fuelling &amp; Race Day Bag</h4>
-        </div>
-        <ul class="space-y-2 text-xs text-slate-300">
-          <li class="flex items-start gap-2">
-            <i class="fa-solid fa-check text-gold-400 mt-0.5"></i>
-            <span><strong>Pre-Race Fuel:</strong> Oats, banana &amp; honey 2–2.5 hrs before warm-up.</span>
-          </li>
-          <li class="flex items-start gap-2">
-            <i class="fa-solid fa-check text-gold-400 mt-0.5"></i>
-            <span><strong>Deck Hydration:</strong> 1L water + electrolyte drink; sip between every race.</span>
-          </li>
-          <li class="flex items-start gap-2">
-            <i class="fa-solid fa-check text-gold-400 mt-0.5"></i>
-            <span><strong>30-Min Post Race:</strong> Chocolate milk, protein shake, or banana within 20 mins.</span>
-          </li>
-          <li class="flex items-start gap-2">
-            <i class="fa-solid fa-check text-gold-400 mt-0.5"></i>
-            <span><strong>Deck Rest:</strong> Keep warm, stay off feet between prelims &amp; finals on yoga mat.</span>
-          </li>
-        </ul>
-      </div>
-
-    </section>
-
+    <!-- Dual Comparison View Container -->
+    <div id="dual-swimmer-view" class="hidden space-y-6">
+      <!-- Injected by renderDualComparison() -->
+    </div>
   </main>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: GITHUB PAGES DEPLOYMENT GUIDE                                      -->
+  <!-- MODAL: ADD NEW SWIMMER WIZARD                                             -->
   <!-- ========================================================================= -->
-  <div id="github-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-700 shadow-2xl">
+  <div id="add-swimmer-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-xl w-full p-6 space-y-4 border border-emerald-500/40 shadow-2xl my-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2 text-white font-display font-bold text-base">
-          <i class="fa-brands fa-github text-cyan-400 text-lg"></i>
-          Publish to GitHub Pages in 3 Minutes
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base font-bold">
+            <i class="fa-solid fa-user-plus"></i>
+          </div>
+          <div>
+            <h3 class="text-white font-display font-bold text-base">Add New Swimmer Profile</h3>
+            <p class="text-xs text-slate-400">Creates a personalized performance guide, benchmark matrix &amp; OCR link</p>
+          </div>
         </div>
-        <button onclick="closeGitHubModal()" class="text-slate-400 hover:text-white text-lg">
+        <button onclick="closeAddSwimmerModal()" class="text-slate-400 hover:text-white text-lg">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
-        <p>This dashboard is already structured as a <strong>single-file static web application (<code class="text-cyan-400 font-mono">index.html</code>)</strong>, making it 100% ready for free instant hosting on GitHub Pages.</p>
+      <div class="space-y-3.5 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Full Name</label>
+            <input type="text" id="new-swimmer-name" placeholder="e.g. Maya Chen" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-semibold">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Current Age</label>
+            <input type="number" id="new-swimmer-age" placeholder="e.g. 11" min="7" max="18" value="11" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-semibold">
+          </div>
+        </div>
 
-        <ol class="list-decimal pl-4 space-y-2">
-          <li>
-            <strong>Create a new repository</strong> on GitHub named <code class="text-cyan-400 font-mono">day-brothers-dashboard</code> (or any name you like). Make it <em>Public</em>.
-          </li>
-          <li>
-            <strong>Upload this file</strong> as <code class="text-cyan-400 font-mono">index.html</code> in the main branch (root directory).
-          </li>
-          <li>
-            Go to <strong>Settings</strong> &gt; <strong>Pages</strong> (in the left sidebar).
-          </li>
-          <li>
-            Under <em>Build and deployment &gt; Branch</em>, select <code class="text-cyan-400 font-mono">main</code> and folder <code class="text-cyan-400 font-mono">/ (root)</code>, then click <strong>Save</strong>.
-          </li>
-          <li>
-            Within 60 seconds, your site will be live at:
-            <div class="mt-1 p-2 rounded bg-slate-950 font-mono text-cyan-300 break-all select-all border border-slate-800">
-              https://&lt;your-username&gt;.github.io/day-brothers-dashboard/
-            </div>
-          </li>
-        </ol>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Swim Team / Club</label>
+            <input type="text" id="new-swimmer-club" placeholder="e.g. Tanglin Merlions, ATS, SAC" value="Tanglin Merlions (TTS-VD)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Primary Stroke Specialty</label>
+            <select id="new-swimmer-specialty" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-emerald-500">
+              <option value="free_sprint">Freestyle Sprint (50m/100m)</option>
+              <option value="free_distance">Freestyle Mid/Distance (200m/400m)</option>
+              <option value="breast">Breaststroke Specialist</option>
+              <option value="fly">Butterfly Specialist</option>
+              <option value="back">Backstroke Specialist</option>
+              <option value="im">Individual Medley (IM) All-Rounder</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Profile Accent Color</label>
+          <div class="flex items-center gap-3">
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="radio" name="swimmer-color" value="#00d2ff" checked class="accent-cyan-400">
+              <span class="w-4 h-4 rounded-full bg-cyan-400 inline-block"></span>
+              <span class="text-slate-300">Cyan</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="radio" name="swimmer-color" value="#f59e0b" class="accent-gold-500">
+              <span class="w-4 h-4 rounded-full bg-gold-500 inline-block"></span>
+              <span class="text-slate-300">Gold</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="radio" name="swimmer-color" value="#10b981" class="accent-emerald-400">
+              <span class="w-4 h-4 rounded-full bg-emerald-400 inline-block"></span>
+              <span class="text-slate-300">Emerald</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="radio" name="swimmer-color" value="#a855f7" class="accent-purple-400">
+              <span class="w-4 h-4 rounded-full bg-purple-400 inline-block"></span>
+              <span class="text-slate-300">Purple</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="radio" name="swimmer-color" value="#ec4899" class="accent-pink-400">
+              <span class="w-4 h-4 rounded-full bg-pink-400 inline-block"></span>
+              <span class="text-slate-300">Pink</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
+          <div class="font-bold text-slate-200 flex items-center gap-1.5">
+            <i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i> Automatic Setup:
+          </div>
+          <div>• Generates customized Huegill Performance Loop, habit bricks, and dryland plan.</div>
+          <div>• Instantly accessible in the Screenshot Scanner dropdown for one-click OCR updates.</div>
+        </div>
       </div>
 
-      <div class="flex justify-end pt-2 border-t border-slate-800">
-        <button onclick="closeGitHubModal()" class="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-midnight font-bold text-xs transition">
-          Got It, Thanks!
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+        <button onclick="closeAddSwimmerModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
+          Cancel
+        </button>
+        <button onclick="saveNewSwimmer()" class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-midnight font-bold text-xs transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
+          <i class="fa-solid fa-check"></i>
+          Create Profile
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: TEAM / FAMILY ROSTER MANAGER                                       -->
+  <!-- ========================================================================= -->
+  <div id="roster-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-xl w-full p-6 space-y-4 border border-slate-700 shadow-2xl my-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-blue-500/20 text-cyan-400 flex items-center justify-center text-base font-bold">
+            <i class="fa-solid fa-users"></i>
+          </div>
+          <div>
+            <h3 class="text-white font-display font-bold text-base">Club &amp; Family Swimmer Roster</h3>
+            <p class="text-xs text-slate-400">Manage all registered swimmers on this device</p>
+          </div>
+        </div>
+        <button onclick="closeRosterModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2.5 text-xs" id="roster-list-container">
+        <!-- Dynamically injected roster list -->
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+        <button onclick="openAddSwimmerModal(); closeRosterModal();" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5">
+          <i class="fa-solid fa-user-plus"></i> Add Swimmer
+        </button>
+        <button onclick="closeRosterModal()" class="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">
+          Done
         </button>
       </div>
     </div>
@@ -787,9 +421,8 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           <div>
             <label class="block text-[11px] font-bold text-slate-400 mb-1">Swimmer</label>
-            <select id="field-swimmer" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-cyan-500">
-              <option value="monty">Monty Day (Age 12 • Free/Fly)</option>
-              <option value="rupert">Rupert Day (Age 10 • Breast/Free)</option>
+            <select id="field-swimmer" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-cyan-500 font-semibold">
+              <!-- Dynamically populated from active swimmers list -->
             </select>
           </div>
 
@@ -1050,6 +683,21 @@
     let splitChartInstance = null;
     let trajectoryChartInstance = null;
 
+    // Helper: parse string times like "2:19.70" or "28.73" into seconds
+    function parseTimeToSeconds(timeStr) {
+      if (!timeStr || timeStr === '--') return null;
+      const clean = timeStr.trim();
+      if (clean.includes(':')) {
+        const parts = clean.split(':');
+        const min = parseFloat(parts[0]);
+        const sec = parseFloat(parts[1]);
+        if (isNaN(min) || isNaN(sec)) return null;
+        return min * 60 + sec;
+      }
+      const s = parseFloat(clean);
+      return isNaN(s) ? null : s;
+    }
+
     // ---------------------------------------------------------------------------
     // USA SWIMMING STANDARD RE-CALCULATOR ENGINE
     // ---------------------------------------------------------------------------
@@ -1105,733 +753,502 @@
     }
 
     // ---------------------------------------------------------------------------
-    // INITIALIZATION & TAB SWITCHING
+    // RENDER FUNCTIONS (renderSwimmer, renderDualComparison, etc.)
     // ---------------------------------------------------------------------------
-    window.onload = function() {
-      renderSwimmer(currentSwimmer);
-      runSplitCalculator();
-    };
+    function renderSwimmer(id) {
+      const athlete = athletesData[id] || athletesData['monty'];
+      if (!athlete) return;
 
-    function setSwimmerMode(mode) {
-      currentSwimmer = mode;
-      
-      const btnMonty = document.getElementById('btn-monty');
-      const btnRupert = document.getElementById('btn-rupert');
-      const btnDual = document.getElementById('btn-dual');
+      const singleContainer = document.getElementById('single-swimmer-view');
+      const dualContainer = document.getElementById('dual-swimmer-view');
 
-      btnMonty.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-200 text-slate-400 hover:text-white';
-      btnRupert.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-200 text-slate-400 hover:text-white';
-      btnDual.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition duration-200 text-slate-400 hover:text-white';
+      singleContainer.classList.remove('hidden');
+      dualContainer.classList.add('hidden');
 
-      if (mode === 'monty') {
-        btnMonty.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-200 bg-cyan-500 text-midnight shadow-md shadow-cyan-500/20';
-        renderSwimmer('monty');
-      } else if (mode === 'rupert') {
-        btnRupert.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-200 bg-gold-500 text-midnight shadow-md shadow-gold-500/20';
-        renderSwimmer('rupert');
-      } else if (mode === 'dual') {
-        btnDual.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition duration-200 bg-purple-600 text-white shadow-md shadow-purple-600/20';
-        renderDualComparison();
-      }
-    }
+      const isMonty = athlete.id === 'monty';
+      const borderClass = isMonty ? 'glass-card-monty' : (athlete.id === 'rupert' ? 'glass-card-rupert' : '');
 
-    // ---------------------------------------------------------------------------
-    // RENDER INDIVIDUAL SWIMMER PROFILE
-    // ---------------------------------------------------------------------------
-    function renderSwimmer(key) {
-      const athlete = athletesData[key];
-      const isMonty = (key === 'monty');
+      singleContainer.innerHTML = `
+        <!-- Top Profile Banner -->
+        <div class="glass-card ${borderClass} rounded-2xl p-6 sm:p-7 relative overflow-hidden">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div class="space-y-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="px-2.5 py-1 rounded text-xs font-black uppercase tracking-wider text-midnight" style="background-color: ${athlete.accentColor}">
+                  ${athlete.division}
+                </span>
+                <span class="px-2.5 py-1 rounded text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                  ${athlete.club}
+                </span>
+                <span class="text-xs text-slate-400 font-mono">${athlete.dobDetail}</span>
+              </div>
+              <h2 class="font-display font-extrabold text-2xl sm:text-3xl text-white tracking-tight flex items-center gap-3">
+                ${athlete.name}
+                <span class="text-sm font-normal text-slate-400">(${athlete.age}y)</span>
+              </h2>
+              <p class="text-sm text-cyan-400 font-medium">${athlete.specialty}</p>
+            </div>
 
-      // Hero Card Updates
-      const banner = document.getElementById('hero-banner');
-      banner.className = `glass-card ${isMonty ? 'glass-card-monty' : 'glass-card-rupert'} rounded-2xl p-6 relative overflow-hidden transition-all duration-300`;
-
-      document.getElementById('hero-badge').textContent = athlete.division;
-      document.getElementById('hero-badge').className = `px-2.5 py-0.5 rounded-full text-xs font-black tracking-wide uppercase ${isMonty ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' : 'bg-gold-500/20 text-gold-300 border-gold-500/40'} border`;
-      document.getElementById('hero-age').textContent = `${athlete.age} Years Old (${athlete.dobDetail})`;
-      document.getElementById('hero-name').textContent = athlete.name;
-      document.getElementById('hero-division').textContent = athlete.club;
-      document.getElementById('hero-desc').textContent = athlete.specialty;
-
-      // Quick stats
-      document.getElementById('stat-1-val').textContent = athlete.quickStats.s1.val;
-      document.getElementById('stat-1-val').className = `text-xl font-display font-black mt-0.5 ${isMonty ? 'text-cyan-400' : 'text-gold-400'}`;
-      document.getElementById('stat-1-sub').textContent = athlete.quickStats.s1.sub;
-
-      document.getElementById('stat-2-val').textContent = athlete.quickStats.s2.val;
-      document.getElementById('stat-2-val').className = `text-xl font-display font-black mt-0.5 text-emerald-400`;
-      document.getElementById('stat-2-sub').textContent = athlete.quickStats.s2.sub;
-
-      document.getElementById('stat-3-val').textContent = athlete.quickStats.s3.val;
-      document.getElementById('stat-3-val').className = `text-xl font-display font-black mt-0.5 ${isMonty ? 'text-cyan-400' : 'text-gold-400'}`;
-      document.getElementById('stat-3-sub').textContent = athlete.quickStats.s3.sub;
-
-      document.getElementById('stat-4-val').textContent = athlete.quickStats.s4.val;
-      document.getElementById('stat-4-val').className = `text-xl font-display font-black mt-0.5 ${isMonty ? 'text-cyan-400' : 'text-gold-400'}`;
-      document.getElementById('stat-4-sub').textContent = athlete.quickStats.s4.sub;
-
-      // Technical Synopsis
-      document.getElementById('tech-content').innerHTML = athlete.technicalSynopsis;
-
-      // Pillars
-      const pillarHTML = athlete.pillars.map(p => `
-        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-          <div class="flex items-center gap-2 mb-1">
-            <i class="fa-solid ${p.icon} ${isMonty ? 'text-cyan-400' : 'text-gold-400'} text-xs"></i>
-            <span class="font-bold text-xs text-white">${p.title}</span>
+            <!-- Quick Stat Pill Counters -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              ${Object.values(athlete.quickStats).map(s => `
+                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-center">
+                  <div class="text-[10px] uppercase font-bold text-slate-400">${s.label}</div>
+                  <div class="text-lg font-black font-display text-white mt-0.5">${s.val}</div>
+                  <div class="text-[10px] text-emerald-400 font-medium truncate">${s.sub}</div>
+                </div>
+              `).join('')}
+            </div>
           </div>
-          <p class="text-[11px] text-slate-400 leading-snug">${p.desc}</p>
         </div>
-      `).join('');
-      document.getElementById('tech-pillars').innerHTML = pillarHTML;
 
-      // Breakthrough Spotlight
-      document.getElementById('breakthrough-box').innerHTML = `
-        <div class="flex items-center justify-between">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Featured Highlight</span>
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isMonty ? 'bg-cyan-950 text-cyan-300 border border-cyan-800' : 'bg-gold-950 text-gold-300 border border-gold-800'}">${athlete.breakthrough.badge}</span>
+        <!-- Coach's Video Technical Synopsis & Pillars -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 glass-card rounded-2xl p-6 space-y-4">
+            <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+              <i class="fa-solid fa-video text-cyan-400 text-sm"></i>
+              <h3 class="font-display font-bold text-white text-base">Coach's Video Observations &amp; Technical Synopsis</h3>
+            </div>
+            <div class="text-sm text-slate-300 space-y-3 leading-relaxed">
+              ${athlete.technicalSynopsis}
+            </div>
+          </div>
+
+          <!-- Key Technical Pillars -->
+          <div class="glass-card rounded-2xl p-6 space-y-4">
+            <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+              <i class="fa-solid fa-gem text-gold-400 text-sm"></i>
+              <h3 class="font-display font-bold text-white text-base">Core Technical Pillars</h3>
+            </div>
+            <div class="space-y-3.5">
+              ${athlete.pillars.map(p => `
+                <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-900/70 border border-slate-800">
+                  <div class="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center shrink-0 text-sm">
+                    <i class="fa-solid ${p.icon}"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-white">${p.title}</h4>
+                    <p class="text-[11px] text-slate-400 leading-snug mt-0.5">${p.desc}</p>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
         </div>
-        <div class="text-sm font-display font-bold text-white">${athlete.breakthrough.title}</div>
-        <p class="text-xs text-slate-400 leading-snug">${athlete.breakthrough.details}</p>
-        <div class="text-[10px] text-slate-500 font-semibold border-t border-slate-800/80 pt-1.5">${athlete.breakthrough.meet}</div>
+
+        <!-- Latest Breakthrough Feature Spotlight -->
+        <div class="glass-card rounded-2xl p-6 border-l-4" style="border-left-color: ${athlete.accentColor}">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[11px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                ${athlete.breakthrough.badge}
+              </span>
+              <h3 class="font-display font-bold text-white text-base sm:text-lg">${athlete.breakthrough.title}</h3>
+            </div>
+            <div class="text-xs text-slate-400 font-mono">${athlete.breakthrough.meet}</div>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-300 mt-3 leading-relaxed">${athlete.breakthrough.details}</p>
+        </div>
+
+        <!-- Split Pacing Analysis & Charts (If 200m Free or splits present) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="glass-card rounded-2xl p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2 font-display font-bold text-white text-base">
+                <i class="fa-solid fa-chart-line text-cyan-400"></i>
+                <span>Race Split Degradation Curve</span>
+              </div>
+              <span class="text-xs text-slate-400">50m Intervals</span>
+            </div>
+            <div class="h-60 relative">
+              <canvas id="splitChartCanvas"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2 font-display font-bold text-white text-base">
+                <i class="fa-solid fa-bullseye text-gold-400"></i>
+                <span>Pacing Architecture Calculator</span>
+              </div>
+              <span class="text-xs text-slate-400 font-mono">Lap Math</span>
+            </div>
+            
+            <div class="space-y-3">
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <label class="text-[11px] text-slate-400 block mb-1">Select Event Target</label>
+                  <select id="calc-event-select" onchange="runSplitCalculator()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white text-xs">
+                    ${athlete.pacing.map((p, idx) => `<option value="${idx}">${p.event} (Target: ${p.target})</option>`).join('')}
+                  </select>
+                </div>
+                <div>
+                  <label class="text-[11px] text-slate-400 block mb-1">Target Milestone Time</label>
+                  <input type="text" id="calc-target-input" value="${athlete.pacing[0]?.target || ''}" oninput="runSplitCalculator()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-cyan-400 font-mono font-bold text-xs">
+                </div>
+              </div>
+
+              <div id="calc-results-box" class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs space-y-2">
+                <!-- Dynamically filled by runSplitCalculator() -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Personal Bests & USA Swimming Standards Table -->
+        <div class="glass-card rounded-2xl p-6 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2 font-display font-bold text-white text-base">
+              <i class="fa-solid fa-trophy text-amber-400"></i>
+              <span>Official Personal Bests &amp; USA Swimming Standard Benchmark</span>
+            </div>
+            <div class="text-xs text-slate-400">Verified Long Course &amp; Short Course</div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900/80 text-[11px] uppercase font-bold text-slate-400 border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-3">Event</th>
+                  <th class="py-3 px-3">Course</th>
+                  <th class="py-3 px-3 font-mono">Time (PB)</th>
+                  <th class="py-3 px-3">USA Swimming Standard</th>
+                  <th class="py-3 px-3">Age-Group Ranking</th>
+                  <th class="py-3 px-3">Tactical Context / Note</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/60 font-medium">
+                ${athlete.pbs.map(row => `
+                  <tr class="hover:bg-slate-800/30 transition">
+                    <td class="py-2.5 px-3 font-bold text-white">${row.event}</td>
+                    <td class="py-2.5 px-3 font-mono text-slate-400">${row.course}</td>
+                    <td class="py-2.5 px-3 font-mono font-bold text-cyan-300 text-sm">${row.time}</td>
+                    <td class="py-2.5 px-3">
+                      <span class="px-2 py-0.5 rounded font-mono font-bold text-[10px] ${
+                        row.std.includes('AAAA') ? 'bg-purple-950 text-purple-300 border border-purple-800/80' :
+                        row.std.includes('AAA') ? 'bg-blue-950 text-cyan-300 border border-cyan-800/80' :
+                        row.std.includes('AA') ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/80' :
+                        row.std.includes('A') ? 'bg-amber-950 text-amber-300 border border-amber-800/80' :
+                        'bg-slate-800 text-slate-300 border border-slate-700'
+                      }">
+                        ${row.std}
+                      </span>
+                    </td>
+                    <td class="py-2.5 px-3 text-slate-300">${row.pct}</td>
+                    <td class="py-2.5 px-3 text-slate-400 text-[11px]">${row.note}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Huegill Performance Loop & 3 Daily Bricks -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="glass-card rounded-2xl p-6 space-y-4">
+            <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+              <i class="fa-solid fa-arrows-spin text-cyan-400"></i>
+              <h3 class="font-display font-bold text-white text-base">The 5-Step Performance Loop</h3>
+            </div>
+            <div class="space-y-2.5 text-xs">
+              <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                <span class="font-bold text-cyan-400">1. Vision:</span>
+                <p class="text-slate-300 text-[11px] mt-0.5">${athlete.steps.s1}</p>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                <span class="font-bold text-cyan-400">2. Ownership:</span>
+                <p class="text-slate-300 text-[11px] mt-0.5">${athlete.steps.s2}</p>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                <span class="font-bold text-cyan-400">3. Believe:</span>
+                <p class="text-slate-300 text-[11px] mt-0.5">${athlete.steps.s3}</p>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                <span class="font-bold text-cyan-400">4. Accountability:</span>
+                <p class="text-slate-300 text-[11px] mt-0.5">${athlete.steps.s4}</p>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                <span class="font-bold text-cyan-400">5. Feedback:</span>
+                <p class="text-slate-300 text-[11px] mt-0.5">${athlete.steps.s5}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily Bricks -->
+          <div class="glass-card rounded-2xl p-6 space-y-4">
+            <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+              <i class="fa-solid fa-cubes text-emerald-400"></i>
+              <h3 class="font-display font-bold text-white text-base">3 Non-Negotiable Daily Bricks</h3>
+            </div>
+            <div class="space-y-3">
+              ${athlete.habits.map((h, idx) => `
+                <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800">
+                  <div class="flex items-center justify-between text-xs font-bold text-white mb-1">
+                    <span>${h.title}</span>
+                    <input type="checkbox" id="${h.id}" class="rounded bg-slate-800 border-slate-700 text-cyan-500 focus:ring-0">
+                  </div>
+                  <p class="text-[11px] text-slate-400 leading-snug">${h.desc}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Dryland Protocol -->
+          <div class="glass-card rounded-2xl p-6 space-y-4">
+            <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+              <i class="fa-solid fa-dumbbell text-gold-400"></i>
+              <h3 class="font-display font-bold text-white text-base">Dryland &amp; Pre-Pool Activation</h3>
+            </div>
+            <ul class="space-y-2.5 text-xs text-slate-300">
+              ${athlete.dryland.map(d => `
+                <li class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 leading-snug">
+                  ${d}
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        </div>
       `;
 
-      // Render PB Table
-      renderPBTable(athlete.pbs, isMonty);
-
-      // Render Pacing Table
-      renderPacingTable(athlete.pacing);
-
-      // Render Performance Loop Steps
-      document.getElementById('step-1-desc').textContent = athlete.steps.s1;
-      document.getElementById('step-2-desc').textContent = athlete.steps.s2;
-      document.getElementById('step-3-desc').textContent = athlete.steps.s3;
-      document.getElementById('step-4-desc').textContent = athlete.steps.s4;
-      document.getElementById('step-5-desc').textContent = athlete.steps.s5;
-
-      // Render Habit Bricks
-      renderHabitBricks(athlete.habits, isMonty);
-
-      // Render Dryland List
-      document.getElementById('dryland-list').innerHTML = athlete.dryland.map(item => `
-        <li class="p-2 rounded-lg bg-slate-900/80 border border-slate-800">${item}</li>
-      `).join('');
-
-      // Render Charts
-      renderCharts(key);
-
-      // Re-run split calculator with swimmer's primary event
-      document.getElementById('calc-event').value = isMonty ? '200free' : '50breast';
-      document.getElementById('calc-target').value = isMonty ? '2:16.00' : '42.50';
-      runSplitCalculator();
+      // Render chart
+      renderSplitChart(athlete);
     }
 
-    // ---------------------------------------------------------------------------
-    // RENDER PERSONAL BESTS TABLE
-    // ---------------------------------------------------------------------------
-    function renderPBTable(pbs, isMonty) {
-      const tbody = document.getElementById('pb-table-body');
-      tbody.innerHTML = pbs.map(pb => {
-        let badgeColor = 'bg-slate-800 text-slate-300 border-slate-700';
-        if (pb.std.includes('AAAA')) badgeColor = 'bg-purple-950 text-purple-300 border-purple-800';
-        else if (pb.std.includes('AAA')) badgeColor = 'bg-blue-950 text-cyan-300 border-cyan-800';
-        else if (pb.std.includes('AA')) badgeColor = 'bg-emerald-950 text-emerald-300 border-emerald-800';
-        else if (pb.std.includes('A')) badgeColor = 'bg-amber-950 text-amber-300 border-amber-800';
+    function renderDualComparison() {
+      const singleContainer = document.getElementById('single-swimmer-view');
+      const dualContainer = document.getElementById('dual-swimmer-view');
 
-        return `
-          <tr class="hover:bg-slate-800/30 transition">
-            <td class="py-2.5 px-4 font-bold text-white">${pb.event}</td>
-            <td class="py-2.5 px-4 font-mono text-slate-400">${pb.course}</td>
-            <td class="py-2.5 px-4 font-mono font-bold text-sm ${isMonty ? 'text-cyan-400' : 'text-gold-400'}">${pb.time}</td>
-            <td class="py-2.5 px-4">
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeColor}">${pb.std}</span>
-            </td>
-            <td class="py-2.5 px-4 text-slate-300 font-semibold">${pb.pct}</td>
-            <td class="py-2.5 px-4 text-slate-400 text-[11px]">${pb.note}</td>
-          </tr>
-        `;
-      }).join('');
+      singleContainer.classList.add('hidden');
+      dualContainer.classList.remove('hidden');
+
+      const monty = athletesData['monty'];
+      const rupert = athletesData['rupert'];
+
+      dualContainer.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Monty Column -->
+          <div class="space-y-5">
+            <div class="glass-card glass-card-monty rounded-2xl p-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="font-display font-extrabold text-xl text-white">${monty.name}</h3>
+                  <div class="text-xs text-cyan-400 font-semibold">${monty.specialty}</div>
+                </div>
+                <span class="px-2 py-0.5 rounded text-xs font-bold bg-cyan-500/20 text-cyan-300">${monty.age} yrs • M12-13</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-center text-xs">
+                <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                  <div class="text-slate-400 text-[10px]">100 Free (SCM)</div>
+                  <div class="text-base font-bold text-cyan-300">1:03.21</div>
+                </div>
+                <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                  <div class="text-slate-400 text-[10px]">200 Free (SCM)</div>
+                  <div class="text-base font-bold text-emerald-300">2:19.70</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Monty PB Highlights -->
+            <div class="glass-card rounded-2xl p-5 space-y-3">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-2">Key Events &amp; Standards</h4>
+              <div class="space-y-2 text-xs">
+                ${monty.pbs.slice(0, 5).map(p => `
+                  <div class="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 border border-slate-800">
+                    <span class="font-bold text-white">${p.event}</span>
+                    <div class="flex items-center gap-2">
+                      <span class="font-mono text-cyan-300 font-bold">${p.time}</span>
+                      <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-blue-950 text-cyan-300">${p.std.split(' ')[0]}</span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Rupert Column -->
+          <div class="space-y-5">
+            <div class="glass-card glass-card-rupert rounded-2xl p-5 space-y-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="font-display font-extrabold text-xl text-white">${rupert.name}</h3>
+                  <div class="text-xs text-gold-400 font-semibold">${rupert.specialty}</div>
+                </div>
+                <span class="px-2 py-0.5 rounded text-xs font-bold bg-gold-500/20 text-gold-300">${rupert.age} yrs • 10&U</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-center text-xs">
+                <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                  <div class="text-slate-400 text-[10px]">50 Breast (SCM)</div>
+                  <div class="text-base font-bold text-gold-300">44.58</div>
+                </div>
+                <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                  <div class="text-slate-400 text-[10px]">50 Free (SCM)</div>
+                  <div class="text-base font-bold text-cyan-300">33.25</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rupert PB Highlights -->
+            <div class="glass-card rounded-2xl p-5 space-y-3">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-2">Key Events &amp; Standards</h4>
+              <div class="space-y-2 text-xs">
+                ${rupert.pbs.slice(0, 5).map(p => `
+                  <div class="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 border border-slate-800">
+                    <span class="font-bold text-white">${p.event}</span>
+                    <div class="flex items-center gap-2">
+                      <span class="font-mono text-gold-300 font-bold">${p.time}</span>
+                      <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-amber-950 text-amber-300">${p.std.split(' ')[0]}</span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      `;
     }
 
-    function filterStrokeTable(filter) {
-      const athlete = athletesData[currentSwimmer === 'dual' ? 'monty' : currentSwimmer];
-      const isMonty = (currentSwimmer !== 'rupert');
+    function renderSplitChart(athlete) {
+      const ctx = document.getElementById('splitChartCanvas');
+      if (!ctx) return;
 
-      const buttons = ['all', 'free', 'fly', 'breast', 'back', 'im'];
-      buttons.forEach(b => {
-        const btn = document.getElementById(`filter-${b}`);
-        if (btn) {
-          btn.className = (b === filter) 
-            ? 'px-2.5 py-1 rounded-lg font-bold bg-slate-800 text-white transition' 
-            : 'px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white transition';
+      if (splitChartInstance) {
+        splitChartInstance.destroy();
+      }
+
+      // If Monty, show his actual 200m Free splits vs target curve
+      const isMonty = athlete.id === 'monty';
+      const labels = isMonty ? ['Lap 1 (50m)', 'Lap 2 (100m)', 'Lap 3 (150m)', 'Lap 4 (200m)'] : ['Start (25m)', 'Finish (50m)'];
+      const actualSplits = isMonty ? [31.09, 35.08, 35.96, 37.57] : [19.80, 24.78];
+      const targetSplits = isMonty ? [31.20, 34.60, 35.20, 35.00] : [19.50, 23.00];
+
+      splitChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Recorded Split (SNSC)',
+              data: actualSplits,
+              borderColor: athlete.accentColor,
+              backgroundColor: athlete.accentColor + '22',
+              borderWidth: 3,
+              pointBackgroundColor: athlete.accentColor,
+              pointRadius: 5,
+              tension: 0.3,
+              fill: true
+            },
+            {
+              label: 'Target Balanced Pace',
+              data: targetSplits,
+              borderColor: '#10b981',
+              borderDash: [5, 5],
+              borderWidth: 2,
+              pointRadius: 4,
+              pointBackgroundColor: '#10b981',
+              tension: 0.2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: {
+                color: '#cbd5e1',
+                font: { size: 11, family: 'Inter' }
+              }
+            }
+          },
+          scales: {
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.08)' },
+              ticks: {
+                color: '#94a3b8',
+                callback: function(v) { return v + 's'; }
+              }
+            },
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8' }
+            }
+          }
         }
       });
-
-      if (filter === 'all') {
-        renderPBTable(athlete.pbs, isMonty);
-        return;
-      }
-
-      const filtered = athlete.pbs.filter(pb => {
-        const ev = pb.event.toLowerCase();
-        if (filter === 'free') return ev.includes('free');
-        if (filter === 'fly') return ev.includes('fly');
-        if (filter === 'breast') return ev.includes('breast');
-        if (filter === 'back') return ev.includes('back');
-        if (filter === 'im') return ev.includes('im');
-        return true;
-      });
-
-      renderPBTable(filtered, isMonty);
-    }
-
-    // ---------------------------------------------------------------------------
-    // RENDER PACING TABLE
-    // ---------------------------------------------------------------------------
-    function renderPacingTable(pacing) {
-      const tbody = document.getElementById('pacing-table-body');
-      tbody.innerHTML = pacing.map(row => `
-        <tr class="hover:bg-slate-800/20 transition">
-          <td class="py-2.5 px-3 font-bold text-white">${row.event}</td>
-          <td class="py-2.5 px-3 font-mono text-slate-400">${row.pb}</td>
-          <td class="py-2.5 px-3 font-mono font-bold text-cyan-400">${row.target}</td>
-          <td class="py-2.5 px-3 text-slate-300 font-mono text-[11px]">${row.splits}</td>
-          <td class="py-2.5 px-3 text-slate-400 text-[11px]">${row.cue}</td>
-        </tr>
-      `).join('');
-    }
-
-    // ---------------------------------------------------------------------------
-    // RENDER HABIT BRICKS WITH LOCAL STORAGE
-    // ---------------------------------------------------------------------------
-    function renderHabitBricks(habits, isMonty) {
-      const container = document.getElementById('habit-bricks-container');
-      container.innerHTML = habits.map(h => {
-        const isChecked = localStorage.getItem(h.id) === 'true';
-        return `
-          <div onclick="toggleHabit('${h.id}')" class="cursor-pointer select-none p-3.5 rounded-xl border transition ${isChecked ? 'bg-cyan-950/40 border-cyan-500/60' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'} flex items-start gap-3">
-            <div class="mt-0.5 w-5 h-5 rounded flex items-center justify-center border ${isChecked ? 'bg-cyan-500 border-cyan-500 text-midnight font-bold' : 'border-slate-600 bg-slate-800'}">
-              ${isChecked ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
-            </div>
-            <div>
-              <h5 class="font-bold text-xs ${isChecked ? 'text-cyan-300 line-through' : 'text-white'}">${h.title}</h5>
-              <p class="text-[11px] text-slate-400 leading-snug mt-0.5">${h.desc}</p>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function toggleHabit(id) {
-      const cur = localStorage.getItem(id) === 'true';
-      localStorage.setItem(id, (!cur).toString());
-      const athlete = athletesData[currentSwimmer === 'dual' ? 'monty' : currentSwimmer];
-      renderHabitBricks(athlete.habits, currentSwimmer !== 'rupert');
-    }
-
-    function resetHabits() {
-      ['m-brick-1', 'm-brick-2', 'm-brick-3', 'r-brick-1', 'r-brick-2', 'r-brick-3'].forEach(id => {
-        localStorage.removeItem(id);
-      });
-      const athlete = athletesData[currentSwimmer === 'dual' ? 'monty' : currentSwimmer];
-      renderHabitBricks(athlete.habits, currentSwimmer !== 'rupert');
-    }
-
-    // ---------------------------------------------------------------------------
-    // DUAL COMPARISON VIEW (HEAD-TO-HEAD)
-    // ---------------------------------------------------------------------------
-    function renderDualComparison() {
-      const banner = document.getElementById('hero-banner');
-      banner.className = `glass-card rounded-2xl p-6 relative overflow-hidden transition-all duration-300 border-top-4 border-purple-500`;
-
-      document.getElementById('hero-badge').textContent = 'Dual Profile View';
-      document.getElementById('hero-badge').className = 'px-2.5 py-0.5 rounded-full text-xs font-black tracking-wide uppercase bg-purple-500/20 text-purple-300 border-purple-500/40 border';
-      document.getElementById('hero-age').textContent = 'Monty (Age 12) & Rupert (Age 10)';
-      document.getElementById('hero-name').textContent = 'Day Brothers Head-to-Head Overview';
-      document.getElementById('hero-division').textContent = 'Tanglin Merlions (TTS-VD)';
-      document.getElementById('hero-desc').textContent = 'Dual athlete comparison showing complementary swimming profiles: Monty as the long-axis distance/pacing tactician (Free & Fly) and Rupert as the explosive short-axis sprinter (Breaststroke & Sprint Free).';
-
-      // Combined Stats
-      document.getElementById('stat-1-val').textContent = '28.73 / 33.25';
-      document.getElementById('stat-1-sub').textContent = '50m Free (Monty / Rupert)';
-
-      document.getElementById('stat-2-val').textContent = '1:03.21 / 1:14.84';
-      document.getElementById('stat-2-sub').textContent = '100m Free (Monty / Rupert)';
-
-      document.getElementById('stat-3-val').textContent = '41.76 / 44.58';
-      document.getElementById('stat-3-sub').textContent = '50m Breast (Monty / Rupert)';
-
-      document.getElementById('stat-4-val').textContent = '31.77 / 42.98';
-      document.getElementById('stat-4-sub').textContent = '50m Fly (Monty / Rupert)';
-
-      // Dual Synopsis
-      document.getElementById('tech-content').innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-cyan-500/30">
-            <span class="text-xs font-bold text-cyan-400 block mb-1">Monty Day (Age 12 • Free/Fly)</span>
-            <p class="text-xs text-slate-300 leading-relaxed">Excels in distance-per-stroke and holding high velocity through the back half of 100m, 200m, and 400m races. His breakthrough 2:19.70 200m Free highlights his expanding aerobic capacity.</p>
-          </div>
-          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-gold-500/30">
-            <span class="text-xs font-bold text-gold-400 block mb-1">Rupert Day (Age 10 • Breast/Free)</span>
-            <p class="text-xs text-slate-300 leading-relaxed">Fast-twitch explosive power. His 44.58s 50m Breaststroke is an elite foundation with natural heel snap whip, paired with aggressive 33.25s sprint freestyle turnover.</p>
-          </div>
-        </div>
-      `;
-
-      // Dual Pillars
-      document.getElementById('tech-pillars').innerHTML = `
-        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-          <span class="font-bold text-xs text-cyan-400 block mb-1">Monty's Sweet Spot</span>
-          <p class="text-[11px] text-slate-400">100m &amp; 200m Free &amp; Fly (Pacing &amp; Negative Splitting)</p>
-        </div>
-        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-          <span class="font-bold text-xs text-gold-400 block mb-1">Rupert's Sweet Spot</span>
-          <p class="text-[11px] text-slate-400">50m Breaststroke &amp; 50m Freestyle (Power &amp; Reaction)</p>
-        </div>
-        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-          <span class="font-bold text-xs text-purple-400 block mb-1">Shared Family Edge</span>
-          <p class="text-[11px] text-slate-400">Streamline breakouts, dedicated work ethic, and sportsmanship.</p>
-        </div>
-      `;
-
-      // Dual Table
-      const combinedPBs = [
-        ...athletesData.monty.pbs.slice(0, 6).map(p => ({ ...p, event: `[Monty] ${p.event}` })),
-        ...athletesData.rupert.pbs.slice(0, 5).map(p => ({ ...p, event: `[Rupert] ${p.event}` }))
-      ];
-      renderPBTable(combinedPBs, true);
-
-      // Render Charts for Dual
-      renderCharts('dual');
-    }
-
-    // ---------------------------------------------------------------------------
-    // INTERACTIVE SPLIT CALCULATOR LOGIC
-    // ---------------------------------------------------------------------------
-    function parseTimeToSeconds(str) {
-      if (!str) return 0;
-      const clean = str.trim();
-      if (clean.includes(':')) {
-        const parts = clean.split(':');
-        return parseFloat(parts[0]) * 60 + parseFloat(parts[1]);
-      }
-      return parseFloat(clean);
-    }
-
-    function formatSecondsToTime(sec) {
-      if (isNaN(sec) || sec <= 0) return '--';
-      if (sec >= 60) {
-        const m = Math.floor(sec / 60);
-        const s = (sec % 60).toFixed(2);
-        return `${m}:${s < 10 ? '0' : ''}${s}`;
-      }
-      return sec.toFixed(2);
     }
 
     function runSplitCalculator() {
-      const ev = document.getElementById('calc-event').value;
-      const rawTarget = document.getElementById('calc-target').value;
-      const totalSec = parseTimeToSeconds(rawTarget);
-      const resBox = document.getElementById('calc-result');
+      const select = document.getElementById('calc-event-select');
+      const targetInput = document.getElementById('calc-target-input');
+      const resultsBox = document.getElementById('calc-results-box');
+      if (!select || !targetInput || !resultsBox) return;
 
-      if (!totalSec || isNaN(totalSec)) {
-        resBox.innerHTML = '<span class="text-xs text-rose-400">Please enter a valid time (e.g. 1:01.80 or 31.80)</span>';
-        return;
+      const athlete = athletesData[currentSwimmer] || athletesData['monty'];
+      const selectedPacing = athlete.pacing[parseInt(select.value) || 0];
+      if (!selectedPacing) return;
+
+      resultsBox.innerHTML = `
+        <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+          <span class="text-slate-400">Current Benchmark:</span>
+          <span class="font-mono text-cyan-300 font-bold">${selectedPacing.pb}</span>
+        </div>
+        <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+          <span class="text-slate-400">Target Lap Architecture:</span>
+          <span class="font-mono text-emerald-300 font-bold">${selectedPacing.splits}</span>
+        </div>
+        <div class="pt-1">
+          <span class="text-slate-400 block text-[10px] uppercase font-bold">Key Tactical Cue:</span>
+          <p class="text-slate-200 text-[11px] mt-0.5 leading-snug">${selectedPacing.cue}</p>
+        </div>
+      `;
+    }
+
+    // Drag & Drop / File selection handlers for screenshot modal
+    function handleFileSelect(evt) {
+      const file = evt.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('thumb-img').src = e.target.result;
+        document.getElementById('thumb-name').textContent = file.name;
+        document.getElementById('scan-preview-thumb').classList.remove('hidden');
+        runOCR(file);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function runOCR(imageFile) {
+      const progressBox = document.getElementById('scan-progress-box');
+      const progressBar = document.getElementById('scan-progress-bar');
+      const statusText = document.getElementById('scan-status-text');
+      const pctText = document.getElementById('scan-pct-text');
+
+      progressBox.classList.remove('hidden');
+
+      try {
+        const worker = await Tesseract.createWorker('eng', 1, {
+          logger: m => {
+            if (m.status === 'recognizing text') {
+              const pct = Math.round(m.progress * 100);
+              progressBar.style.width = pct + '%';
+              pctText.textContent = pct + '%';
+              statusText.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Reading race text (${pct}%)...`;
+            }
+          }
+        });
+
+        const ret = await worker.recognize(imageFile);
+        await worker.terminate();
+
+        statusText.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Parsing complete!`;
+        parseExtractedText(ret.data.text);
+      } catch (err) {
+        console.error('OCR Error:', err);
+        statusText.innerHTML = `<span class="text-rose-400"><i class="fa-solid fa-triangle-exclamation"></i> Could not parse text automatically. Please enter manually.</span>`;
       }
-
-      if (ev === '100free') {
-        // Ideal elite age-group drop-off: +3.0s
-        // Let x + (x + 3.0) = totalSec => 2x = totalSec - 3.0 => x = (totalSec - 3.0)/2
-        const lap1 = (totalSec - 3.0) / 2;
-        const lap2 = lap1 + 3.0;
-        resBox.innerHTML = `
-          <div class="text-xs font-bold text-cyan-400 mb-1">Target 100m Free: ${formatSecondsToTime(totalSec)}</div>
-          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-            <div class="bg-slate-950 p-2 rounded border border-slate-800">
-              <span class="text-[10px] text-slate-500 block">0-50m Split</span>
-              <strong class="text-white text-sm">${lap1.toFixed(2)}s</strong>
-              <span class="text-[10px] text-slate-400 block mt-0.5">Controlled easy speed</span>
-            </div>
-            <div class="bg-slate-950 p-2 rounded border border-slate-800">
-              <span class="text-[10px] text-slate-500 block">50-100m Split</span>
-              <strong class="text-white text-sm">${lap2.toFixed(2)}s</strong>
-              <span class="text-[10px] text-emerald-400 block mt-0.5">+3.00s drop-off</span>
-            </div>
-          </div>
-        `;
-      } else if (ev === '200free') {
-        // Target model: Lap 1 base, Lap 2 (+3.4), Lap 3 (+4.0), Lap 4 (+3.8)
-        // total = L1 + (L1+3.4) + (L1+4.0) + (L1+3.8) = 4*L1 + 11.2
-        const L1 = (totalSec - 11.2) / 4;
-        const L2 = L1 + 3.4;
-        const L3 = L1 + 4.0;
-        const L4 = L1 + 3.8;
-        resBox.innerHTML = `
-          <div class="text-xs font-bold text-cyan-400 mb-1">Target 200m Free: ${formatSecondsToTime(totalSec)}</div>
-          <div class="grid grid-cols-4 gap-1.5 text-xs font-mono text-center">
-            <div class="bg-slate-950 p-1.5 rounded border border-slate-800">
-              <span class="text-[9px] text-slate-500 block">Lap 1</span>
-              <strong class="text-white text-xs">${L1.toFixed(1)}s</strong>
-            </div>
-            <div class="bg-slate-950 p-1.5 rounded border border-slate-800">
-              <span class="text-[9px] text-slate-500 block">Lap 2</span>
-              <strong class="text-white text-xs">${L2.toFixed(1)}s</strong>
-            </div>
-            <div class="bg-slate-950 p-1.5 rounded border border-slate-800">
-              <span class="text-[9px] text-slate-500 block">Lap 3</span>
-              <strong class="text-cyan-300 text-xs">${L3.toFixed(1)}s</strong>
-            </div>
-            <div class="bg-slate-950 p-1.5 rounded border border-slate-800">
-              <span class="text-[9px] text-slate-500 block">Lap 4</span>
-              <strong class="text-emerald-400 text-xs">${L4.toFixed(1)}s</strong>
-            </div>
-          </div>
-          <div class="text-[10px] text-slate-400 mt-1">1st 100m: <strong>${formatSecondsToTime(L1+L2)}</strong> | 2nd 100m: <strong>${formatSecondsToTime(L3+L4)}</strong> (+${(L3+L4 - (L1+L2)).toFixed(2)}s)</div>
-        `;
-      } else if (ev === '100fly') {
-        const lap1 = (totalSec - 4.8) / 2;
-        const lap2 = lap1 + 4.8;
-        resBox.innerHTML = `
-          <div class="text-xs font-bold text-cyan-400 mb-1">Target 100m Fly: ${formatSecondsToTime(totalSec)}</div>
-          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-            <div class="bg-slate-950 p-2 rounded border border-slate-800">
-              <span class="text-[10px] text-slate-500 block">0-50m Split</span>
-              <strong class="text-white text-sm">${lap1.toFixed(2)}s</strong>
-            </div>
-            <div class="bg-slate-950 p-2 rounded border border-slate-800">
-              <span class="text-[10px] text-slate-500 block">50-100m Split</span>
-              <strong class="text-white text-sm">${lap2.toFixed(2)}s</strong>
-              <span class="text-[10px] text-emerald-400 block mt-0.5">+4.80s fly curve</span>
-            </div>
-          </div>
-        `;
-      } else if (ev === '50breast') {
-        const split1 = totalSec * 0.465;
-        const split2 = totalSec - split1;
-        resBox.innerHTML = `
-          <div class="text-xs font-bold text-gold-400 mb-1">Target 50m Breast: ${formatSecondsToTime(totalSec)}</div>
-          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-            <div class="bg-slate-950 p-2 rounded border border-slate-800">
-              <span class="text-[10px] text-slate-500 block">0-25m (Pullout)</span>
-              <strong class="text-white text-sm">${split1.toFixed(2)}s</strong>
-            </div>
-            <div class="bg-slate-950 p-2 rounded border border-slate-800">
-              <span class="text-[10px] text-slate-500 block">25-50m (Home)</span>
-              <strong class="text-white text-sm">${split2.toFixed(2)}s</strong>
-            </div>
-          </div>
-        `;
-      } else if (ev === '50free') {
-        const split1 = totalSec * 0.475;
-        const split2 = totalSec - split1;
-        resBox.innerHTML = `
-          <div class="text-xs font-bold text-cyan-400 mb-1">Target 50m Free: ${formatSecondsToTime(totalSec)}</div>
-          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-            <div class="bg-slate-950 p-2 rounded border border-slate-800">
-              <span class="text-[10px] text-slate-500 block">0-25m (Breakout)</span>
-              <strong class="text-white text-sm">${split1.toFixed(2)}s</strong>
-            </div>
-            <div class="bg-slate-950 p-2 rounded border border-slate-800">
-              <span class="text-[10px] text-slate-500 block">25-50m (Finish)</span>
-              <strong class="text-white text-sm">${split2.toFixed(2)}s</strong>
-            </div>
-          </div>
-        `;
-      }
-    }
-
-    // ---------------------------------------------------------------------------
-    // CHART.JS VISUAL ENGINE
-    // ---------------------------------------------------------------------------
-    function renderCharts(mode) {
-      if (splitChartInstance) splitChartInstance.destroy();
-      if (trajectoryChartInstance) trajectoryChartInstance.destroy();
-
-      const ctx1 = document.getElementById('splitChart').getContext('2d');
-      const ctx2 = document.getElementById('trajectoryChart').getContext('2d');
-
-      if (mode === 'monty') {
-        document.getElementById('chart-1-title').textContent = '200m Free Split Breakdown (2:19.70 PB)';
-        document.getElementById('chart-1-subtitle').textContent = 'Lap splits from 12th SNSC (Oct 31, 2026) vs Target Milestone';
-
-        splitChartInstance = new Chart(ctx1, {
-          type: 'bar',
-          data: {
-            labels: ['Lap 1 (0-50m)', 'Lap 2 (50-100m)', 'Lap 3 (100-150m)', 'Lap 4 (150-200m)'],
-            datasets: [
-              {
-                label: 'Actual Splits (2:19.70)',
-                data: [31.09, 35.08, 35.96, 37.57],
-                backgroundColor: 'rgba(6, 182, 212, 0.7)',
-                borderColor: '#06b6d4',
-                borderWidth: 1.5,
-                borderRadius: 6
-              },
-              {
-                label: 'Ideal Milestone (2:16.00)',
-                data: [31.2, 34.6, 35.2, 35.0],
-                backgroundColor: 'rgba(16, 185, 129, 0.7)',
-                borderColor: '#10b981',
-                borderWidth: 1.5,
-                borderRadius: 6
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              y: {
-                min: 28,
-                max: 40,
-                grid: { color: 'rgba(255,255,255,0.06)' },
-                ticks: { color: '#94a3b8' }
-              },
-              x: {
-                grid: { display: false },
-                ticks: { color: '#cbd5e1' }
-              }
-            },
-            plugins: {
-              legend: { labels: { color: '#f1f5f9', font: { size: 11 } } }
-            }
-          }
-        });
-
-        document.getElementById('chart-2-title').textContent = 'Monty Freestyle Performance Progression';
-        document.getElementById('chart-2-subtitle').textContent = 'PBs across 50m, 100m, 200m, and 400m Free';
-
-        trajectoryChartInstance = new Chart(ctx2, {
-          type: 'line',
-          data: {
-            labels: ['Entry Baseline', 'Global Series', '12th SNSC SCM', 'Target Milestone'],
-            datasets: [
-              {
-                label: '200m Free (Seconds)',
-                data: [143.89, 142.90, 139.70, 136.00], // 2:23.89 -> 2:22.90 -> 2:19.70 -> 2:16.00
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.15)',
-                tension: 0.3,
-                fill: true,
-                pointRadius: 5
-              },
-              {
-                label: '100m Free (Seconds)',
-                data: [65.20, 64.79, 63.21, 61.80], // 1:04.79 -> 1:03.21 -> 1:01.80
-                borderColor: '#00d2ff',
-                backgroundColor: 'rgba(0, 210, 255, 0.15)',
-                tension: 0.3,
-                fill: true,
-                pointRadius: 5
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              y: {
-                grid: { color: 'rgba(255,255,255,0.06)' },
-                ticks: { color: '#94a3b8' }
-              },
-              x: {
-                grid: { display: false },
-                ticks: { color: '#cbd5e1' }
-              }
-            },
-            plugins: {
-              legend: { labels: { color: '#f1f5f9', font: { size: 11 } } }
-            }
-          }
-        });
-
-      } else if (mode === 'rupert') {
-        document.getElementById('chart-1-title').textContent = 'Rupert 50m Stroke Comparison (SCM)';
-        document.getElementById('chart-1-subtitle').textContent = 'Times across all 4 competitive 50m events';
-
-        splitChartInstance = new Chart(ctx1, {
-          type: 'bar',
-          data: {
-            labels: ['50m Free', '50m Fly', '50m Breast', '50m Back'],
-            datasets: [
-              {
-                label: 'Current PB (Seconds)',
-                data: [33.25, 42.98, 44.58, 45.92],
-                backgroundColor: ['#00d2ff', '#a855f7', '#f59e0b', '#3b82f6'],
-                borderRadius: 6
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              y: {
-                min: 25,
-                max: 50,
-                grid: { color: 'rgba(255,255,255,0.06)' },
-                ticks: { color: '#94a3b8' }
-              },
-              x: {
-                grid: { display: false },
-                ticks: { color: '#cbd5e1' }
-              }
-            },
-            plugins: {
-              legend: { display: false }
-            }
-          }
-        });
-
-        document.getElementById('chart-2-title').textContent = 'Rupert Sprint Milestone Trajectory';
-        document.getElementById('chart-2-subtitle').textContent = 'Targeting sub-41.00 50m Breast & sub-31.50 50m Free';
-
-        trajectoryChartInstance = new Chart(ctx2, {
-          type: 'line',
-          data: {
-            labels: ['Club Baseline', 'Global Series (Current)', 'Mid-Term Goal', 'Long-Term Vision'],
-            datasets: [
-              {
-                label: '50m Breast (Seconds)',
-                data: [48.86, 44.58, 41.50, 36.50],
-                borderColor: '#f59e0b',
-                backgroundColor: 'rgba(245, 158, 11, 0.15)',
-                tension: 0.3,
-                fill: true,
-                pointRadius: 5
-              },
-              {
-                label: '50m Free (Seconds)',
-                data: [35.50, 33.25, 31.50, 27.50],
-                borderColor: '#00d2ff',
-                backgroundColor: 'rgba(0, 210, 255, 0.15)',
-                tension: 0.3,
-                fill: true,
-                pointRadius: 5
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              y: {
-                grid: { color: 'rgba(255,255,255,0.06)' },
-                ticks: { color: '#94a3b8' }
-              },
-              x: {
-                grid: { display: false },
-                ticks: { color: '#cbd5e1' }
-              }
-            },
-            plugins: {
-              legend: { labels: { color: '#f1f5f9', font: { size: 11 } } }
-            }
-          }
-        });
-
-      } else if (mode === 'dual') {
-        document.getElementById('chart-1-title').textContent = 'Brothers Comparative 50m PBs';
-        document.getElementById('chart-1-subtitle').textContent = 'Head-to-head sprint baseline comparison';
-
-        splitChartInstance = new Chart(ctx1, {
-          type: 'bar',
-          data: {
-            labels: ['50m Free', '50m Fly', '50m Back', '50m Breast'],
-            datasets: [
-              {
-                label: 'Monty (Age 12)',
-                data: [28.73, 31.77, 35.41, 41.76],
-                backgroundColor: 'rgba(0, 210, 255, 0.8)',
-                borderRadius: 6
-              },
-              {
-                label: 'Rupert (Age 10)',
-                data: [33.25, 42.98, 44.63, 44.58],
-                backgroundColor: 'rgba(245, 158, 11, 0.8)',
-                borderRadius: 6
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              y: {
-                min: 25,
-                max: 50,
-                grid: { color: 'rgba(255,255,255,0.06)' },
-                ticks: { color: '#94a3b8' }
-              },
-              x: {
-                grid: { display: false },
-                ticks: { color: '#cbd5e1' }
-              }
-            },
-            plugins: {
-              legend: { labels: { color: '#f1f5f9', font: { size: 11 } } }
-            }
-          }
-        });
-
-        document.getElementById('chart-2-title').textContent = 'Event Versatility Map';
-        document.getElementById('chart-2-subtitle').textContent = 'Specialty focus: Monty (Free/Fly) vs Rupert (Breast/Free)';
-
-        trajectoryChartInstance = new Chart(ctx2, {
-          type: 'radar',
-          data: {
-            labels: ['Sprint Free', 'Mid Free', 'Butterfly', 'Breaststroke', 'Backstroke', 'IM Versatility'],
-            datasets: [
-              {
-                label: 'Monty Day (12yo)',
-                data: [95, 98, 94, 65, 80, 85],
-                borderColor: '#00d2ff',
-                backgroundColor: 'rgba(0, 210, 255, 0.25)',
-                pointRadius: 4
-              },
-              {
-                label: 'Rupert Day (10yo)',
-                data: [88, 70, 65, 94, 68, 72],
-                borderColor: '#f59e0b',
-                backgroundColor: 'rgba(245, 158, 11, 0.25)',
-                pointRadius: 4
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              r: {
-                grid: { color: 'rgba(255,255,255,0.1)' },
-                angleLines: { color: 'rgba(255,255,255,0.1)' },
-                pointLabels: { color: '#cbd5e1', font: { size: 10 } },
-                ticks: { display: false }
-              }
-            },
-            plugins: {
-              legend: { labels: { color: '#f1f5f9', font: { size: 11 } } }
-            }
-          }
-        });
-      }
-    }
-
-    // ---------------------------------------------------------------------------
-    // MODAL HANDLERS
-    // ---------------------------------------------------------------------------
-    function openGitHubModal() {
-      document.getElementById('github-modal').classList.remove('hidden');
-    }
-    function closeGitHubModal() {
-      document.getElementById('github-modal').classList.add('hidden');
-    }
-
-    function openDataBackupModal() {
-      document.getElementById('backup-modal').classList.remove('hidden');
-    }
-    function closeDataBackupModal() {
-      document.getElementById('backup-modal').classList.add('hidden');
     }
 
     function openScanModal() {
@@ -1839,77 +1256,303 @@
     }
     function closeScanModal() {
       document.getElementById('scan-modal').classList.add('hidden');
-      document.getElementById('scan-progress-box').classList.add('hidden');
+    }
+    function openDataBackupModal() {
+      document.getElementById('backup-modal').classList.remove('hidden');
+    }
+    function closeDataBackupModal() {
+      document.getElementById('backup-modal').classList.add('hidden');
+    }
+    function openGitHubModal() {
+      alert('To push changes: commit your updated index.html directly to the main branch of your GitHub repository. GitHub Pages will build the live site automatically!');
     }
 
     // ---------------------------------------------------------------------------
-    // OCR SCREENSHOT SCANNING ENGINE (TESSERACT.JS)
+    // INITIALIZATION & TAB SWITCHING
     // ---------------------------------------------------------------------------
-    function handleFileSelect(event) {
-      const file = event.target.files?.[0];
-      if (!file) return;
+    window.onload = function() {
+      // Check if URL has a ?swimmer= parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramSwimmer = urlParams.get('swimmer');
+      if (paramSwimmer && (athletesData[paramSwimmer] || paramSwimmer === 'dual')) {
+        currentSwimmer = paramSwimmer;
+      }
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const imageUrl = e.target.result;
-        
-        // Show Thumbnail preview
-        const thumb = document.getElementById('scan-preview-thumb');
-        const thumbImg = document.getElementById('thumb-img');
-        const thumbName = document.getElementById('thumb-name');
-        thumbImg.src = imageUrl;
-        thumbName.textContent = file.name;
-        thumb.classList.remove('hidden');
+      refreshSwimmerTabs();
+      updateScannerSwimmerDropdown();
+      setSwimmerMode(currentSwimmer);
+      runSplitCalculator();
+    };
 
-        // Run In-Browser OCR
-        runOCR(imageUrl);
-      };
-      reader.readAsDataURL(file);
+    // Dynamically rebuild the top swimmer switcher tabs
+    function refreshSwimmerTabs() {
+      const container = document.getElementById('swimmer-tabs-container');
+      if (!container) return;
+
+      const keys = Object.keys(athletesData);
+      let html = '';
+
+      keys.forEach(k => {
+        const ath = athletesData[k];
+        const isSelected = (currentSwimmer === k);
+        const activeClass = isSelected 
+          ? `bg-[${ath.accentColor}] text-midnight font-bold shadow-md` 
+          : 'text-slate-400 hover:text-white font-medium';
+        const pulse = isSelected ? '<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>' : `<span class="w-2 h-2 rounded-full" style="background-color: ${ath.accentColor}"></span>`;
+
+        html += `
+          <button id="btn-${k}" onclick="setSwimmerMode('${k}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition duration-200 ${isSelected ? 'text-midnight font-bold shadow-md' : 'text-slate-400 hover:text-white font-medium'}" style="${isSelected ? `background-color: ${ath.accentColor};` : ''}">
+            ${pulse}
+            <span>${ath.name}</span>
+            <span class="text-[10px] opacity-75 hidden sm:inline">(${ath.age}y)</span>
+          </button>
+        `;
+      });
+
+      // Dual view tab
+      const isDual = (currentSwimmer === 'dual');
+      html += `
+        <button id="btn-dual" onclick="setSwimmerMode('dual')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition duration-200 ${isDual ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-slate-400 hover:text-white font-medium'}">
+          <i class="fa-solid fa-arrows-split-up-and-left text-[11px]"></i>
+          <span>Dual View</span>
+        </button>
+      `;
+
+      container.innerHTML = html;
     }
 
-    async function runOCR(imageUrl) {
-      const progressBox = document.getElementById('scan-progress-box');
-      const progressBar = document.getElementById('scan-progress-bar');
-      const statusText = document.getElementById('scan-status-text');
-      const pctText = document.getElementById('scan-pct-text');
+    // Update Scanner dropdown with all active swimmers
+    function updateScannerSwimmerDropdown() {
+      const select = document.getElementById('field-swimmer');
+      if (!select) return;
 
-      progressBox.classList.remove('hidden');
-      progressBar.style.width = '10%';
-      pctText.textContent = '10%';
-      statusText.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Initializing OCR Worker...';
+      select.innerHTML = Object.keys(athletesData).map(k => {
+        const a = athletesData[k];
+        return `<option value="${k}">${a.name} (Age ${a.age} • ${a.specialty.split('(')[0].trim()})</option>`;
+      }).join('');
+    }
 
+    function setSwimmerMode(mode) {
+      currentSwimmer = mode;
+      
+      // Update browser URL query param for shareability without page reload
       try {
-        const worker = await Tesseract.createWorker('eng');
-        
-        statusText.innerHTML = '<i class="fa-solid fa-eye fa-bounce"></i> Reading Text from Meet Mobile Screenshot...';
-        progressBar.style.width = '45%';
-        pctText.textContent = '45%';
+        const url = new URL(window.location);
+        url.searchParams.set('swimmer', mode);
+        window.history.replaceState({}, '', url);
+      } catch (e) {}
 
-        const result = await worker.recognize(imageUrl);
-        await worker.terminate();
+      refreshSwimmerTabs();
 
-        progressBar.style.width = '100%';
-        pctText.textContent = '100%';
-        statusText.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> Extraction Complete!';
-
-        parseExtractedText(result.data.text);
-
-      } catch (err) {
-        console.error('OCR Error:', err);
-        statusText.innerHTML = '<span class="text-rose-400"><i class="fa-solid fa-triangle-exclamation"></i> OCR parsing failed. Please enter details manually below.</span>';
+      if (mode === 'dual') {
+        renderDualComparison();
+      } else {
+        renderSwimmer(mode);
       }
     }
 
-    // Intelligent Text Parsing for Meet Mobile & SwimCloud formats
+    // ---------------------------------------------------------------------------
+    // ADD SWIMMER WIZARD & PROFILE GENERATOR
+    // ---------------------------------------------------------------------------
+    function openAddSwimmerModal() {
+      document.getElementById('add-swimmer-modal').classList.remove('hidden');
+    }
+    function closeAddSwimmerModal() {
+      document.getElementById('add-swimmer-modal').classList.add('hidden');
+    }
+
+    function openRosterModal() {
+      renderRosterList();
+      document.getElementById('roster-modal').classList.remove('hidden');
+    }
+    function closeRosterModal() {
+      document.getElementById('roster-modal').classList.add('hidden');
+    }
+
+    function renderRosterList() {
+      const listContainer = document.getElementById('roster-list-container');
+      const keys = Object.keys(athletesData);
+
+      listContainer.innerHTML = keys.map(k => {
+        const ath = athletesData[k];
+        const isCore = (k === 'monty' || k === 'rupert');
+        return `
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-slate-800">
+            <div class="flex items-center gap-3">
+              <div class="w-3.5 h-3.5 rounded-full" style="background-color: ${ath.accentColor}"></div>
+              <div>
+                <div class="font-bold text-white text-xs flex items-center gap-2">
+                  <span>${ath.name}</span>
+                  <span class="text-[10px] text-slate-400 font-normal">(${ath.age} yrs • ${ath.division})</span>
+                </div>
+                <div class="text-[11px] text-slate-400">${ath.specialty}</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="setSwimmerMode('${k}'); closeRosterModal();" class="px-2.5 py-1 rounded bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-semibold text-[11px] transition">
+                View
+              </button>
+              ${!isCore ? `
+                <button onclick="deleteSwimmer('${k}')" class="px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-semibold text-[11px] transition" title="Delete Swimmer">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function deleteSwimmer(id) {
+      if (confirm(`Remove ${athletesData[id].name} from this roster?`)) {
+        delete athletesData[id];
+        persistState();
+        refreshSwimmerTabs();
+        updateScannerSwimmerDropdown();
+        renderRosterList();
+        setSwimmerMode('monty');
+      }
+    }
+
+    function saveNewSwimmer() {
+      const name = document.getElementById('new-swimmer-name').value.trim();
+      const age = parseInt(document.getElementById('new-swimmer-age').value) || 11;
+      const club = document.getElementById('new-swimmer-club').value.trim() || 'Club Swimming';
+      const specialtyType = document.getElementById('new-swimmer-specialty').value;
+      const color = document.querySelector('input[name="swimmer-color"]:checked')?.value || '#00d2ff';
+
+      if (!name) {
+        alert('Please enter a swimmer name.');
+        return;
+      }
+
+      const id = name.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Math.floor(Math.random()*1000);
+
+      // Generate customized specialty description and initial template
+      let specTitle = 'Freestyle & IM Specialist';
+      let quickS1 = { label: '50m Free', val: '--', sub: 'Awaiting Scan' };
+      let quickS2 = { label: '100m Free', val: '--', sub: 'Awaiting Scan' };
+      let quickS3 = { label: 'Primary Event', val: '--', sub: 'Awaiting Scan' };
+      let quickS4 = { label: '200m Free', val: '--', sub: 'Awaiting Scan' };
+
+      if (specialtyType === 'breast') {
+        specTitle = 'Breaststroke Specialist & Sprint Racer';
+        quickS1 = { label: '50m Breast', val: '--', sub: 'Primary Focus' };
+        quickS2 = { label: '100m Breast', val: '--', sub: 'Target Milestone' };
+        quickS3 = { label: '50m Free', val: '--', sub: 'Sprint Edge' };
+        quickS4 = { label: '200m IM', val: '--', sub: 'Versatility' };
+      } else if (specialtyType === 'fly') {
+        specTitle = 'Butterfly & Sprint Freestyle Specialist';
+        quickS1 = { label: '50m Fly', val: '--', sub: 'Explosive Focus' };
+        quickS2 = { label: '100m Fly', val: '--', sub: 'Rhythm Target' };
+        quickS3 = { label: '50m Free', val: '--', sub: 'Speed Reserve' };
+        quickS4 = { label: '100m IM', val: '--', sub: 'Skills' };
+      } else if (specialtyType === 'back') {
+        specTitle = 'Backstroke Specialist & Rotation Technician';
+        quickS1 = { label: '50m Back', val: '--', sub: 'Underwater Power' };
+        quickS2 = { label: '100m Back', val: '--', sub: 'Distance Target' };
+        quickS3 = { label: '50m Free', val: '--', sub: 'Speed Reserve' };
+        quickS4 = { label: '200m Free', val: '--', sub: 'Engine' };
+      }
+
+      const newSwimmerObj = {
+        id: id,
+        name: name,
+        age: age,
+        dobDetail: `${age} Years Old`,
+        club: club,
+        division: `Age ${age} Pathway`,
+        specialty: `${specTitle} (${club})`,
+        accentColor: color,
+        quickStats: {
+          s1: quickS1,
+          s2: quickS2,
+          s3: quickS3,
+          s4: quickS4
+        },
+        technicalSynopsis: `
+          <p><strong>Race Video Observations &amp; Strengths:</strong> ${name} displays an athletic foundation with high natural enthusiasm and competitive racing focus. Early observations highlight strong kick rhythm and high body position on the surface.</p>
+          <p><strong>Key Developmental Priorities:</strong> Developing <em>streamline discipline off walls</em>, maintaining a consistent stroke rate when fatigued, and establishing tight two-hand touches on breaststroke/butterfly turns.</p>
+        `,
+        pillars: [
+          { title: 'Streamline Focus', desc: 'Hold tight streamline off starts and turns before taking stroke #1.', icon: 'fa-arrow-right' },
+          { title: 'Cadence & Breath Control', desc: 'Maintain clean rhythmic breathing without lifting head excessively high.', icon: 'fa-lungs' },
+          { title: 'Race Craft Mindset', desc: 'Focus on race process, block reaction, and positive sportsmanship.', icon: 'fa-fire' }
+        ],
+        breakthrough: {
+          title: 'Profile Initialized',
+          meet: 'Scan any Meet Mobile screenshot to populate live PBs & splits',
+          details: 'Ready for race data. Drop a screenshot of any event to log times, calculate USA Swimming motivational standards, and generate pacing.',
+          badge: 'New Profile'
+        },
+        pbs: [
+          { event: '50m Freestyle', course: '25m SCM', time: '--', std: 'Target: A Standard', pct: 'Pending', note: 'Scan screenshot to record' },
+          { event: '100m Freestyle', course: '25m SCM', time: '--', std: 'Target: A Standard', pct: 'Pending', note: 'Scan screenshot to record' }
+        ],
+        pacing: [
+          { event: '50m Freestyle', pb: 'Baseline', target: 'Sub-32.0s', splits: '15.50 / 16.50', cue: 'Explode off blocks; head down looking at black line; zero breaths inside final 10m.' },
+          { event: '100m Freestyle', pb: 'Baseline', target: 'Sub-1:12.0s', splits: '34.50 / 37.50 (+3.0s drop)', cue: 'Controlled easy speed over 1st 50m; accelerate kick over final lap.' }
+        ],
+        steps: {
+          s1: `Long-term: Achieve Championship qualifying standards for ${age}yo bracket. Medium-term: Drop times across primary stroke events.`,
+          s2: 'Own the warmup and pre-race nutrition. Pack water, electrolytes, and healthy deck snacks.',
+          s3: 'Belief built brick by brick through attendance and giving 100% effort in every training set.',
+          s4: 'Record splits in a training logbook; celebrate effort and improvements regardless of placing.',
+          s5: 'It is all feedback: Every race teaches what worked well and what to practice next week.'
+        },
+        habits: [
+          { id: `${id}-brick-1`, title: 'Brick 1: Streamline Lock', desc: 'Lock thumbs and squeeze ears tight off every single wall in practice.' },
+          { id: `${id}-brick-2`, title: 'Brick 2: No Breaths Into Wall', desc: 'Zero breathing inside the flags into turns and finishes.' },
+          { id: `${id}-brick-3`, title: 'Brick 3: Consistent Kick Tempo', desc: 'Keep feet moving continuously through every stroke cycle.' }
+        ],
+        dryland: [
+          '<strong>Plank Holds:</strong> 3 × 35s (develops core stability to prevent hip drop).',
+          '<strong>Streamline Squat Jumps:</strong> 3 × 8 reps (explosive takeoff power off blocks).',
+          '<strong>Arm & Leg Cross Extensions (Bird-Dog):</strong> 3 × 10 reps (balance and posture).',
+          '<strong>Deadbug Stabilization:</strong> 3 × 30s (neutral spine and pelvic alignment).'
+        ]
+      };
+
+      athletesData[id] = newSwimmerObj;
+      persistState();
+      refreshSwimmerTabs();
+      updateScannerSwimmerDropdown();
+      closeAddSwimmerModal();
+
+      // Switch to new swimmer profile immediately
+      setSwimmerMode(id);
+      alert(`Success! Created profile for ${name}. You can now scan race screenshots or enter personal bests.`);
+    }
+
+    // ---------------------------------------------------------------------------
+    // INTELLIGENT TEXT PARSING WITH MULTI-SWIMMER RECOGNITION
+    // ---------------------------------------------------------------------------
     function parseExtractedText(rawText) {
       console.log('Extracted OCR Raw Text:', rawText);
       const text = rawText.replace(/\r\n/g, '\n');
 
-      // 1. Swimmer Detection
-      if (/rupert/i.test(text)) {
-        document.getElementById('field-swimmer').value = 'rupert';
-      } else if (/monty/i.test(text)) {
-        document.getElementById('field-swimmer').value = 'monty';
+      // 1. Swimmer Detection across all registered swimmers in roster
+      const swimmerKeys = Object.keys(athletesData);
+      let matchedSwimmer = null;
+
+      for (let k of swimmerKeys) {
+        const ath = athletesData[k];
+        const firstName = ath.name.split(' ')[0].toLowerCase();
+        const lastName = ath.name.split(' ').slice(1).join(' ').toLowerCase();
+
+        // Check for full name or "LAST, FIRST" as used in Meet Mobile (e.g. DAY, MONTY)
+        const regex1 = new RegExp(ath.name, 'i');
+        const regex2 = new RegExp(`${lastName},\\s*${firstName}`, 'i');
+        const regex3 = new RegExp(`\\b${firstName}\\b`, 'i');
+
+        if (regex1.test(text) || regex2.test(text) || regex3.test(text)) {
+          matchedSwimmer = k;
+          break;
+        }
+      }
+
+      if (matchedSwimmer) {
+        document.getElementById('field-swimmer').value = matchedSwimmer;
       }
 
       // 2. Course Detection (SCM, LCM, SCY)
@@ -1921,48 +1564,50 @@
         document.getElementById('field-course').value = '25y SCY';
       }
 
-      // 3. Event Detection (e.g. 200 Meter Free, 50 Free, 100 Breast)
+      // 3. Event Detection
       let detectedEvent = '';
-      if (/200\s*(meter|m)?\s*free/i.test(text)) detectedEvent = '200m Freestyle';
+      if (/400\s*(meter|m)?\s*free/i.test(text)) detectedEvent = '400m Freestyle';
+      else if (/200\s*(meter|m)?\s*free/i.test(text)) detectedEvent = '200m Freestyle';
       else if (/100\s*(meter|m)?\s*free/i.test(text)) detectedEvent = '100m Freestyle';
       else if (/50\s*(meter|m)?\s*free/i.test(text)) detectedEvent = '50m Freestyle';
-      else if (/400\s*(meter|m)?\s*free/i.test(text)) detectedEvent = '400m Freestyle';
       else if (/50\s*(meter|m)?\s*breast/i.test(text)) detectedEvent = '50m Breaststroke';
       else if (/100\s*(meter|m)?\s*breast/i.test(text)) detectedEvent = '100m Breaststroke';
+      else if (/200\s*(meter|m)?\s*breast/i.test(text)) detectedEvent = '200m Breaststroke';
       else if (/50\s*(meter|m)?\s*fly|butterfly/i.test(text)) detectedEvent = '50m Butterfly';
       else if (/100\s*(meter|m)?\s*fly|butterfly/i.test(text)) detectedEvent = '100m Butterfly';
       else if (/200\s*(meter|m)?\s*fly|butterfly/i.test(text)) detectedEvent = '200m Butterfly';
       else if (/50\s*(meter|m)?\s*back/i.test(text)) detectedEvent = '50m Backstroke';
       else if (/100\s*(meter|m)?\s*back/i.test(text)) detectedEvent = '100m Backstroke';
+      else if (/200\s*(meter|m)?\s*back/i.test(text)) detectedEvent = '200m Backstroke';
       else if (/200\s*(meter|m)?\s*im/i.test(text)) detectedEvent = '200m IM';
       else if (/100\s*(meter|m)?\s*im/i.test(text)) detectedEvent = '100m IM';
+      else if (/400\s*(meter|m)?\s*im/i.test(text)) detectedEvent = '400m IM';
       
       if (detectedEvent) {
         document.getElementById('field-event').value = detectedEvent;
       }
 
       // 4. Final Time Detection
-      // Look for strings like 2:19.70 or 28.73 or 1:03.21
       const timeMatches = text.match(/\b(?:\d{1,2}:)?\d{2}\.\d{2}\b/g);
       if (timeMatches && timeMatches.length > 0) {
-        // Typically the official time appears near keywords like "PRELIMS", "FINALS", or "TOTAL"
         let chosenTime = timeMatches[0];
         const prelimsMatch = text.match(/prelims[\s\S]{0,30}(\b(?:\d{1,2}:)?\d{2}\.\d{2}\b)/i);
+        const finalsMatch = text.match(/finals[\s\S]{0,30}(\b(?:\d{1,2}:)?\d{2}\.\d{2}\b)/i);
         const totalMatch = text.match(/total[\s\S]{0,30}(\b(?:\d{1,2}:)?\d{2}\.\d{2}\b)/i);
         
         if (prelimsMatch && prelimsMatch[1]) chosenTime = prelimsMatch[1];
+        else if (finalsMatch && finalsMatch[1]) chosenTime = finalsMatch[1];
         else if (totalMatch && totalMatch[1]) chosenTime = totalMatch[1];
         
         document.getElementById('field-time').value = chosenTime;
       }
 
-      // 5. Lap Splits Detection (e.g. 31.09, 35.08, 35.96, 37.57)
+      // 5. Lap Splits Detection
       const splitMatches = [];
       const lines = text.split('\n');
       lines.forEach(l => {
         const m = l.match(/(\d{2}\.\d{2})/);
         if (m && !splitMatches.includes(m[1])) {
-          // Avoid matching time drops or percentages
           if (!l.includes('-') && !l.includes('+')) {
             splitMatches.push(m[1]);
           }
