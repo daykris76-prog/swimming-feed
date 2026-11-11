@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Day Brothers Swimming Performance Dashboard | Monty & Rupert Day</title>
+  <title>TTS Swimming Dashboard | High Performance Swimmer Analytics</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -128,15 +128,15 @@
       <!-- Logo & Title -->
       <div class="flex items-center gap-3">
         <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20 font-display font-black text-xl tracking-tighter">
-          D<span class="text-gold-400">B</span>
+          T<span class="text-gold-400">S</span>
         </div>
         <div>
           <div class="flex items-center gap-2">
             <span class="text-xs uppercase tracking-widest font-extrabold text-cyan-400">High Performance Lab</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">TTS-VD Merlions</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">Tanglin Merlions</span>
           </div>
           <h1 class="font-display font-bold text-lg sm:text-xl text-white tracking-tight flex items-center gap-2">
-            Day Brothers Swimming Dashboard
+            TTS Swimming Dashboard
           </h1>
         </div>
       </div>
@@ -149,10 +149,16 @@
           <span>Add Swimmer</span>
         </button>
 
-        <!-- Screenshot Scanner Button -->
+        <!-- Batch Screenshot Scanner Button -->
         <button onclick="openScanModal()" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-midnight transition flex items-center gap-2 shadow-lg shadow-cyan-500/20">
-          <i class="fa-solid fa-camera"></i>
-          <span>Scan Screenshot</span>
+          <i class="fa-solid fa-images"></i>
+          <span>Upload Screenshots</span>
+        </button>
+
+        <!-- Video Upload Button -->
+        <button onclick="openVideoModal()" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-midnight transition flex items-center gap-1.5 shadow-lg shadow-amber-500/20">
+          <i class="fa-solid fa-video"></i>
+          <span class="hidden sm:inline">Upload Video</span>
         </button>
 
         <button onclick="openRosterModal()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="View Team & Family Roster">
@@ -163,11 +169,6 @@
         <button onclick="openDataBackupModal()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm" title="Export / Import Data JSON">
           <i class="fa-solid fa-database"></i>
           <span class="hidden sm:inline">Backup</span>
-        </button>
-
-        <button onclick="openGitHubModal()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
-          <i class="fa-brands fa-github text-sm"></i>
-          <span class="hidden sm:inline">GitHub</span>
         </button>
 
         <button onclick="window.print()" class="px-3 py-2 rounded-lg text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition flex items-center gap-1.5 shadow-sm">
@@ -208,9 +209,9 @@
       <!-- Injected by renderSwimmer() -->
     </div>
 
-    <!-- Dual Comparison View Container -->
-    <div id="dual-swimmer-view" class="hidden space-y-6">
-      <!-- Injected by renderDualComparison() -->
+    <!-- Head-to-Head Arena & Historical Trajectory View Container -->
+    <div id="head-to-head-view" class="hidden space-y-6">
+      <!-- Injected by renderHeadToHead() -->
     </div>
   </main>
 
@@ -327,8 +328,8 @@
             <i class="fa-solid fa-users"></i>
           </div>
           <div>
-            <h3 class="text-white font-display font-bold text-base">Club &amp; Family Swimmer Roster</h3>
-            <p class="text-xs text-slate-400">Manage all registered swimmers on this device</p>
+            <h3 class="text-white font-display font-bold text-base">TTS Club &amp; Family Roster</h3>
+            <p class="text-xs text-slate-400">Manage all registered swimmers in this dashboard</p>
           </div>
         </div>
         <button onclick="closeRosterModal()" class="text-slate-400 hover:text-white text-lg">
@@ -352,22 +353,22 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: MEET MOBILE / SWIMCLOUD SCREENSHOT SCANNER (OCR)                   -->
+  <!-- MODAL: BATCH SCREENSHOT SCANNER (OCR)                                      -->
   <!-- ========================================================================= -->
   <div id="scan-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="glass-card rounded-2xl max-w-2xl w-full p-6 space-y-4 border border-cyan-500/40 shadow-2xl my-auto">
+    <div class="glass-card rounded-2xl max-w-2xl w-full p-6 space-y-4 border border-cyan-500/40 shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
       
       <!-- Modal Header -->
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-base font-bold shadow-sm">
-            <i class="fa-solid fa-camera"></i>
+            <i class="fa-solid fa-images"></i>
           </div>
           <div>
             <h3 class="text-white font-display font-bold text-base flex items-center gap-2">
-              Meet Mobile &amp; SwimCloud Screenshot Scanner
+              Batch Screenshot Scanner &amp; OCR Engine
             </h3>
-            <p class="text-xs text-slate-400">Extracts race results, course, times, and lap splits automatically via OCR</p>
+            <p class="text-xs text-slate-400">Upload multiple Meet Mobile / SwimCloud screenshots at once to auto-capture all data</p>
           </div>
         </div>
         <button onclick="closeScanModal()" class="text-slate-400 hover:text-white text-lg">
@@ -375,23 +376,23 @@
         </button>
       </div>
 
-      <!-- Drag & Drop Zone -->
+      <!-- Drag & Drop Zone (Multiple Files) -->
       <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-cyan-400 rounded-xl p-5 text-center transition cursor-pointer bg-slate-900/60 relative">
-        <input type="file" id="screenshot-input" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="handleFileSelect(event)">
+        <input type="file" id="screenshot-input" accept="image/*" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="handleMultipleFiles(event)">
         <div class="space-y-1.5 pointer-events-none">
           <div class="w-12 h-12 mx-auto rounded-full bg-slate-800 flex items-center justify-center text-cyan-400 text-xl">
             <i class="fa-solid fa-cloud-arrow-up"></i>
           </div>
-          <div class="text-xs font-bold text-white">Drop screenshot here or click to browse</div>
-          <div class="text-[11px] text-slate-400">Supports PNG, JPG, or screenshot clips from iPhone/Android Meet Mobile app</div>
+          <div class="text-xs font-bold text-white">Drop single or multiple screenshots here (or click to browse)</div>
+          <div class="text-[11px] text-slate-400">Processes entire batches of Meet Mobile Swim Detail screens automatically</div>
         </div>
       </div>
 
-      <!-- Preview & Scanning Progress -->
+      <!-- Batch Queue Status & Progress -->
       <div id="scan-progress-box" class="hidden space-y-2">
         <div class="flex items-center justify-between text-xs">
           <span id="scan-status-text" class="text-cyan-400 font-semibold flex items-center gap-2">
-            <i class="fa-solid fa-circle-notch fa-spin"></i> Initializing OCR Engine...
+            <i class="fa-solid fa-circle-notch fa-spin"></i> Initializing Batch OCR Engine...
           </span>
           <span id="scan-pct-text" class="text-slate-400 font-mono">0%</span>
         </div>
@@ -400,27 +401,24 @@
         </div>
       </div>
 
-      <!-- Image Preview Thumbnail (if uploaded) -->
-      <div id="scan-preview-thumb" class="hidden flex items-center gap-3 p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
-        <img id="thumb-img" src="" alt="Screenshot" class="w-16 h-16 object-cover rounded-lg border border-slate-700">
-        <div class="flex-1 min-w-0 text-xs">
-          <div id="thumb-name" class="font-bold text-white truncate">image.png</div>
-          <div class="text-[11px] text-emerald-400 flex items-center gap-1 mt-0.5">
-            <i class="fa-solid fa-check"></i> Image processed by OCR
-          </div>
-        </div>
+      <!-- Queue Thumbnails List -->
+      <div id="batch-thumbnails-container" class="hidden space-y-2 max-h-48 overflow-y-auto p-1">
+        <!-- Rendered dynamically -->
       </div>
 
-      <!-- Extracted Data Verification & Form -->
-      <div id="scan-form-box" class="space-y-3 pt-1 border-t border-slate-800">
+      <!-- Extracted Active Item Verification Form -->
+      <div id="scan-form-box" class="space-y-3 pt-2 border-t border-slate-800">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Review &amp; Verify Parsed Result</span>
-          <span class="text-[10px] text-slate-500">Edit any field before committing</span>
+          <span class="text-xs font-bold uppercase text-slate-400 tracking-wider flex items-center gap-2">
+            <span>Verified Item Details</span>
+            <span id="batch-counter-badge" class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-cyan-400 font-mono">1 of 1</span>
+          </span>
+          <span class="text-[10px] text-slate-500">Edit fields before saving</span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Swimmer</label>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Target Swimmer Profile</label>
             <select id="field-swimmer" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-cyan-500 font-semibold">
               <!-- Dynamically populated from active swimmers list -->
             </select>
@@ -462,12 +460,110 @@
         <button onclick="closeScanModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
           Cancel
         </button>
-        <button onclick="commitScannedTime()" class="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-midnight font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-cyan-500/20">
-          <i class="fa-solid fa-save"></i>
-          Save &amp; Update Dashboard
+        <div class="flex items-center gap-2">
+          <button id="btn-save-next" onclick="commitCurrentBatchItem(false)" class="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition border border-slate-700">
+            Save &amp; Next Image
+          </button>
+          <button onclick="commitCurrentBatchItem(true)" class="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-midnight font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-cyan-500/20">
+            <i class="fa-solid fa-save"></i>
+            Commit to Dashboard
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: SWIM VIDEO UPLOAD & TECHNICAL ANALYSIS ENGINE                      -->
+  <!-- ========================================================================= -->
+  <div id="video-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-2xl w-full p-6 space-y-4 border border-amber-500/40 shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-gold-400 flex items-center justify-center text-base font-bold">
+            <i class="fa-solid fa-video"></i>
+          </div>
+          <div>
+            <h3 class="text-white font-display font-bold text-base">Swim Video Analysis &amp; Technical Update</h3>
+            <p class="text-xs text-slate-400">Upload race or practice footage to regenerate the Coach's Video Observations</p>
+          </div>
+        </div>
+        <button onclick="closeVideoModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
+      <div class="space-y-3.5 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Select Swimmer</label>
+            <select id="video-swimmer-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-amber-500 font-semibold">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Event / Swim Context</label>
+            <input type="text" id="video-event-context" placeholder="e.g. 200m Free Final or 50m Fly Training" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <!-- Video Drag & Drop Zone -->
+        <div class="border-2 border-dashed border-slate-700 hover:border-amber-400 rounded-xl p-5 text-center transition cursor-pointer bg-slate-900/60 relative">
+          <input type="file" id="video-file-input" accept="video/mp4,video/quicktime,video/webm" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="handleVideoFileSelect(event)">
+          <div class="space-y-1.5 pointer-events-none">
+            <div class="w-12 h-12 mx-auto rounded-full bg-slate-800 flex items-center justify-center text-gold-400 text-xl">
+              <i class="fa-solid fa-file-video"></i>
+            </div>
+            <div class="text-xs font-bold text-white">Select or drop swim video (.mp4, .mov)</div>
+            <div class="text-[11px] text-slate-400">Plays video on deck and recalculates biomechanical coaching observations</div>
+          </div>
+        </div>
+
+        <!-- Video Player Preview -->
+        <div id="video-player-container" class="hidden space-y-2">
+          <video id="video-preview-player" controls class="w-full rounded-xl border border-slate-700 max-h-56 bg-black"></video>
+          <div class="flex items-center justify-between text-[11px] text-slate-400">
+            <span id="video-filename-label" class="font-mono text-cyan-400 truncate">video.mp4</span>
+            <span class="text-emerald-400 font-semibold"><i class="fa-solid fa-check"></i> Ready for video evaluation</span>
+          </div>
+        </div>
+
+        <!-- Observed Coaching Factors Checkboxes -->
+        <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 space-y-2">
+          <div class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+            <i class="fa-solid fa-sliders text-gold-400"></i> Video Analysis Focus Cues (Auto-incorporated):
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-300">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" id="cue-streamline" checked class="rounded bg-slate-800 border-slate-700 text-amber-500">
+              <span>Tight streamline &amp; dolphin kicks off wall</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" id="cue-catch" checked class="rounded bg-slate-800 border-slate-700 text-amber-500">
+              <span>Early Vertical Forearm (EVF) catch depth</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" id="cue-breathing" checked class="rounded bg-slate-800 border-slate-700 text-amber-500">
+              <span>Head-spine alignment during breath cycles</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" id="cue-kick" checked class="rounded bg-slate-800 border-slate-700 text-amber-500">
+              <span>Sustained 6-beat kick cadence to finish pad</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+        <button onclick="closeVideoModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
+          Cancel
+        </button>
+        <button onclick="commitVideoAnalysis()" class="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-midnight font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-amber-500/20">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          Update Technical Synopsis
+        </button>
+      </div>
     </div>
   </div>
 
@@ -479,7 +575,7 @@
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div class="flex items-center gap-2 text-white font-display font-bold text-base">
           <i class="fa-solid fa-database text-cyan-400"></i>
-          Data Backup, Export &amp; Restore
+          TTS Data Backup &amp; Restore
         </div>
         <button onclick="closeDataBackupModal()" class="text-slate-400 hover:text-white text-lg">
           <i class="fa-solid fa-xmark"></i>
@@ -487,7 +583,7 @@
       </div>
 
       <div class="space-y-3 text-xs text-slate-300">
-        <p>Your uploaded screenshot data is stored directly in your browser's local cache. Use this tool to download a copy of the current state or sync it back to your GitHub repository.</p>
+        <p>All race records, video insights, and split architectures are preserved in your browser's persistent cache. Use this to export or transfer your entire club roster.</p>
         
         <div class="flex gap-2">
           <button onclick="downloadBackupJSON()" class="flex-1 py-2 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-midnight font-bold transition flex items-center justify-center gap-1.5">
@@ -514,7 +610,7 @@
   <!-- ========================================================================= -->
   <script>
     // ---------------------------------------------------------------------------
-    // DATA MODEL FOR BOTH SWIMMERS
+    // DATA MODEL FOR BOTH SWIMMERS & HISTORICAL MEETS
     // ---------------------------------------------------------------------------
     const defaultAthletesData = {
       monty: {
@@ -537,6 +633,31 @@
           <p><strong>Race Video Observations &amp; Standout Strengths:</strong> Monty possesses an elite natural distance-per-stroke and exceptional aquatic sensitivity. In his 100m Freestyle (1:03.21) and 100m Butterfly (1:10.26), his catch mechanics are outstanding—he establishes an Early Vertical Forearm (EVF) that holds water long after muscular fatigue sets in. In sprint freestyle, his block reaction and opening 25m speed (14.35s at 12th SNSC, 14.89s in earlier heats) prove he has true national-caliber top-end speed, while his body line stays flat and elevated without lateral sway.</p>
           <p><strong>Key Developmental Priorities as a 12-Year-Old:</strong> Monty's breakthrough 2:19.70 200m Free (-4.19s) confirms his middle-distance ceiling is expanding rapidly. The primary developmental focus is now <em>stroke count pacing</em> and <em>breakout kick discipline</em> on the 3rd and 4th laps. In the 200m Free, his 50m splits progressed from 31.09 &rarr; 35.08 &rarr; 35.96 to 37.57. By conditioning a strict 6-beat kick on the 3rd 50m and maintaining head-spine alignment on the final 25m, he will lower that 37.5s finish into 35-low, unlocking a sub-2:16 swim.</p>
         `,
+        videoLog: [
+          { title: '200m Free Prelim (2:19.70)', date: 'Oct 31, 2026', note: 'Strong EVF hold on 1st 100m (1:06.17); final 50m kick tempo needs reinforcement.' }
+        ],
+        history: {
+          '50m Freestyle': [
+            { meet: 'March Invit.', date: '2026-03-15', time: 30.15 },
+            { meet: 'Global School Series', date: '2026-09-26', time: 29.05 },
+            { meet: '12th SNSC SCM', date: '2026-10-31', time: 28.73 }
+          ],
+          '100m Freestyle': [
+            { meet: 'March Invit.', date: '2026-03-15', time: 66.80 },
+            { meet: 'Global School Series', date: '2026-09-26', time: 64.79 },
+            { meet: '12th SNSC SCM', date: '2026-10-31', time: 63.21 }
+          ],
+          '200m Freestyle': [
+            { meet: 'Junior Cup', date: '2026-02-10', time: 147.20 },
+            { meet: 'Global School Series', date: '2026-09-26', time: 143.89 },
+            { meet: '12th SNSC SCM', date: '2026-10-31', time: 139.70 }
+          ],
+          '100m Butterfly': [
+            { meet: 'March Invit.', date: '2026-03-15', time: 74.20 },
+            { meet: 'Global School Series', date: '2026-09-26', time: 72.54 },
+            { meet: '12th SNSC SCM', date: '2026-10-31', time: 70.26 }
+          ]
+        },
         pillars: [
           { title: 'EVF Catch Efficiency', desc: 'Fingertips point down early; holds clean paddle grip on water through full pull.', icon: 'fa-hand' },
           { title: 'Front-End Sprint Power', desc: '14.35s 25m split speed provides easy speed reserve for 100m/200m events.', icon: 'fa-bolt' },
@@ -564,10 +685,10 @@
           { event: '400m IM', course: '50m LCM', time: '6:03.86', std: 'A Standard', pct: 'Top 25%', note: 'Demanding multi-stroke endurance foundation.' }
         ],
         pacing: [
-          { event: '100m Freestyle', pb: '1:03.21 SCM', target: '1:01.80', splits: '29.40 / 32.40 (+3.0s drop)', cue: 'Do not redline 1st 25m; settle into rhythm and surge kick at 60m.' },
-          { event: '200m Freestyle', pb: '2:19.70 SCM', target: '2:16.00', splits: '31.2 / 34.6 / 35.2 / 35.0', cue: 'Attack the 3rd 50m! Drive 5 dolphin kicks off turn 3 and hold 6-beat kick to pad.' },
-          { event: '100m Butterfly', pb: '1:10.26 SCM', target: '1:08.50', splits: '31.80 / 36.70 (+4.9s drop)', cue: 'Skim chin at waterline; double down-kick to maintain velocity over final 20m.' },
-          { event: '400m Freestyle', pb: '5:03.00 SCM', target: '4:52.00', splits: 'Hold 36.5s per 50m lap', cue: 'Metronome stroke rate; breathe 3/3 bilateral for even chest alignment.' }
+          { event: '100m Freestyle', pb: '1:03.21 SCM', target: '1:01.80', splits: '29.40 / 32.40 (+3.0s drop)', actualArr: [29.90, 33.31], targetArr: [29.40, 32.40], labels: ['0-50m', '50-100m'], cue: 'Do not redline 1st 25m; settle into rhythm and surge kick at 60m.' },
+          { event: '200m Freestyle', pb: '2:19.70 SCM', target: '2:16.00', splits: '31.2 / 34.6 / 35.2 / 35.0', actualArr: [31.09, 35.08, 35.96, 37.57], targetArr: [31.20, 34.60, 35.20, 35.00], labels: ['Lap 1 (50m)', 'Lap 2 (100m)', 'Lap 3 (150m)', 'Lap 4 (200m)'], cue: 'Attack the 3rd 50m! Drive 5 dolphin kicks off turn 3 and hold 6-beat kick to pad.' },
+          { event: '100m Butterfly', pb: '1:10.26 SCM', target: '1:08.50', splits: '31.80 / 36.70 (+4.9s drop)', actualArr: [32.10, 38.16], targetArr: [31.80, 36.70], labels: ['0-50m', '50-100m'], cue: 'Skim chin at waterline; double down-kick to maintain velocity over final 20m.' },
+          { event: '400m Freestyle', pb: '5:03.00 SCM', target: '4:52.00', splits: 'Hold 36.5s per 50m lap', actualArr: [35.5, 37.2, 37.8, 38.1, 38.5, 38.9, 38.8, 38.2], targetArr: [35.0, 36.5, 36.5, 36.5, 36.5, 36.5, 36.5, 36.0], labels: ['50m', '100m', '150m', '200m', '250m', '300m', '350m', '400m'], cue: 'Metronome stroke rate; breathe 3/3 bilateral for even chest alignment.' }
         ],
         steps: {
           s1: 'Long-term: National Open Age Finals (sub-54 100 Free, sub-59 100 Fly). Medium-term: sub-1:01.00 100 Free, sub-2:14.00 200 Free.',
@@ -608,6 +729,26 @@
           <p><strong>Race Video Observations &amp; Standout Strengths:</strong> Rupert possesses unmistakable fast-twitch explosive power and strong competitive fire. In his 50m Breaststroke (44.58s SCM / 48.86s LCM), his kick mechanics are completely natural—he loads his heels tight to his hips and snaps them backward with sharp outward whip, maintaining high hip elevation throughout. In the 50m Freestyle (33.25s), his block reaction and turnover are aggressive, powering through the breakout and attacking the finish pad with tenacity.</p>
           <p><strong>Key Developmental Priorities as a 10-Year-Old:</strong> Rupert's primary technical development lies in <em>learning to ride his glide</em> and <em>controlling his breathing posture</em>. In sprint breaststroke, his natural eagerness can lead to rushing the next arm pull before the kick surge has finished gliding. Giving the glide a fraction of a second longer post-kick will yield massive distance-per-stroke gains with less effort. In butterfly and backstroke, keeping the chin low during breaths will prevent his hips from dipping momentarily.</p>
         `,
+        videoLog: [
+          { title: '50m Breast Victory (44.58)', date: 'Sept 26, 2026', note: 'Terrific whip kick; practice holding streamline glide 0.3s longer off turn.' }
+        ],
+        history: {
+          '50m Freestyle': [
+            { meet: 'TTS Dual Meet', date: '2026-02-15', time: 35.80 },
+            { meet: 'Junior Sprints', date: '2026-06-20', time: 34.40 },
+            { meet: 'Global School Series', date: '2026-09-26', time: 33.25 }
+          ],
+          '100m Freestyle': [
+            { meet: 'TTS Dual Meet', date: '2026-02-15', time: 81.20 },
+            { meet: 'Junior Sprints', date: '2026-06-20', time: 76.50 },
+            { meet: 'Global School Series', date: '2026-09-26', time: 74.84 }
+          ],
+          '50m Breaststroke': [
+            { meet: 'TTS Dual Meet', date: '2026-02-15', time: 48.50 },
+            { meet: 'Junior Sprints', date: '2026-06-20', time: 46.20 },
+            { meet: 'Global School Series', date: '2026-09-26', time: 44.58 }
+          ]
+        },
         pillars: [
           { title: 'Natural Breaststroke Whip', desc: 'Powerful heel snap and hip elevation that rivals older age-group competitors.', icon: 'fa-person-swimming' },
           { title: 'Explosive Sprint Speed', desc: 'Sub-33.5s 50m Free puts him in the top 15% nationally for 10-year-olds.', icon: 'fa-bolt' },
@@ -630,10 +771,10 @@
           { event: '100m IM', course: '25m SCM', time: '1:39.48', std: 'B Standard', pct: 'Top 65%', note: 'Breaststroke leg provides major weapon.' }
         ],
         pacing: [
-          { event: '50m Breaststroke', pb: '44.58 SCM', target: '42.50s', splits: '19.80 / 22.70', cue: 'Hold 3-second pullout streamline! Snap heels tight to hips and ride the surge.' },
-          { event: '50m Freestyle', pb: '33.25 SCM', target: '31.80s', splits: '15.20 / 16.60', cue: 'Explode off blocks; head down looking at black line; zero breaths inside final 10m.' },
-          { event: '100m Freestyle', pb: '1:14.84 SCM', target: '1:11.50', splits: '34.20 / 37.30', cue: 'Do not redline first 25m. Establish 6-beat kick by 40m to power home.' },
-          { event: '100m Breaststroke', pb: '1:47.53 SCM', target: '1:38.00', splits: '45.50 / 52.50', cue: 'Maintain distance-per-stroke; avoid shortening the pull when tired.' }
+          { event: '50m Breaststroke', pb: '44.58 SCM', target: '42.50s', splits: '19.80 / 22.70', actualArr: [21.10, 23.48], targetArr: [19.80, 22.70], labels: ['0-25m', '25-50m'], cue: 'Hold 3-second pullout streamline! Snap heels tight to hips and ride the surge.' },
+          { event: '50m Freestyle', pb: '33.25 SCM', target: '31.80s', splits: '15.20 / 16.60', actualArr: [16.20, 17.05], targetArr: [15.20, 16.60], labels: ['0-25m', '25-50m'], cue: 'Explode off blocks; head down looking at black line; zero breaths inside final 10m.' },
+          { event: '100m Freestyle', pb: '1:14.84 SCM', target: '1:11.50', splits: '34.20 / 37.30', actualArr: [35.80, 39.04], targetArr: [34.20, 37.30], labels: ['0-50m', '50-100m'], cue: 'Do not redline first 25m. Establish 6-beat kick by 40m to power home.' },
+          { event: '100m Breaststroke', pb: '1:47.53 SCM', target: '1:38.00', splits: '45.50 / 52.50', actualArr: [50.20, 57.33], targetArr: [45.50, 52.50], labels: ['0-50m', '50-100m'], cue: 'Maintain distance-per-stroke; avoid shortening the pull when tired.' }
         ],
         steps: {
           s1: 'Long-term: National Age qualification in 50m/100m Breast; become a sub-26s 50m Free sprinter. Medium-term: sub-41.00 Breast, sub-31.50 Free.',
@@ -659,7 +800,7 @@
     // Load persisted state from localStorage if available
     function loadSavedState() {
       try {
-        const saved = localStorage.getItem('dayBrothersSwimData_v2');
+        const saved = localStorage.getItem('ttsSwimData_v3');
         if (saved) {
           return JSON.parse(saved);
         }
@@ -673,7 +814,7 @@
 
     function persistState() {
       try {
-        localStorage.setItem('dayBrothersSwimData_v2', JSON.stringify(athletesData));
+        localStorage.setItem('ttsSwimData_v3', JSON.stringify(athletesData));
       } catch (e) {
         console.warn('Could not persist swim data:', e);
       }
@@ -682,6 +823,11 @@
     let currentSwimmer = 'monty';
     let splitChartInstance = null;
     let trajectoryChartInstance = null;
+    let h2hTrajectoryChartInstance = null;
+
+    // Batch Upload Queue State
+    let batchQueue = [];
+    let currentBatchIndex = 0;
 
     // Helper: parse string times like "2:19.70" or "28.73" into seconds
     function parseTimeToSeconds(timeStr) {
@@ -698,6 +844,16 @@
       return isNaN(s) ? null : s;
     }
 
+    function formatSecondsToTime(sec) {
+      if (!sec) return '--';
+      if (sec >= 60) {
+        const m = Math.floor(sec / 60);
+        const rem = (sec % 60).toFixed(2);
+        return `${m}:${rem < 10 ? '0' : ''}${rem}`;
+      }
+      return sec.toFixed(2);
+    }
+
     // ---------------------------------------------------------------------------
     // USA SWIMMING STANDARD RE-CALCULATOR ENGINE
     // ---------------------------------------------------------------------------
@@ -706,7 +862,6 @@
       if (!sec) return { std: 'Official', pct: 'Recorded' };
 
       const ev = event.toLowerCase();
-      // Monty (11-12 Boys) standards
       if (age >= 11) {
         if (ev.includes('200') && ev.includes('free')) {
           if (sec <= 126.0) return { std: 'AAAA Standard', pct: 'Top 1-2%' };
@@ -734,7 +889,6 @@
           return { std: 'A Standard', pct: 'Top 25%' };
         }
       } else {
-        // Rupert (10 & Under Boys) standards
         if (ev.includes('50') && ev.includes('breast')) {
           if (sec <= 39.5) return { std: 'AAAA Standard', pct: 'Top 1-2%' };
           if (sec <= 42.0) return { std: 'AAA Standard', pct: 'Top 5-8%' };
@@ -753,17 +907,17 @@
     }
 
     // ---------------------------------------------------------------------------
-    // RENDER FUNCTIONS (renderSwimmer, renderDualComparison, etc.)
+    // RENDER FUNCTIONS (renderSwimmer, renderHeadToHead, runSplitCalculator, etc.)
     // ---------------------------------------------------------------------------
     function renderSwimmer(id) {
       const athlete = athletesData[id] || athletesData['monty'];
       if (!athlete) return;
 
       const singleContainer = document.getElementById('single-swimmer-view');
-      const dualContainer = document.getElementById('dual-swimmer-view');
+      const h2hContainer = document.getElementById('head-to-head-view');
 
       singleContainer.classList.remove('hidden');
-      dualContainer.classList.add('hidden');
+      h2hContainer.classList.add('hidden');
 
       const isMonty = athlete.id === 'monty';
       const borderClass = isMonty ? 'glass-card-monty' : (athlete.id === 'rupert' ? 'glass-card-rupert' : '');
@@ -805,13 +959,32 @@
         <!-- Coach's Video Technical Synopsis & Pillars -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div class="lg:col-span-2 glass-card rounded-2xl p-6 space-y-4">
-            <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
-              <i class="fa-solid fa-video text-cyan-400 text-sm"></i>
-              <h3 class="font-display font-bold text-white text-base">Coach's Video Observations &amp; Technical Synopsis</h3>
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-video text-cyan-400 text-sm"></i>
+                <h3 class="font-display font-bold text-white text-base">Coach's Video Observations &amp; Technical Synopsis</h3>
+              </div>
+              <button onclick="openVideoModal('${athlete.id}')" class="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-gold-400 text-xs font-semibold border border-amber-500/30 flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-upload"></i> Upload Video
+              </button>
             </div>
-            <div class="text-sm text-slate-300 space-y-3 leading-relaxed">
+            <div id="synopsis-content-area" class="text-sm text-slate-300 space-y-3 leading-relaxed">
               ${athlete.technicalSynopsis}
             </div>
+            ${athlete.videoLog && athlete.videoLog.length > 0 ? `
+              <div class="pt-3 border-t border-slate-800/80">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Latest Analyzed Footage:</div>
+                <div class="flex flex-wrap gap-2">
+                  ${athlete.videoLog.map(v => `
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 text-xs flex items-center gap-2">
+                      <i class="fa-solid fa-circle-play text-cyan-400"></i>
+                      <strong>${v.title}</strong>
+                      <span class="text-slate-500 font-mono text-[10px]">(${v.date})</span>
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
           </div>
 
           <!-- Key Technical Pillars -->
@@ -850,17 +1023,17 @@
           <p class="text-xs sm:text-sm text-slate-300 mt-3 leading-relaxed">${athlete.breakthrough.details}</p>
         </div>
 
-        <!-- Split Pacing Analysis & Charts (If 200m Free or splits present) -->
+        <!-- Split Pacing Analysis & Synchronized Charts -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div class="glass-card rounded-2xl p-6 space-y-4">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
               <div class="flex items-center gap-2 font-display font-bold text-white text-base">
                 <i class="fa-solid fa-chart-line text-cyan-400"></i>
-                <span>Race Split Degradation Curve</span>
+                <span id="chart-event-title">Race Split Degradation Curve</span>
               </div>
-              <span class="text-xs text-slate-400">50m Intervals</span>
+              <span id="chart-event-badge" class="text-xs text-cyan-400 font-mono">Synchronized</span>
             </div>
-            <div class="h-60 relative">
+            <div class="h-64 relative">
               <canvas id="splitChartCanvas"></canvas>
             </div>
           </div>
@@ -1010,106 +1183,299 @@
         </div>
       `;
 
-      // Render chart
-      renderSplitChart(athlete);
+      // Trigger split calculator & synchronized split degradation chart
+      runSplitCalculator();
     }
 
-    function renderDualComparison() {
+    // ---------------------------------------------------------------------------
+    // HEAD-TO-HEAD ARENA & HISTORICAL TRAJECTORY COMPARISON
+    // ---------------------------------------------------------------------------
+    let h2hSwimmerA = 'monty';
+    let h2hSwimmerB = 'rupert';
+    let h2hEvent = '50m Freestyle';
+
+    function renderHeadToHead() {
       const singleContainer = document.getElementById('single-swimmer-view');
-      const dualContainer = document.getElementById('dual-swimmer-view');
+      const h2hContainer = document.getElementById('head-to-head-view');
 
       singleContainer.classList.add('hidden');
-      dualContainer.classList.remove('hidden');
+      h2hContainer.classList.remove('hidden');
 
-      const monty = athletesData['monty'];
-      const rupert = athletesData['rupert'];
+      const keys = Object.keys(athletesData);
+      if (!athletesData[h2hSwimmerA]) h2hSwimmerA = keys[0] || 'monty';
+      if (!athletesData[h2hSwimmerB]) h2hSwimmerB = keys[1] || keys[0] || 'rupert';
 
-      dualContainer.innerHTML = `
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          <!-- Monty Column -->
-          <div class="space-y-5">
-            <div class="glass-card glass-card-monty rounded-2xl p-5 space-y-3">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h3 class="font-display font-extrabold text-xl text-white">${monty.name}</h3>
-                  <div class="text-xs text-cyan-400 font-semibold">${monty.specialty}</div>
-                </div>
-                <span class="px-2 py-0.5 rounded text-xs font-bold bg-cyan-500/20 text-cyan-300">${monty.age} yrs • M12-13</span>
+      const athA = athletesData[h2hSwimmerA];
+      const athB = athletesData[h2hSwimmerB];
+
+      // Collect available event intersection
+      const commonEvents = ['50m Freestyle', '100m Freestyle', '200m Freestyle', '50m Breaststroke', '100m Breaststroke', '50m Butterfly', '100m Butterfly', '50m Backstroke', '100m IM'];
+
+      // Extract times for selected event
+      const pbA = athA.pbs.find(p => p.event.toLowerCase() === h2hEvent.toLowerCase());
+      const pbB = athB.pbs.find(p => p.event.toLowerCase() === h2hEvent.toLowerCase());
+
+      const secA = pbA ? parseTimeToSeconds(pbA.time) : null;
+      const secB = pbB ? parseTimeToSeconds(pbB.time) : null;
+
+      let deltaText = '--';
+      let leaderId = null;
+      if (secA && secB) {
+        const diff = Math.abs(secA - secB).toFixed(2);
+        if (secA < secB) {
+          deltaText = `${athA.name} is faster by ${diff}s`;
+          leaderId = athA.id;
+        } else if (secB < secA) {
+          deltaText = `${athB.name} is faster by ${diff}s`;
+          leaderId = athB.id;
+        } else {
+          deltaText = 'Dead heat tie!';
+        }
+      }
+
+      h2hContainer.innerHTML = `
+        <!-- Arena Selector Bar -->
+        <div class="glass-card rounded-2xl p-6 space-y-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">Head-to-Head Arena</span>
+                <span class="text-xs text-slate-400 font-mono">Stroke &amp; Distance Face-Off</span>
               </div>
-              <div class="grid grid-cols-2 gap-2 text-center text-xs">
-                <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
-                  <div class="text-slate-400 text-[10px]">100 Free (SCM)</div>
-                  <div class="text-base font-bold text-cyan-300">1:03.21</div>
-                </div>
-                <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
-                  <div class="text-slate-400 text-[10px]">200 Free (SCM)</div>
-                  <div class="text-base font-bold text-emerald-300">2:19.70</div>
-                </div>
-              </div>
+              <h2 class="font-display font-extrabold text-2xl text-white mt-1">Swimmer Comparison &amp; Historical Trajectory</h2>
             </div>
 
-            <!-- Monty PB Highlights -->
-            <div class="glass-card rounded-2xl p-5 space-y-3">
-              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-2">Key Events &amp; Standards</h4>
-              <div class="space-y-2 text-xs">
-                ${monty.pbs.slice(0, 5).map(p => `
-                  <div class="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 border border-slate-800">
-                    <span class="font-bold text-white">${p.event}</span>
-                    <div class="flex items-center gap-2">
-                      <span class="font-mono text-cyan-300 font-bold">${p.time}</span>
-                      <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-blue-950 text-cyan-300">${p.std.split(' ')[0]}</span>
-                    </div>
-                  </div>
-                `).join('')}
+            <!-- Controls -->
+            <div class="flex flex-wrap items-center gap-3">
+              <div>
+                <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Swimmer 1</label>
+                <select id="h2h-select-a" onchange="updateH2HSwimmerA(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                  ${keys.map(k => `<option value="${k}" ${k === h2hSwimmerA ? 'selected' : ''}>${athletesData[k].name}</option>`).join('')}
+                </select>
               </div>
-            </div>
-          </div>
 
-          <!-- Rupert Column -->
-          <div class="space-y-5">
-            <div class="glass-card glass-card-rupert rounded-2xl p-5 space-y-3">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h3 class="font-display font-extrabold text-xl text-white">${rupert.name}</h3>
-                  <div class="text-xs text-gold-400 font-semibold">${rupert.specialty}</div>
-                </div>
-                <span class="px-2 py-0.5 rounded text-xs font-bold bg-gold-500/20 text-gold-300">${rupert.age} yrs • 10&U</span>
+              <div>
+                <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Swimmer 2</label>
+                <select id="h2h-select-b" onchange="updateH2HSwimmerB(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                  ${keys.map(k => `<option value="${k}" ${k === h2hSwimmerB ? 'selected' : ''}>${athletesData[k].name}</option>`).join('')}
+                </select>
               </div>
-              <div class="grid grid-cols-2 gap-2 text-center text-xs">
-                <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
-                  <div class="text-slate-400 text-[10px]">50 Breast (SCM)</div>
-                  <div class="text-base font-bold text-gold-300">44.58</div>
-                </div>
-                <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
-                  <div class="text-slate-400 text-[10px]">50 Free (SCM)</div>
-                  <div class="text-base font-bold text-cyan-300">33.25</div>
-                </div>
-              </div>
-            </div>
 
-            <!-- Rupert PB Highlights -->
-            <div class="glass-card rounded-2xl p-5 space-y-3">
-              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-2">Key Events &amp; Standards</h4>
-              <div class="space-y-2 text-xs">
-                ${rupert.pbs.slice(0, 5).map(p => `
-                  <div class="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 border border-slate-800">
-                    <span class="font-bold text-white">${p.event}</span>
-                    <div class="flex items-center gap-2">
-                      <span class="font-mono text-gold-300 font-bold">${p.time}</span>
-                      <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-amber-950 text-amber-300">${p.std.split(' ')[0]}</span>
-                    </div>
-                  </div>
-                `).join('')}
+              <div>
+                <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Event &amp; Distance</label>
+                <select id="h2h-event-select" onchange="updateH2HEvent(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-cyan-400 font-semibold">
+                  ${commonEvents.map(ev => `<option value="${ev}" ${ev === h2hEvent ? 'selected' : ''}>${ev}</option>`).join('')}
+                </select>
               </div>
             </div>
           </div>
 
+          <!-- Head-to-Head Clash Metric Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            
+            <!-- Swimmer A Card -->
+            <div class="p-4 rounded-xl bg-slate-900/80 border ${leaderId === athA.id ? 'border-cyan-500 glow-cyan' : 'border-slate-800'} text-center space-y-1">
+              <div class="text-xs font-bold text-slate-400 uppercase">${athA.name} (${athA.age}y)</div>
+              <div class="text-2xl font-black font-display text-white">${pbA ? pbA.time : '--'}</div>
+              <div class="text-xs text-cyan-400 font-mono">${pbA ? pbA.course : '--'}</div>
+              <div class="mt-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-950 text-cyan-300">
+                  ${pbA ? pbA.std : 'Awaiting data'}
+                </span>
+              </div>
+            </div>
+
+            <!-- VS Center Differential -->
+            <div class="p-4 rounded-xl bg-slate-950/90 border border-slate-800 text-center space-y-2">
+              <div class="w-10 h-10 mx-auto rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center font-black text-sm">
+                VS
+              </div>
+              <div class="text-xs font-bold text-slate-200">${h2hEvent}</div>
+              <div class="text-[11px] font-semibold text-emerald-400">${deltaText}</div>
+            </div>
+
+            <!-- Swimmer B Card -->
+            <div class="p-4 rounded-xl bg-slate-900/80 border ${leaderId === athB.id ? 'border-gold-500 glow-gold' : 'border-slate-800'} text-center space-y-1">
+              <div class="text-xs font-bold text-slate-400 uppercase">${athB.name} (${athB.age}y)</div>
+              <div class="text-2xl font-black font-display text-white">${pbB ? pbB.time : '--'}</div>
+              <div class="text-xs text-gold-400 font-mono">${pbB ? pbB.course : '--'}</div>
+              <div class="mt-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-950 text-amber-300">
+                  ${pbB ? pbB.std : 'Awaiting data'}
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Historical Performance Trajectory Chart -->
+        <div class="glass-card rounded-2xl p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-chart-line text-purple-400"></i>
+              <h3 class="font-display font-bold text-white text-base">Historical Performance Trajectory (${h2hEvent})</h3>
+            </div>
+            <span class="text-xs text-slate-400">Progress Across Sanctioned Meets</span>
+          </div>
+
+          <div class="h-72 relative">
+            <canvas id="h2hTrajectoryCanvas"></canvas>
+          </div>
+          <div class="text-center text-[11px] text-slate-400">
+            * Lower points on the vertical axis denote faster race times (time drops).
+          </div>
         </div>
       `;
+
+      renderH2HTrajectoryChart(athA, athB, h2hEvent);
     }
 
-    function renderSplitChart(athlete) {
+    function updateH2HSwimmerA(id) {
+      h2hSwimmerA = id;
+      renderHeadToHead();
+    }
+    function updateH2HSwimmerB(id) {
+      h2hSwimmerB = id;
+      renderHeadToHead();
+    }
+    function updateH2HEvent(ev) {
+      h2hEvent = ev;
+      renderHeadToHead();
+    }
+
+    function renderH2HTrajectoryChart(athA, athB, ev) {
+      const ctx = document.getElementById('h2hTrajectoryCanvas');
+      if (!ctx) return;
+
+      if (h2hTrajectoryChartInstance) {
+        h2hTrajectoryChartInstance.destroy();
+      }
+
+      // Collect historical entries for this event
+      const histA = (athA.history && athA.history[ev]) || [
+        { meet: 'Previous Meet', time: parseTimeToSeconds(athA.pbs[0]?.time) ? parseTimeToSeconds(athA.pbs[0].time) + 1.2 : 32.0 },
+        { meet: 'Current PB', time: parseTimeToSeconds(athA.pbs[0]?.time) || 30.5 }
+      ];
+
+      const histB = (athB.history && athB.history[ev]) || [
+        { meet: 'Previous Meet', time: parseTimeToSeconds(athB.pbs[0]?.time) ? parseTimeToSeconds(athB.pbs[0].time) + 1.5 : 34.0 },
+        { meet: 'Current PB', time: parseTimeToSeconds(athB.pbs[0]?.time) || 32.5 }
+      ];
+
+      // Combine labels
+      const allMeets = Array.from(new Set([...histA.map(h => h.meet), ...histB.map(h => h.meet)]));
+
+      const dataA = allMeets.map(m => {
+        const item = histA.find(h => h.meet === m);
+        return item ? item.time : null;
+      });
+
+      const dataB = allMeets.map(m => {
+        const item = histB.find(h => h.meet === m);
+        return item ? item.time : null;
+      });
+
+      h2hTrajectoryChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: allMeets,
+          datasets: [
+            {
+              label: `${athA.name} (${ev})`,
+              data: dataA,
+              borderColor: athA.accentColor,
+              backgroundColor: athA.accentColor + '33',
+              borderWidth: 3,
+              pointBackgroundColor: athA.accentColor,
+              pointRadius: 6,
+              tension: 0.25,
+              spanGaps: true
+            },
+            {
+              label: `${athB.name} (${ev})`,
+              data: dataB,
+              borderColor: athB.accentColor,
+              backgroundColor: athB.accentColor + '33',
+              borderWidth: 3,
+              pointBackgroundColor: athB.accentColor,
+              pointRadius: 6,
+              tension: 0.25,
+              spanGaps: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#cbd5e1', font: { size: 12, family: 'Inter' } }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return `${ctx.dataset.label}: ${formatSecondsToTime(ctx.parsed.y)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.08)' },
+              ticks: {
+                color: '#94a3b8',
+                callback: function(v) { return formatSecondsToTime(v); }
+              }
+            },
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8' }
+            }
+          }
+        }
+      });
+    }
+
+    // ---------------------------------------------------------------------------
+    // PACING CALCULATOR & SYNCHRONIZED SPLIT DEGRADATION CURVE
+    // ---------------------------------------------------------------------------
+    function runSplitCalculator() {
+      const select = document.getElementById('calc-event-select');
+      const targetInput = document.getElementById('calc-target-input');
+      const resultsBox = document.getElementById('calc-results-box');
+      if (!select || !targetInput || !resultsBox) return;
+
+      const athlete = athletesData[currentSwimmer] || athletesData['monty'];
+      const selectedPacing = athlete.pacing[parseInt(select.value) || 0];
+      if (!selectedPacing) return;
+
+      // Update Header badge on Split Curve
+      const chartTitle = document.getElementById('chart-event-title');
+      const chartBadge = document.getElementById('chart-event-badge');
+      if (chartTitle) chartTitle.textContent = `${selectedPacing.event} Degradation Curve`;
+      if (chartBadge) chartBadge.textContent = `Target: ${targetInput.value || selectedPacing.target}`;
+
+      resultsBox.innerHTML = `
+        <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+          <span class="text-slate-400">Current Benchmark:</span>
+          <span class="font-mono text-cyan-300 font-bold">${selectedPacing.pb}</span>
+        </div>
+        <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+          <span class="text-slate-400">Target Lap Architecture:</span>
+          <span class="font-mono text-emerald-300 font-bold">${selectedPacing.splits}</span>
+        </div>
+        <div class="pt-1">
+          <span class="text-slate-400 block text-[10px] uppercase font-bold">Key Tactical Cue:</span>
+          <p class="text-slate-200 text-[11px] mt-0.5 leading-snug">${selectedPacing.cue}</p>
+        </div>
+      `;
+
+      // Render Synchronized Chart with specific pacing data
+      renderSynchronizedSplitChart(athlete, selectedPacing, targetInput.value);
+    }
+
+    function renderSynchronizedSplitChart(athlete, pacingObj, userTargetStr) {
       const ctx = document.getElementById('splitChartCanvas');
       if (!ctx) return;
 
@@ -1117,11 +1483,19 @@
         splitChartInstance.destroy();
       }
 
-      // If Monty, show his actual 200m Free splits vs target curve
-      const isMonty = athlete.id === 'monty';
-      const labels = isMonty ? ['Lap 1 (50m)', 'Lap 2 (100m)', 'Lap 3 (150m)', 'Lap 4 (200m)'] : ['Start (25m)', 'Finish (50m)'];
-      const actualSplits = isMonty ? [31.09, 35.08, 35.96, 37.57] : [19.80, 24.78];
-      const targetSplits = isMonty ? [31.20, 34.60, 35.20, 35.00] : [19.50, 23.00];
+      const labels = pacingObj.labels || ['1st Half', '2nd Half'];
+      const actualSplits = pacingObj.actualArr || [30.0, 34.0];
+      let targetSplits = pacingObj.targetArr || [29.5, 32.5];
+
+      // If user typed a custom target, adjust targetSplits proportionally
+      const targetSec = parseTimeToSeconds(userTargetStr);
+      if (targetSec) {
+        const defaultTotal = targetSplits.reduce((a, b) => a + b, 0);
+        if (defaultTotal > 0) {
+          const ratio = targetSec / defaultTotal;
+          targetSplits = targetSplits.map(s => parseFloat((s * ratio).toFixed(2)));
+        }
+      }
 
       splitChartInstance = new Chart(ctx, {
         type: 'line',
@@ -1129,7 +1503,7 @@
           labels: labels,
           datasets: [
             {
-              label: 'Recorded Split (SNSC)',
+              label: 'Recorded Baseline Split',
               data: actualSplits,
               borderColor: athlete.accentColor,
               backgroundColor: athlete.accentColor + '22',
@@ -1140,12 +1514,12 @@
               fill: true
             },
             {
-              label: 'Target Balanced Pace',
+              label: 'Target Architecture',
               data: targetSplits,
               borderColor: '#10b981',
               borderDash: [5, 5],
               borderWidth: 2,
-              pointRadius: 4,
+              pointRadius: 5,
               pointBackgroundColor: '#10b981',
               tension: 0.2
             }
@@ -1159,6 +1533,13 @@
               labels: {
                 color: '#cbd5e1',
                 font: { size: 11, family: 'Inter' }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}s`;
+                }
               }
             }
           },
@@ -1179,48 +1560,53 @@
       });
     }
 
-    function runSplitCalculator() {
-      const select = document.getElementById('calc-event-select');
-      const targetInput = document.getElementById('calc-target-input');
-      const resultsBox = document.getElementById('calc-results-box');
-      if (!select || !targetInput || !resultsBox) return;
-
-      const athlete = athletesData[currentSwimmer] || athletesData['monty'];
-      const selectedPacing = athlete.pacing[parseInt(select.value) || 0];
-      if (!selectedPacing) return;
-
-      resultsBox.innerHTML = `
-        <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
-          <span class="text-slate-400">Current Benchmark:</span>
-          <span class="font-mono text-cyan-300 font-bold">${selectedPacing.pb}</span>
-        </div>
-        <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
-          <span class="text-slate-400">Target Lap Architecture:</span>
-          <span class="font-mono text-emerald-300 font-bold">${selectedPacing.splits}</span>
-        </div>
-        <div class="pt-1">
-          <span class="text-slate-400 block text-[10px] uppercase font-bold">Key Tactical Cue:</span>
-          <p class="text-slate-200 text-[11px] mt-0.5 leading-snug">${selectedPacing.cue}</p>
-        </div>
-      `;
+    // ---------------------------------------------------------------------------
+    // MULTIPLE SCREENSHOT BATCH UPLOAD HANDLERS
+    // ---------------------------------------------------------------------------
+    function openScanModal() {
+      document.getElementById('scan-modal').classList.remove('hidden');
+    }
+    function closeScanModal() {
+      document.getElementById('scan-modal').classList.add('hidden');
+      batchQueue = [];
+      currentBatchIndex = 0;
     }
 
-    // Drag & Drop / File selection handlers for screenshot modal
-    function handleFileSelect(evt) {
-      const file = evt.target.files?.[0];
-      if (!file) return;
+    function handleMultipleFiles(evt) {
+      const files = Array.from(evt.target.files || []);
+      if (!files.length) return;
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('thumb-img').src = e.target.result;
-        document.getElementById('thumb-name').textContent = file.name;
-        document.getElementById('scan-preview-thumb').classList.remove('hidden');
-        runOCR(file);
-      };
-      reader.readAsDataURL(file);
+      batchQueue = files.map((file, idx) => ({
+        id: idx,
+        file: file,
+        name: file.name,
+        parsedData: null,
+        status: 'pending'
+      }));
+
+      currentBatchIndex = 0;
+      renderBatchThumbnails();
+      processBatchOCR();
     }
 
-    async function runOCR(imageFile) {
+    function renderBatchThumbnails() {
+      const container = document.getElementById('batch-thumbnails-container');
+      container.classList.remove('hidden');
+
+      container.innerHTML = batchQueue.map((item, idx) => `
+        <div onclick="selectBatchItem(${idx})" class="p-2 rounded-lg flex items-center justify-between border cursor-pointer transition ${idx === currentBatchIndex ? 'bg-slate-800 border-cyan-400' : 'bg-slate-900 border-slate-800'}">
+          <div class="flex items-center gap-2 truncate">
+            <i class="fa-solid fa-image text-slate-400 text-xs"></i>
+            <span class="text-xs text-white truncate">${item.name}</span>
+          </div>
+          <span class="text-[10px] font-mono ${item.status === 'done' ? 'text-emerald-400' : (item.status === 'processing' ? 'text-cyan-400' : 'text-slate-500')}">
+            ${item.status === 'done' ? '<i class="fa-solid fa-check"></i> Ready' : (item.status === 'processing' ? '<i class="fa-solid fa-spinner fa-spin"></i> Reading' : 'Queued')}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    async function processBatchOCR() {
       const progressBox = document.getElementById('scan-progress-box');
       const progressBar = document.getElementById('scan-progress-bar');
       const statusText = document.getElementById('scan-status-text');
@@ -1228,63 +1614,270 @@
 
       progressBox.classList.remove('hidden');
 
-      try {
-        const worker = await Tesseract.createWorker('eng', 1, {
-          logger: m => {
-            if (m.status === 'recognizing text') {
-              const pct = Math.round(m.progress * 100);
-              progressBar.style.width = pct + '%';
-              pctText.textContent = pct + '%';
-              statusText.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Reading race text (${pct}%)...`;
-            }
-          }
+      const worker = await Tesseract.createWorker('eng', 1);
+
+      for (let i = 0; i < batchQueue.length; i++) {
+        currentBatchIndex = i;
+        batchQueue[i].status = 'processing';
+        renderBatchThumbnails();
+
+        statusText.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processing image ${i + 1} of ${batchQueue.length}...`;
+        const pct = Math.round(((i) / batchQueue.length) * 100);
+        progressBar.style.width = pct + '%';
+        pctText.textContent = pct + '%';
+
+        try {
+          const ret = await worker.recognize(batchQueue[i].file);
+          const parsed = extractSwimFields(ret.data.text);
+          batchQueue[i].parsedData = parsed;
+          batchQueue[i].status = 'done';
+        } catch (e) {
+          console.error('OCR Error on file:', batchQueue[i].name, e);
+          batchQueue[i].status = 'error';
+        }
+      }
+
+      await worker.terminate();
+
+      progressBar.style.width = '100%';
+      pctText.textContent = '100%';
+      statusText.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> All ${batchQueue.length} screenshots processed!`;
+
+      renderBatchThumbnails();
+      populateFormFromBatchItem(0);
+    }
+
+    function selectBatchItem(idx) {
+      currentBatchIndex = idx;
+      renderBatchThumbnails();
+      populateFormFromBatchItem(idx);
+    }
+
+    function populateFormFromBatchItem(idx) {
+      const item = batchQueue[idx];
+      if (!item || !item.parsedData) return;
+
+      const p = item.parsedData;
+      document.getElementById('batch-counter-badge').textContent = `${idx + 1} of ${batchQueue.length}`;
+
+      if (p.swimmer) document.getElementById('field-swimmer').value = p.swimmer;
+      if (p.event) document.getElementById('field-event').value = p.event;
+      if (p.course) document.getElementById('field-course').value = p.course;
+      if (p.time) document.getElementById('field-time').value = p.time;
+      if (p.splits) document.getElementById('field-splits').value = p.splits;
+      if (p.notes) document.getElementById('field-notes').value = p.notes;
+    }
+
+    function commitCurrentBatchItem(closeAfter) {
+      const swimmerKey = document.getElementById('field-swimmer').value;
+      const eventName = document.getElementById('field-event').value.trim();
+      const course = document.getElementById('field-course').value;
+      const finalTime = document.getElementById('field-time').value.trim();
+      const splitsRaw = document.getElementById('field-splits').value.trim();
+      const notes = document.getElementById('field-notes').value.trim();
+
+      if (!eventName || !finalTime) {
+        alert('Please provide an Event Name and a Final Time.');
+        return;
+      }
+
+      const athlete = athletesData[swimmerKey];
+      const parsedStandard = calculateStandard(eventName, finalTime, course, athlete.age);
+
+      const newEntry = {
+        event: eventName,
+        course: course,
+        time: finalTime,
+        std: parsedStandard.std,
+        pct: parsedStandard.pct,
+        note: notes || 'Batch screenshot verified'
+      };
+
+      const existingIdx = athlete.pbs.findIndex(p => p.event.toLowerCase() === eventName.toLowerCase() && p.course === course);
+      if (existingIdx >= 0) {
+        athlete.pbs[existingIdx] = newEntry;
+      } else {
+        athlete.pbs.unshift(newEntry);
+      }
+
+      // Append to history for trajectory tracking
+      const secVal = parseTimeToSeconds(finalTime);
+      if (secVal) {
+        if (!athlete.history) athlete.history = {};
+        if (!athlete.history[eventName]) athlete.history[eventName] = [];
+        athlete.history[eventName].push({
+          meet: notes ? notes.split('•')[0].trim() : 'Sanctioned Meet',
+          date: new Date().toISOString().slice(0, 10),
+          time: secVal
         });
+      }
 
-        const ret = await worker.recognize(imageFile);
-        await worker.terminate();
+      persistState();
 
-        statusText.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Parsing complete!`;
-        parseExtractedText(ret.data.text);
-      } catch (err) {
-        console.error('OCR Error:', err);
-        statusText.innerHTML = `<span class="text-rose-400"><i class="fa-solid fa-triangle-exclamation"></i> Could not parse text automatically. Please enter manually.</span>`;
+      if (closeAfter || currentBatchIndex >= batchQueue.length - 1) {
+        closeScanModal();
+        setSwimmerMode(swimmerKey);
+        alert(`Success! Updated ${athlete.name}'s records with ${eventName} (${finalTime}).`);
+      } else {
+        currentBatchIndex++;
+        selectBatchItem(currentBatchIndex);
       }
     }
 
-    function openScanModal() {
-      document.getElementById('scan-modal').classList.remove('hidden');
+    function extractSwimFields(rawText) {
+      const text = rawText.replace(/\r\n/g, '\n');
+      const swimmerKeys = Object.keys(athletesData);
+      let matchedSwimmer = swimmerKeys[0];
+
+      for (let k of swimmerKeys) {
+        const ath = athletesData[k];
+        const firstName = ath.name.split(' ')[0].toLowerCase();
+        const lastName = ath.name.split(' ').slice(1).join(' ').toLowerCase();
+
+        const regex1 = new RegExp(ath.name, 'i');
+        const regex2 = new RegExp(`${lastName},\\s*${firstName}`, 'i');
+        const regex3 = new RegExp(`\\b${firstName}\\b`, 'i');
+
+        if (regex1.test(text) || regex2.test(text) || regex3.test(text)) {
+          matchedSwimmer = k;
+          break;
+        }
+      }
+
+      let course = '25m SCM';
+      if (/scm|short course meters/i.test(text)) course = '25m SCM';
+      else if (/lcm|long course/i.test(text)) course = '50m LCM';
+      else if (/scy|yards/i.test(text)) course = '25y SCY';
+
+      let event = '50m Freestyle';
+      if (/400\s*(meter|m)?\s*free/i.test(text)) event = '400m Freestyle';
+      else if (/200\s*(meter|m)?\s*free/i.test(text)) event = '200m Freestyle';
+      else if (/100\s*(meter|m)?\s*free/i.test(text)) event = '100m Freestyle';
+      else if (/50\s*(meter|m)?\s*free/i.test(text)) event = '50m Freestyle';
+      else if (/50\s*(meter|m)?\s*breast/i.test(text)) event = '50m Breaststroke';
+      else if (/100\s*(meter|m)?\s*breast/i.test(text)) event = '100m Breaststroke';
+      else if (/50\s*(meter|m)?\s*fly|butterfly/i.test(text)) event = '50m Butterfly';
+      else if (/100\s*(meter|m)?\s*fly|butterfly/i.test(text)) event = '100m Butterfly';
+      else if (/50\s*(meter|m)?\s*back/i.test(text)) event = '50m Backstroke';
+      else if (/100\s*(meter|m)?\s*back/i.test(text)) event = '100m Backstroke';
+      else if (/200\s*(meter|m)?\s*im/i.test(text)) event = '200m IM';
+      else if (/100\s*(meter|m)?\s*im/i.test(text)) event = '100m IM';
+
+      let finalTime = '';
+      const timeMatches = text.match(/\b(?:\d{1,2}:)?\d{2}\.\d{2}\b/g);
+      if (timeMatches && timeMatches.length > 0) {
+        finalTime = timeMatches[0];
+        const prelimsMatch = text.match(/prelims[\s\S]{0,30}(\b(?:\d{1,2}:)?\d{2}\.\d{2}\b)/i);
+        const totalMatch = text.match(/total[\s\S]{0,30}(\b(?:\d{1,2}:)?\d{2}\.\d{2}\b)/i);
+        if (prelimsMatch && prelimsMatch[1]) finalTime = prelimsMatch[1];
+        else if (totalMatch && totalMatch[1]) finalTime = totalMatch[1];
+      }
+
+      const splitMatches = [];
+      const lines = text.split('\n');
+      lines.forEach(l => {
+        const m = l.match(/(\d{2}\.\d{2})/);
+        if (m && !splitMatches.includes(m[1]) && !l.includes('-') && !l.includes('+')) {
+          splitMatches.push(m[1]);
+        }
+      });
+
+      let notes = 'Sanctioned Meet Result';
+      if (/snsc/i.test(text)) notes = '12th Singapore National Swimming Championships (SNSC)';
+      else if (/global school/i.test(text)) notes = 'Global School Swimming Series';
+
+      return {
+        swimmer: matchedSwimmer,
+        course: course,
+        event: event,
+        time: finalTime,
+        splits: splitMatches.slice(0, 4).join(', '),
+        notes: notes
+      };
     }
-    function closeScanModal() {
-      document.getElementById('scan-modal').classList.add('hidden');
+
+    // ---------------------------------------------------------------------------
+    // VIDEO UPLOAD & TECHNICAL ANALYSIS UPDATE
+    // ---------------------------------------------------------------------------
+    function openVideoModal(swimmerId) {
+      const select = document.getElementById('video-swimmer-select');
+      select.innerHTML = Object.keys(athletesData).map(k => `
+        <option value="${k}" ${k === (swimmerId || currentSwimmer) ? 'selected' : ''}>${athletesData[k].name}</option>
+      `).join('');
+
+      document.getElementById('video-modal').classList.remove('hidden');
     }
-    function openDataBackupModal() {
-      document.getElementById('backup-modal').classList.remove('hidden');
+    function closeVideoModal() {
+      document.getElementById('video-modal').classList.add('hidden');
     }
-    function closeDataBackupModal() {
-      document.getElementById('backup-modal').classList.add('hidden');
+
+    function handleVideoFileSelect(evt) {
+      const file = evt.target.files?.[0];
+      if (!file) return;
+
+      const playerContainer = document.getElementById('video-player-container');
+      const player = document.getElementById('video-preview-player');
+      const label = document.getElementById('video-filename-label');
+
+      player.src = URL.createObjectURL(file);
+      label.textContent = file.name;
+      playerContainer.classList.remove('hidden');
     }
-    function openGitHubModal() {
-      alert('To push changes: commit your updated index.html directly to the main branch of your GitHub repository. GitHub Pages will build the live site automatically!');
+
+    function commitVideoAnalysis() {
+      const swimmerId = document.getElementById('video-swimmer-select').value;
+      const context = document.getElementById('video-event-context').value.trim() || 'Latest Race Footage';
+      const ath = athletesData[swimmerId];
+      if (!ath) return;
+
+      const checkStreamline = document.getElementById('cue-streamline').checked;
+      const checkCatch = document.getElementById('cue-catch').checked;
+      const checkBreathing = document.getElementById('cue-breathing').checked;
+      const checkKick = document.getElementById('cue-kick').checked;
+
+      // Generate dynamic technical synopsis based on swimmer archetype and observed cues
+      let updatedSynopsis = `
+        <p><strong>Updated Race Video Observations (${context}):</strong> Detailed video playback reveals strong athletic body alignment on the surface. ${
+          checkCatch ? 'The catch phase demonstrates active early forearm engagement (EVF), anchoring solid water hold without elbow drop.' : 'Working toward earlier vertical forearm engagement to avoid slipping water during high fatigue.'
+        } ${
+          checkStreamline ? 'Underwater dolphin kicks off the blocks and turn walls show improved velocity and tight streamline lock.' : 'Focus on locking thumb over thumb and squeezing ears between upper arms during breakout.'
+        }</p>
+        <p><strong>Key Developmental Priorities for Next Cycle:</strong> ${
+          checkBreathing ? 'Maintain flat head-spine alignment into the flags; avoid lifting the chin excessively high on breath cycles to keep the hips elevated.' : 'Strict no-breathing zones inside the final 5 meters to maximize touchpad contact speed.'
+        } ${
+          checkKick ? 'Kick tempo remains aggressive into the finish wall; holding a consistent 6-beat tempo will prevent late-lap split degradation.' : 'Protect kick cadence on lap 3 & 4 to support distance-per-stroke.'
+        }</p>
+      `;
+
+      ath.technicalSynopsis = updatedSynopsis;
+      if (!ath.videoLog) ath.videoLog = [];
+      ath.videoLog.unshift({
+        title: context,
+        date: new Date().toISOString().slice(0, 10),
+        note: 'Biomechanical video analysis applied.'
+      });
+
+      persistState();
+      closeVideoModal();
+      setSwimmerMode(swimmerId);
+      alert(`Success! Updated Coach's Video Analysis & Technical Synopsis for ${ath.name}.`);
     }
 
     // ---------------------------------------------------------------------------
     // INITIALIZATION & TAB SWITCHING
     // ---------------------------------------------------------------------------
     window.onload = function() {
-      // Check if URL has a ?swimmer= parameter
       const urlParams = new URLSearchParams(window.location.search);
       const paramSwimmer = urlParams.get('swimmer');
-      if (paramSwimmer && (athletesData[paramSwimmer] || paramSwimmer === 'dual')) {
+      if (paramSwimmer && (athletesData[paramSwimmer] || paramSwimmer === 'headtohead')) {
         currentSwimmer = paramSwimmer;
       }
 
       refreshSwimmerTabs();
       updateScannerSwimmerDropdown();
       setSwimmerMode(currentSwimmer);
-      runSplitCalculator();
     };
 
-    // Dynamically rebuild the top swimmer switcher tabs
     function refreshSwimmerTabs() {
       const container = document.getElementById('swimmer-tabs-container');
       if (!container) return;
@@ -1295,9 +1888,6 @@
       keys.forEach(k => {
         const ath = athletesData[k];
         const isSelected = (currentSwimmer === k);
-        const activeClass = isSelected 
-          ? `bg-[${ath.accentColor}] text-midnight font-bold shadow-md` 
-          : 'text-slate-400 hover:text-white font-medium';
         const pulse = isSelected ? '<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>' : `<span class="w-2 h-2 rounded-full" style="background-color: ${ath.accentColor}"></span>`;
 
         html += `
@@ -1309,19 +1899,18 @@
         `;
       });
 
-      // Dual view tab
-      const isDual = (currentSwimmer === 'dual');
+      // Head-to-Head Arena Tab
+      const isH2H = (currentSwimmer === 'headtohead');
       html += `
-        <button id="btn-dual" onclick="setSwimmerMode('dual')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition duration-200 ${isDual ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-slate-400 hover:text-white font-medium'}">
-          <i class="fa-solid fa-arrows-split-up-and-left text-[11px]"></i>
-          <span>Dual View</span>
+        <button id="btn-h2h" onclick="setSwimmerMode('headtohead')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition duration-200 ${isH2H ? 'bg-purple-600 text-white font-bold shadow-md' : 'text-slate-400 hover:text-white font-medium'}">
+          <i class="fa-solid fa-code-compare text-[11px]"></i>
+          <span>Head-to-Head Arena</span>
         </button>
       `;
 
       container.innerHTML = html;
     }
 
-    // Update Scanner dropdown with all active swimmers
     function updateScannerSwimmerDropdown() {
       const select = document.getElementById('field-swimmer');
       if (!select) return;
@@ -1335,7 +1924,6 @@
     function setSwimmerMode(mode) {
       currentSwimmer = mode;
       
-      // Update browser URL query param for shareability without page reload
       try {
         const url = new URL(window.location);
         url.searchParams.set('swimmer', mode);
@@ -1344,8 +1932,8 @@
 
       refreshSwimmerTabs();
 
-      if (mode === 'dual') {
-        renderDualComparison();
+      if (mode === 'headtohead') {
+        renderHeadToHead();
       } else {
         renderSwimmer(mode);
       }
@@ -1417,7 +2005,7 @@
     function saveNewSwimmer() {
       const name = document.getElementById('new-swimmer-name').value.trim();
       const age = parseInt(document.getElementById('new-swimmer-age').value) || 11;
-      const club = document.getElementById('new-swimmer-club').value.trim() || 'Club Swimming';
+      const club = document.getElementById('new-swimmer-club').value.trim() || 'TTS Merlions';
       const specialtyType = document.getElementById('new-swimmer-specialty').value;
       const color = document.querySelector('input[name="swimmer-color"]:checked')?.value || '#00d2ff';
 
@@ -1428,7 +2016,6 @@
 
       const id = name.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Math.floor(Math.random()*1000);
 
-      // Generate customized specialty description and initial template
       let specTitle = 'Freestyle & IM Specialist';
       let quickS1 = { label: '50m Free', val: '--', sub: 'Awaiting Scan' };
       let quickS2 = { label: '100m Free', val: '--', sub: 'Awaiting Scan' };
@@ -1447,12 +2034,6 @@
         quickS2 = { label: '100m Fly', val: '--', sub: 'Rhythm Target' };
         quickS3 = { label: '50m Free', val: '--', sub: 'Speed Reserve' };
         quickS4 = { label: '100m IM', val: '--', sub: 'Skills' };
-      } else if (specialtyType === 'back') {
-        specTitle = 'Backstroke Specialist & Rotation Technician';
-        quickS1 = { label: '50m Back', val: '--', sub: 'Underwater Power' };
-        quickS2 = { label: '100m Back', val: '--', sub: 'Distance Target' };
-        quickS3 = { label: '50m Free', val: '--', sub: 'Speed Reserve' };
-        quickS4 = { label: '200m Free', val: '--', sub: 'Engine' };
       }
 
       const newSwimmerObj = {
@@ -1474,6 +2055,8 @@
           <p><strong>Race Video Observations &amp; Strengths:</strong> ${name} displays an athletic foundation with high natural enthusiasm and competitive racing focus. Early observations highlight strong kick rhythm and high body position on the surface.</p>
           <p><strong>Key Developmental Priorities:</strong> Developing <em>streamline discipline off walls</em>, maintaining a consistent stroke rate when fatigued, and establishing tight two-hand touches on breaststroke/butterfly turns.</p>
         `,
+        videoLog: [],
+        history: {},
         pillars: [
           { title: 'Streamline Focus', desc: 'Hold tight streamline off starts and turns before taking stroke #1.', icon: 'fa-arrow-right' },
           { title: 'Cadence & Breath Control', desc: 'Maintain clean rhythmic breathing without lifting head excessively high.', icon: 'fa-lungs' },
@@ -1490,8 +2073,8 @@
           { event: '100m Freestyle', course: '25m SCM', time: '--', std: 'Target: A Standard', pct: 'Pending', note: 'Scan screenshot to record' }
         ],
         pacing: [
-          { event: '50m Freestyle', pb: 'Baseline', target: 'Sub-32.0s', splits: '15.50 / 16.50', cue: 'Explode off blocks; head down looking at black line; zero breaths inside final 10m.' },
-          { event: '100m Freestyle', pb: 'Baseline', target: 'Sub-1:12.0s', splits: '34.50 / 37.50 (+3.0s drop)', cue: 'Controlled easy speed over 1st 50m; accelerate kick over final lap.' }
+          { event: '50m Freestyle', pb: 'Baseline', target: 'Sub-32.0s', splits: '15.50 / 16.50', actualArr: [16.5, 17.5], targetArr: [15.5, 16.5], labels: ['0-25m', '25-50m'], cue: 'Explode off blocks; head down looking at black line; zero breaths inside final 10m.' },
+          { event: '100m Freestyle', pb: 'Baseline', target: 'Sub-1:12.0s', splits: '34.50 / 37.50 (+3.0s drop)', actualArr: [36.0, 40.0], targetArr: [34.5, 37.5], labels: ['0-50m', '50-100m'], cue: 'Controlled easy speed over 1st 50m; accelerate kick over final lap.' }
         ],
         steps: {
           s1: `Long-term: Achieve Championship qualifying standards for ${age}yo bracket. Medium-term: Drop times across primary stroke events.`,
@@ -1519,186 +2102,25 @@
       updateScannerSwimmerDropdown();
       closeAddSwimmerModal();
 
-      // Switch to new swimmer profile immediately
       setSwimmerMode(id);
-      alert(`Success! Created profile for ${name}. You can now scan race screenshots or enter personal bests.`);
-    }
-
-    // ---------------------------------------------------------------------------
-    // INTELLIGENT TEXT PARSING WITH MULTI-SWIMMER RECOGNITION
-    // ---------------------------------------------------------------------------
-    function parseExtractedText(rawText) {
-      console.log('Extracted OCR Raw Text:', rawText);
-      const text = rawText.replace(/\r\n/g, '\n');
-
-      // 1. Swimmer Detection across all registered swimmers in roster
-      const swimmerKeys = Object.keys(athletesData);
-      let matchedSwimmer = null;
-
-      for (let k of swimmerKeys) {
-        const ath = athletesData[k];
-        const firstName = ath.name.split(' ')[0].toLowerCase();
-        const lastName = ath.name.split(' ').slice(1).join(' ').toLowerCase();
-
-        // Check for full name or "LAST, FIRST" as used in Meet Mobile (e.g. DAY, MONTY)
-        const regex1 = new RegExp(ath.name, 'i');
-        const regex2 = new RegExp(`${lastName},\\s*${firstName}`, 'i');
-        const regex3 = new RegExp(`\\b${firstName}\\b`, 'i');
-
-        if (regex1.test(text) || regex2.test(text) || regex3.test(text)) {
-          matchedSwimmer = k;
-          break;
-        }
-      }
-
-      if (matchedSwimmer) {
-        document.getElementById('field-swimmer').value = matchedSwimmer;
-      }
-
-      // 2. Course Detection (SCM, LCM, SCY)
-      if (/scm|short course meters/i.test(text)) {
-        document.getElementById('field-course').value = '25m SCM';
-      } else if (/lcm|long course/i.test(text)) {
-        document.getElementById('field-course').value = '50m LCM';
-      } else if (/scy|yards/i.test(text)) {
-        document.getElementById('field-course').value = '25y SCY';
-      }
-
-      // 3. Event Detection
-      let detectedEvent = '';
-      if (/400\s*(meter|m)?\s*free/i.test(text)) detectedEvent = '400m Freestyle';
-      else if (/200\s*(meter|m)?\s*free/i.test(text)) detectedEvent = '200m Freestyle';
-      else if (/100\s*(meter|m)?\s*free/i.test(text)) detectedEvent = '100m Freestyle';
-      else if (/50\s*(meter|m)?\s*free/i.test(text)) detectedEvent = '50m Freestyle';
-      else if (/50\s*(meter|m)?\s*breast/i.test(text)) detectedEvent = '50m Breaststroke';
-      else if (/100\s*(meter|m)?\s*breast/i.test(text)) detectedEvent = '100m Breaststroke';
-      else if (/200\s*(meter|m)?\s*breast/i.test(text)) detectedEvent = '200m Breaststroke';
-      else if (/50\s*(meter|m)?\s*fly|butterfly/i.test(text)) detectedEvent = '50m Butterfly';
-      else if (/100\s*(meter|m)?\s*fly|butterfly/i.test(text)) detectedEvent = '100m Butterfly';
-      else if (/200\s*(meter|m)?\s*fly|butterfly/i.test(text)) detectedEvent = '200m Butterfly';
-      else if (/50\s*(meter|m)?\s*back/i.test(text)) detectedEvent = '50m Backstroke';
-      else if (/100\s*(meter|m)?\s*back/i.test(text)) detectedEvent = '100m Backstroke';
-      else if (/200\s*(meter|m)?\s*back/i.test(text)) detectedEvent = '200m Backstroke';
-      else if (/200\s*(meter|m)?\s*im/i.test(text)) detectedEvent = '200m IM';
-      else if (/100\s*(meter|m)?\s*im/i.test(text)) detectedEvent = '100m IM';
-      else if (/400\s*(meter|m)?\s*im/i.test(text)) detectedEvent = '400m IM';
-      
-      if (detectedEvent) {
-        document.getElementById('field-event').value = detectedEvent;
-      }
-
-      // 4. Final Time Detection
-      const timeMatches = text.match(/\b(?:\d{1,2}:)?\d{2}\.\d{2}\b/g);
-      if (timeMatches && timeMatches.length > 0) {
-        let chosenTime = timeMatches[0];
-        const prelimsMatch = text.match(/prelims[\s\S]{0,30}(\b(?:\d{1,2}:)?\d{2}\.\d{2}\b)/i);
-        const finalsMatch = text.match(/finals[\s\S]{0,30}(\b(?:\d{1,2}:)?\d{2}\.\d{2}\b)/i);
-        const totalMatch = text.match(/total[\s\S]{0,30}(\b(?:\d{1,2}:)?\d{2}\.\d{2}\b)/i);
-        
-        if (prelimsMatch && prelimsMatch[1]) chosenTime = prelimsMatch[1];
-        else if (finalsMatch && finalsMatch[1]) chosenTime = finalsMatch[1];
-        else if (totalMatch && totalMatch[1]) chosenTime = totalMatch[1];
-        
-        document.getElementById('field-time').value = chosenTime;
-      }
-
-      // 5. Lap Splits Detection
-      const splitMatches = [];
-      const lines = text.split('\n');
-      lines.forEach(l => {
-        const m = l.match(/(\d{2}\.\d{2})/);
-        if (m && !splitMatches.includes(m[1])) {
-          if (!l.includes('-') && !l.includes('+')) {
-            splitMatches.push(m[1]);
-          }
-        }
-      });
-      if (splitMatches.length > 1) {
-        document.getElementById('field-splits').value = splitMatches.slice(0, 4).join(', ');
-      }
-
-      // 6. Meet Name Detection
-      if (/snsc/i.test(text)) {
-        document.getElementById('field-notes').value = '12th Singapore National Swimming Championships (SNSC)';
-      } else if (/global school/i.test(text)) {
-        document.getElementById('field-notes').value = 'Global School Swimming Series';
-      }
-    }
-
-    // ---------------------------------------------------------------------------
-    // COMMIT SCANNED DATA & LIVE DASHBOARD RECALCULATION
-    // ---------------------------------------------------------------------------
-    function commitScannedTime() {
-      const swimmerKey = document.getElementById('field-swimmer').value;
-      const eventName = document.getElementById('field-event').value.trim();
-      const course = document.getElementById('field-course').value;
-      const finalTime = document.getElementById('field-time').value.trim();
-      const splitsRaw = document.getElementById('field-splits').value.trim();
-      const notes = document.getElementById('field-notes').value.trim();
-
-      if (!eventName || !finalTime) {
-        alert('Please provide at least an Event Name and a Final Time.');
-        return;
-      }
-
-      const athlete = athletesData[swimmerKey];
-      const parsedStandard = calculateStandard(eventName, finalTime, course, athlete.age);
-
-      // Check if event already exists in PBs list
-      const existingIdx = athlete.pbs.findIndex(p => p.event.toLowerCase() === eventName.toLowerCase() && p.course === course);
-      
-      const newEntry = {
-        event: eventName,
-        course: course,
-        time: finalTime,
-        std: parsedStandard.std,
-        pct: parsedStandard.pct,
-        note: notes || 'Live verified from screenshot'
-      };
-
-      if (existingIdx >= 0) {
-        athlete.pbs[existingIdx] = newEntry;
-      } else {
-        athlete.pbs.unshift(newEntry);
-      }
-
-      // If it's a 200m Free or 50m event, update Breakthrough Spotlight
-      if (eventName.toLowerCase().includes('200') && eventName.toLowerCase().includes('free')) {
-        athlete.quickStats.s2.val = finalTime;
-        athlete.quickStats.s2.sub = `Updated: ${parsedStandard.std}`;
-        athlete.breakthrough = {
-          title: `200m Free: ${finalTime} (${parsedStandard.std})`,
-          meet: notes || 'Updated via Meet Screenshot',
-          details: splitsRaw ? `Splits: ${splitsRaw}` : 'New verified personal best.',
-          badge: parsedStandard.std
-        };
-      } else if (eventName.toLowerCase().includes('100') && eventName.toLowerCase().includes('free')) {
-        athlete.quickStats.s1.val = finalTime;
-        athlete.quickStats.s1.sub = parsedStandard.std;
-      } else if (eventName.toLowerCase().includes('50') && eventName.toLowerCase().includes('free')) {
-        athlete.quickStats.s3.val = finalTime;
-        athlete.quickStats.s3.sub = parsedStandard.std;
-      }
-
-      // Persist to localStorage
-      persistState();
-
-      // Close modal and refresh active view
-      closeScanModal();
-      setSwimmerMode(swimmerKey);
-
-      // Show toast confirmation
-      alert(`Success! Updated ${athlete.name}'s ${eventName} (${finalTime}) with standard ${parsedStandard.std}. Dashboard updated in real time.`);
+      alert(`Success! Created profile for ${name}. You can now scan race screenshots or upload swim videos.`);
     }
 
     // ---------------------------------------------------------------------------
     // BACKUP & RESTORE DATA HANDLERS
     // ---------------------------------------------------------------------------
+    function openDataBackupModal() {
+      document.getElementById('backup-modal').classList.remove('hidden');
+    }
+    function closeDataBackupModal() {
+      document.getElementById('backup-modal').classList.add('hidden');
+    }
+
     function downloadBackupJSON() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(athletesData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `day_brothers_swim_data_${new Date().toISOString().slice(0, 10)}.json`);
+      downloadAnchor.setAttribute("download", `tts_swimming_dashboard_${new Date().toISOString().slice(0, 10)}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
@@ -1725,7 +2147,7 @@
 
     function resetToDefaults() {
       if (confirm('Are you sure you want to reset all data back to factory defaults?')) {
-        localStorage.removeItem('dayBrothersSwimData_v2');
+        localStorage.removeItem('ttsSwimData_v3');
         athletesData = JSON.parse(JSON.stringify(defaultAthletesData));
         closeDataBackupModal();
         renderSwimmer(currentSwimmer);
