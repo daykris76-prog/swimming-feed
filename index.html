@@ -1070,8 +1070,8 @@
     // ---------------------------------------------------------------------------
     // 1. DEFAULT ATHLETE DATABASE (ALL 7 SWIMMERS) & PERSISTENCE
     // ---------------------------------------------------------------------------
-    const STORAGE_KEY = 'ttsSwimData_v11';
-    const AUDIT_KEY = 'ttsSwimAudit_v11';
+    const STORAGE_KEY = 'ttsSwimData_v12';
+    const AUDIT_KEY = 'ttsSwimAudit_v12';
 
     const ALL_COMPETITIVE_EVENTS = [
       { event: '50m Freestyle', distance: 50, stroke: 'Free' },
@@ -1108,12 +1108,21 @@
           { label: '200m Free (SCM)', val: '2:19.70', sub: 'AA Standard (-3.20s Drop)' }
         ],
         pbs: [
-          { event: '50m Freestyle', course: '25m SCM', time: '28.73', std: 'AAA', pct: 88, note: 'SNSC Sprint PB' },
+          { event: '50m Freestyle', course: '25m SCM', time: '28.73', std: 'AAA', pct: 88, note: '12th SNSC Sprint PB' },
+          { event: '50m Freestyle', course: '50m LCM', time: '29.65', std: 'AA', pct: 83, note: 'SNAG Long Course PB' },
           { event: '100m Freestyle', course: '25m SCM', time: '1:03.21', std: 'AA', pct: 82, note: '29.88 / 33.33 split' },
+          { event: '100m Freestyle', course: '50m LCM', time: '1:05.10', std: 'AA', pct: 80, note: '31.20 / 33.90 split' },
           { event: '200m Freestyle', course: '25m SCM', time: '2:19.70', std: 'AA', pct: 80, note: '31.09 / 35.08 / 35.96 / 37.57' },
+          { event: '200m Freestyle', course: '50m LCM', time: '2:24.85', std: 'A', pct: 76, note: 'Even negative-split target' },
+          { event: '400m Freestyle', course: '25m SCM', time: '4:58.40', std: 'A', pct: 75, note: 'Distance aerobic base' },
           { event: '50m Butterfly', course: '25m SCM', time: '31.45', std: 'AA', pct: 81, note: 'Explosive 15m breakout' },
+          { event: '50m Butterfly', course: '50m LCM', time: '32.80', std: 'A', pct: 77, note: 'Clean two-beat timing' },
           { event: '100m Butterfly', course: '25m SCM', time: '1:10.26', std: 'AA', pct: 79, note: '32.60 / 37.66 split' },
-          { event: '100m IM', course: '25m SCM', time: '1:13.40', std: 'AA', pct: 78, note: 'Strong back-to-breast turn' }
+          { event: '50m Backstroke', course: '25m SCM', time: '34.15', std: 'A', pct: 76, note: 'Fast underwater breakout' },
+          { event: '100m Backstroke', course: '25m SCM', time: '1:14.20', std: 'A', pct: 75, note: 'Consistent flag count' },
+          { event: '50m Breaststroke', course: '25m SCM', time: '39.80', std: 'BB', pct: 71, note: 'IM breaststroke leg' },
+          { event: '100m IM', course: '25m SCM', time: '1:13.40', std: 'AA', pct: 78, note: 'Strong back-to-breast turn' },
+          { event: '200m IM', course: '25m SCM', time: '2:39.90', std: 'A', pct: 75, note: '4-stroke medley balance' }
         ],
         history: {
           '50m Freestyle': [
@@ -1132,8 +1141,8 @@
           ]
         },
         technicalSynopsis: `
-          <p><strong>Biomechanical Strengths:</strong> High-elbow Early Vertical Forearm (EVF) catch holds water cleanly through the mid-pull, generating strong distance-per-stroke on the opening 100m of his 200m Free (31.09s / 35.08s).</p>
-          <p><strong>Key Developmental Priorities:</strong> Maintain tighter streamline depth past the 10m mark on walls 3–7 in the 200m Free and prevent slight head-lift during late-race bilateral breaths.</p>
+          <p><strong>Biomechanical Strengths:</strong> High-elbow Early Vertical Forearm (EVF) catch holds water cleanly through the mid-pull, generating strong distance-per-stroke on the opening 100m of his 200m Free (31.09s / 35.08s) and explosive top-end speed in 50m Free (28.73s AAA).</p>
+          <p><strong>Key Developmental Priorities:</strong> Maintain tighter streamline depth past the 10m mark on walls 3–7 in the 200m/400m Free and prevent slight head-lift during late-race bilateral breaths.</p>
         `,
         videoLog: [
           { title: '12th SNSC 200m Free Heat (2:19.70)', date: '2026-09-20', note: 'Strong front-end speed; 3rd 50m pacing focus' }
@@ -1167,10 +1176,17 @@
         ],
         pbs: [
           { event: '50m Freestyle', course: '25m SCM', time: '32.82', std: 'A', pct: 76, note: '12th SNSC Sprint PB' },
-          { event: '50m Breaststroke', course: '25m SCM', time: '44.58', std: 'A', pct: 75, note: 'Strong heel recovery & glide' },
+          { event: '50m Freestyle', course: '50m LCM', time: '33.75', std: 'A', pct: 74, note: 'Long Course PB' },
           { event: '100m Freestyle', course: '25m SCM', time: '1:14.84', std: 'BB', pct: 70, note: '35.10 / 39.74 split' },
+          { event: '100m Freestyle', course: '50m LCM', time: '1:17.20', std: 'BB', pct: 68, note: '36.40 / 40.80 split' },
+          { event: '200m Freestyle', course: '25m SCM', time: '2:46.50', std: 'BB', pct: 67, note: 'Aerobic endurance builder' },
+          { event: '50m Breaststroke', course: '25m SCM', time: '44.58', std: 'A', pct: 75, note: 'Strong heel recovery & glide' },
+          { event: '50m Breaststroke', course: '50m LCM', time: '46.10', std: 'BB', pct: 72, note: 'Long Course Breast PB' },
+          { event: '100m Breaststroke', course: '25m SCM', time: '1:38.90', std: 'BB', pct: 70, note: '46.80 / 52.10 split' },
           { event: '50m Butterfly', course: '25m SCM', time: '42.98', std: 'BB', pct: 68, note: 'Two-beat rhythm timing' },
-          { event: '50m Backstroke', course: '25m SCM', time: '41.60', std: 'BB', pct: 69, note: 'Clean backstroke start' }
+          { event: '50m Backstroke', course: '25m SCM', time: '41.60', std: 'BB', pct: 69, note: 'Clean backstroke start' },
+          { event: '100m Backstroke', course: '25m SCM', time: '1:29.40', std: 'B', pct: 65, note: 'Steady hip rotation' },
+          { event: '100m IM', course: '25m SCM', time: '1:27.80', std: 'BB', pct: 69, note: '4-stroke transition focus' }
         ],
         history: {
           '50m Freestyle': [
@@ -1219,9 +1235,16 @@
         ],
         pbs: [
           { event: '50m Freestyle', course: '25m SCM', time: '30.95', std: 'A', pct: 78, note: 'Consistent sub-31 sprint' },
+          { event: '50m Freestyle', course: '50m LCM', time: '31.85', std: 'A', pct: 75, note: 'Long Course Free PB' },
           { event: '100m Freestyle', course: '25m SCM', time: '1:08.15', std: 'A', pct: 76, note: 'Even 50m pacing' },
+          { event: '100m Freestyle', course: '50m LCM', time: '1:10.40', std: 'A', pct: 74, note: '33.80 / 36.60 split' },
+          { event: '200m Freestyle', course: '25m SCM', time: '2:31.20', std: 'A', pct: 74, note: 'Strong aerobic threshold' },
           { event: '50m Backstroke', course: '25m SCM', time: '35.80', std: 'A', pct: 77, note: 'High hip posture' },
-          { event: '100m Backstroke', course: '25m SCM', time: '1:16.40', std: 'A', pct: 76, note: 'Strong underwater flags' }
+          { event: '50m Backstroke', course: '50m LCM', time: '37.10', std: 'A', pct: 74, note: 'Clean backstroke start' },
+          { event: '100m Backstroke', course: '25m SCM', time: '1:16.40', std: 'A', pct: 76, note: 'Strong underwater flags' },
+          { event: '100m Backstroke', course: '50m LCM', time: '1:19.25', std: 'BB', pct: 72, note: '38.40 / 40.85 split' },
+          { event: '50m Butterfly', course: '25m SCM', time: '35.20', std: 'BB', pct: 72, note: 'Short-axis speed work' },
+          { event: '100m IM', course: '25m SCM', time: '1:19.50', std: 'A', pct: 74, note: 'Backstroke leg advantage' }
         ],
         history: {
           '50m Freestyle': [{ meet: 'SNSC SCM', date: '2026-09-20', time: 30.95 }]
@@ -1257,18 +1280,24 @@
         ],
         pbs: [
           { event: '50m Breaststroke', course: '50m LCM', time: '35.46', std: 'AAAA', pct: 95, note: '4 performances • Elite LCM mark' },
+          { event: '50m Breaststroke', course: '25m SCM', time: '57.78', std: 'B', pct: 60, note: '1 performance (early mark)' },
+          { event: '100m Breaststroke', course: '50m LCM', time: '1:36.66', std: 'BB', pct: 68, note: '2 performances' },
+          { event: '100m Breaststroke', course: '25m SCM', time: '1:53.20', std: 'B', pct: 60, note: '2 performances' },
           { event: '50m Freestyle', course: '25m SCM', time: '31.76', std: 'AA', pct: 81, note: '10 performances' },
           { event: '50m Freestyle', course: '50m LCM', time: '32.24', std: 'AA', pct: 80, note: '5 performances' },
-          { event: '50m Butterfly', course: '25m SCM', time: '35.48', std: 'AA', pct: 81, note: '7 performances' },
-          { event: '50m Butterfly', course: '50m LCM', time: '38.35', std: 'A', pct: 74, note: '4 performances' },
-          { event: '50m Backstroke', course: '25m SCM', time: '38.27', std: 'A', pct: 74, note: '10 performances' },
-          { event: '50m Backstroke', course: '50m LCM', time: '40.91', std: 'BB', pct: 68, note: '2 performances' },
           { event: '100m Freestyle', course: '25m SCM', time: '1:10.73', std: 'A', pct: 75, note: '4 performances' },
           { event: '100m Freestyle', course: '50m LCM', time: '1:13.77', std: 'A', pct: 73, note: '5 performances' },
-          { event: '100m Breaststroke', course: '50m LCM', time: '1:36.66', std: 'BB', pct: 68, note: '2 performances' },
+          { event: '200m Freestyle', course: '50m LCM', time: '2:45.42', std: 'BB', pct: 67, note: '6 performances' },
+          { event: '200m Freestyle', course: '25m SCM', time: '2:46.80', std: 'BB', pct: 66, note: '1 performance' },
+          { event: '50m Butterfly', course: '25m SCM', time: '35.48', std: 'AA', pct: 81, note: '7 performances' },
+          { event: '50m Butterfly', course: '50m LCM', time: '38.35', std: 'A', pct: 74, note: '4 performances' },
+          { event: '100m Butterfly', course: '50m LCM', time: '2:03.77', std: 'B', pct: 60, note: '1 performance' },
+          { event: '50m Backstroke', course: '25m SCM', time: '38.27', std: 'A', pct: 74, note: '10 performances' },
+          { event: '50m Backstroke', course: '50m LCM', time: '40.91', std: 'BB', pct: 68, note: '2 performances' },
           { event: '100m Backstroke', course: '25m SCM', time: '1:22.88', std: 'BB', pct: 70, note: '5 performances' },
+          { event: '100m Backstroke', course: '50m LCM', time: '1:26.03', std: 'BB', pct: 68, note: '5 performances' },
           { event: '100m IM', course: '25m SCM', time: '1:27.17', std: 'BB', pct: 68, note: '2 performances' },
-          { event: '200m Freestyle', course: '50m LCM', time: '2:45.42', std: 'BB', pct: 67, note: '6 performances' }
+          { event: '200m IM', course: '50m LCM', time: '3:11.70', std: 'B', pct: 62, note: '3 performances' }
         ],
         history: {
           '50m Breaststroke': [{ meet: 'LCM Championship', date: '2026-08-15', time: 35.46 }],
@@ -1276,7 +1305,7 @@
         },
         technicalSynopsis: `
           <p><strong>Biomechanical Strengths:</strong> Standout explosive power in 50m Breaststroke (35.46s LCM — AAAA National Elite tier) paired with versatile sprint speed across 50m Free (31.76s SCM) and 50m Fly (35.48s SCM).</p>
-          <p><strong>Key Developmental Priorities:</strong> Translate 50m breaststroke power into back-half endurance for the 100m Breaststroke (1:36.66 LCM) through controlled stroke-length pacing on the opening 50m.</p>
+          <p><strong>Key Developmental Priorities:</strong> Translate 50m breaststroke power into back-half endurance for the 100m Breaststroke (1:36.66 LCM) and 200m IM (3:11.70 LCM) through controlled stroke-length pacing on the opening 50m.</p>
         `,
         videoLog: [],
         huegillLoop: [
@@ -1312,10 +1341,13 @@
           { event: '50m Freestyle', course: '50m LCM', time: '33.22', std: 'BB', pct: 70, note: '4 performances' },
           { event: '100m Freestyle', course: '25m SCM', time: '1:13.88', std: 'BB', pct: 69, note: '3 performances' },
           { event: '100m Freestyle', course: '50m LCM', time: '1:14.93', std: 'BB', pct: 68, note: '5 performances' },
-          { event: '100m IM', course: '25m SCM', time: '1:28.11', std: 'BB', pct: 68, note: '3 performances' },
+          { event: '200m Freestyle', course: '50m LCM', time: '2:48.24', std: 'B', pct: 65, note: '1 performance' },
           { event: '50m Backstroke', course: '25m SCM', time: '42.45', std: 'B', pct: 64, note: '4 performances' },
+          { event: '50m Backstroke', course: '50m LCM', time: '50.69', std: 'B', pct: 60, note: '1 performance' },
+          { event: '100m Backstroke', course: '50m LCM', time: '1:40.07', std: 'B', pct: 61, note: '2 performances' },
           { event: '50m Butterfly', course: '25m SCM', time: '43.85', std: 'B', pct: 64, note: '1 performance' },
-          { event: '200m Freestyle', course: '50m LCM', time: '2:48.24', std: 'B', pct: 65, note: '1 performance' }
+          { event: '50m Butterfly', course: '50m LCM', time: '53.31', std: 'B', pct: 60, note: '1 performance' },
+          { event: '100m IM', course: '25m SCM', time: '1:28.11', std: 'BB', pct: 68, note: '3 performances' }
         ],
         history: {
           '50m Breaststroke': [{ meet: 'SNSC SCM', date: '2026-09-20', time: 40.45 }],
@@ -1355,17 +1387,19 @@
           { event: '50m Butterfly', course: '50m LCM', time: '39.00', std: 'AA', pct: 80, note: '1 performance' },
           { event: '50m Breaststroke', course: '50m LCM', time: '40.43', std: 'AAA', pct: 87, note: '3 performances' },
           { event: '50m Breaststroke', course: '25m SCM', time: '46.12', std: 'A', pct: 74, note: '2 performances' },
+          { event: '100m Breaststroke', course: '50m LCM', time: '1:38.12', std: 'A', pct: 75, note: '1 performance' },
           { event: '50m Freestyle', course: '25m SCM', time: '34.50', std: 'A', pct: 75, note: '8 performances' },
           { event: '50m Freestyle', course: '50m LCM', time: '36.27', std: 'BB', pct: 70, note: '2 performances' },
-          { event: '50m Backstroke', course: '25m SCM', time: '40.61', std: 'A', pct: 74, note: '7 performances' },
-          { event: '50m Backstroke', course: '50m LCM', time: '42.91', std: 'BB', pct: 70, note: '3 performances' },
           { event: '100m Freestyle', course: '25m SCM', time: '1:18.97', std: 'BB', pct: 71, note: '3 performances' },
           { event: '100m Freestyle', course: '50m LCM', time: '1:20.91', std: 'BB', pct: 69, note: '5 performances' },
-          { event: '100m Backstroke', course: '25m SCM', time: '1:31.14', std: 'BB', pct: 68, note: '2 performances' },
+          { event: '200m Freestyle', course: '50m LCM', time: '2:54.12', std: 'BB', pct: 69, note: '2 performances' },
+          { event: '200m Freestyle', course: '25m SCM', time: '2:55.82', std: 'BB', pct: 68, note: '1 performance' },
+          { event: '50m Backstroke', course: '25m SCM', time: '40.61', std: 'A', pct: 74, note: '7 performances' },
+          { event: '50m Backstroke', course: '50m LCM', time: '42.91', std: 'BB', pct: 70, note: '3 performances' },
           { event: '100m Backstroke', course: '50m LCM', time: '1:29.31', std: 'BB', pct: 70, note: '4 performances' },
-          { event: '100m Breaststroke', course: '50m LCM', time: '1:38.12', std: 'A', pct: 75, note: '1 performance' },
+          { event: '100m Backstroke', course: '25m SCM', time: '1:31.14', std: 'BB', pct: 68, note: '2 performances' },
           { event: '100m IM', course: '25m SCM', time: '1:25.81', std: 'A', pct: 76, note: '3 performances' },
-          { event: '200m Freestyle', course: '50m LCM', time: '2:54.12', std: 'BB', pct: 69, note: '2 performances' }
+          { event: '200m IM', course: '50m LCM', time: '3:24.21', std: 'B', pct: 63, note: '1 performance' }
         ],
         history: {
           '50m Butterfly': [{ meet: 'SNSC SCM', date: '2026-09-20', time: 36.91 }],
@@ -1403,19 +1437,21 @@
         pbs: [
           { event: '50m Breaststroke', course: '50m LCM', time: '39.48', std: 'AAA', pct: 88, note: '3 performances • Sub-40 LCM' },
           { event: '50m Breaststroke', course: '25m SCM', time: '43.96', std: 'A', pct: 76, note: '6 performances' },
+          { event: '100m Breaststroke', course: '50m LCM', time: '1:35.65', std: 'A', pct: 77, note: '2 performances' },
           { event: '50m Backstroke', course: '25m SCM', time: '39.87', std: 'A', pct: 76, note: '9 performances • Sub-40 SCM' },
           { event: '50m Backstroke', course: '50m LCM', time: '40.66', std: 'A', pct: 75, note: '3 performances' },
+          { event: '100m Backstroke', course: '50m LCM', time: '1:28.98', std: 'BB', pct: 71, note: '4 performances' },
+          { event: '100m Backstroke', course: '25m SCM', time: '1:30.87', std: 'BB', pct: 69, note: '2 performances' },
           { event: '50m Freestyle', course: '25m SCM', time: '34.74', std: 'A', pct: 74, note: '6 performances' },
           { event: '50m Freestyle', course: '50m LCM', time: '36.66', std: 'BB', pct: 69, note: '2 performances' },
+          { event: '100m Freestyle', course: '50m LCM', time: '1:22.38', std: 'BB', pct: 68, note: '5 performances' },
+          { event: '100m Freestyle', course: '25m SCM', time: '1:22.46', std: 'BB', pct: 68, note: '2 performances' },
+          { event: '200m Freestyle', course: '50m LCM', time: '2:59.97', std: 'BB', pct: 67, note: '2 performances • Sub-3:00' },
           { event: '50m Butterfly', course: '25m SCM', time: '40.55', std: 'A', pct: 74, note: '5 performances' },
           { event: '50m Butterfly', course: '50m LCM', time: '41.20', std: 'A', pct: 73, note: '1 performance' },
           { event: '100m IM', course: '25m SCM', time: '1:25.62', std: 'A', pct: 76, note: '3 performances' },
-          { event: '100m Backstroke', course: '25m SCM', time: '1:30.87', std: 'BB', pct: 69, note: '2 performances' },
-          { event: '100m Backstroke', course: '50m LCM', time: '1:28.98', std: 'BB', pct: 71, note: '4 performances' },
-          { event: '100m Breaststroke', course: '50m LCM', time: '1:35.65', std: 'A', pct: 77, note: '2 performances' },
-          { event: '100m Freestyle', course: '50m LCM', time: '1:22.38', std: 'BB', pct: 68, note: '5 performances' },
-          { event: '200m Freestyle', course: '50m LCM', time: '2:59.97', std: 'BB', pct: 67, note: '2 performances • Sub-3:00' },
-          { event: '200m IM', course: '25m SCM', time: '3:10.79', std: 'BB', pct: 68, note: '1 performance' }
+          { event: '200m IM', course: '25m SCM', time: '3:10.79', std: 'BB', pct: 68, note: '1 performance' },
+          { event: '200m IM', course: '50m LCM', time: '3:16.49', std: 'BB', pct: 66, note: '1 performance' }
         ],
         history: {
           '50m Breaststroke': [{ meet: 'LCM Meet', date: '2026-08-15', time: 39.48 }],
@@ -1741,7 +1777,7 @@
     }
 
     function generateSuggestedTargetsHTML(ath) {
-      const pbs = (ath.pbs || []).slice(0, 6);
+      const pbs = ath.pbs || [];
       if (!pbs.length) {
         return `<p class="text-xs text-slate-400">Add personal bests via Screenshot OCR or Manual Time entry to unlock algorithmic target race times.</p>`;
       }
@@ -1754,6 +1790,13 @@
         const half1 = formatSecondsToTime(nextSec * 0.478);
         const half2 = formatSecondsToTime(nextSec * 0.522);
 
+        const evLow = pb.event.toLowerCase();
+        let focusCue = 'Controlled front-end tempo; strong underwater breakouts';
+        if (evLow.includes('50m')) focusCue = 'Zero-breath final 5m lunge & explosive 15m breakout';
+        else if (evLow.includes('100m')) focusCue = 'Hold stroke length 1st 50m; build kick rate 2nd 50m';
+        else if (evLow.includes('200m') || evLow.includes('400m')) focusCue = 'Even-split rhythm on laps 2–3; strong finish kick';
+        else if (evLow.includes('im')) focusCue = 'Crisp back-to-breast crossover turn & fast free anchor';
+
         return `
           <tr class="hover:bg-slate-900/50 transition">
             <td class="py-2.5 px-3 font-bold text-white">${pb.event} <span class="text-[10px] text-slate-400 font-mono">(${pb.course})</span></td>
@@ -1761,6 +1804,7 @@
             <td class="py-2.5 px-3 font-mono font-bold text-cyan-400">${formatSecondsToTime(nextSec)}</td>
             <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">${formatSecondsToTime(peakSec)}</td>
             <td class="py-2.5 px-3 font-mono text-[11px] text-slate-400">${half1} / ${half2}</td>
+            <td class="py-2.5 px-3 text-[11px] text-slate-400 hidden md:table-cell">${focusCue}</td>
             <td class="py-2.5 px-3 text-right">
               <button onclick="loadTargetIntoCalculator('${pb.event}', '${formatSecondsToTime(nextSec)}')" class="px-2.5 py-1 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-[11px] font-bold transition">
                 Calc &rarr;
@@ -1780,6 +1824,7 @@
                 <th class="py-2 px-3">Next Milestone (-1.8%)</th>
                 <th class="py-2 px-3">Peak Season (-3.8%)</th>
                 <th class="py-2 px-3">Target Split Model</th>
+                <th class="py-2 px-3 hidden md:table-cell">Tactical Race Focus</th>
                 <th class="py-2 px-3 text-right">Pacing</th>
               </tr>
             </thead>
@@ -1825,13 +1870,24 @@
           : pb.std === 'A' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
           : 'bg-slate-800 text-slate-300 border-slate-700';
 
+        const barColor = pb.std === 'AAAA' ? '#a855f7'
+          : pb.std === 'AAA' ? '#f59e0b'
+          : pb.std === 'AA' ? '#00d2ff'
+          : pb.std === 'A' ? '#10b981'
+          : '#64748b';
+
         return `
           <tr class="hover:bg-slate-900/60 transition">
             <td class="py-2.5 px-3 font-bold text-white">${pb.event}</td>
             <td class="py-2.5 px-3 font-mono text-[11px] text-slate-400">${pb.course}</td>
             <td class="py-2.5 px-3 font-mono font-extrabold text-cyan-300 text-sm">${pb.time}</td>
             <td class="py-2.5 px-3">
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${stdBadgeCol}">${pb.std}</span>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${stdBadgeCol} min-w-[44px] text-center">${pb.std}</span>
+                <div class="hidden sm:block w-16 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                  <div class="h-1.5 rounded-full" style="width:${pb.pct || 70}%; background:${barColor}"></div>
+                </div>
+              </div>
             </td>
             <td class="py-2.5 px-3 text-slate-400 text-[11px] hidden sm:table-cell">${pb.note || ''}</td>
             <td class="py-2.5 px-3 text-right">
