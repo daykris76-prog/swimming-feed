@@ -595,4 +595,2371 @@
         <table class="w-full text-left text-xs">
           <thead class="bg-slate-900 text-[10px] uppercase text-slate-400">
             <tr>
-              <th class="py-2 px-3">Timestamp
+              <th class="py-2 px-3">Timestamp</th>
+              <th class="py-2 px-3">Author</th>
+              <th class="py-2 px-3">Action</th>
+              <th class="py-2 px-3">Swimmer</th>
+              <th class="py-2 px-3">Details</th>
+            </tr>
+          </thead>
+          <tbody id="audit-table-body" class="divide-y divide-slate-800"></tbody>
+        </table>
+      </div>
+      <div class="flex items-center justify-between text-[11px] text-slate-400">
+        <span id="audit-count-label">0 records logged</span>
+        <button onclick="clearAuditLog()" class="text-rose-400 hover:underline">Clear Log</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: IPHONE HOME SCREEN PWA INSTALL GUIDE                               -->
+  <!-- ========================================================================= -->
+  <div id="install-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-700 shadow-2xl my-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-white font-display font-bold text-base flex items-center gap-2">
+          <i class="fa-brands fa-apple text-lg"></i> Install TTS Swim iPhone App
+        </h3>
+        <button onclick="closeInstallModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <ol class="space-y-2.5 text-xs text-slate-300 list-decimal pl-4 leading-relaxed">
+        <li>Open your live GitHub Pages dashboard URL in <strong>Safari</strong> on your iPhone.</li>
+        <li>Tap the <strong>Share</strong> icon (<i class="fa-solid fa-arrow-up-from-bracket text-cyan-400"></i>) at the bottom of Safari.</li>
+        <li>Scroll down and tap <strong>"Add to Home Screen"</strong>, then tap <strong>Add</strong>.</li>
+        <li>Launch <strong>TTS Swim</strong> directly from your Home Screen in full-screen native app mode.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: DATA BACKUP, CLOUD SYNC & RESTORE JSON                             -->
+  <!-- ========================================================================= -->
+  <div id="backup-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-700 shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-white font-display font-bold text-base">Firebase Real-Time Cloud Sync &amp; Data Backup</h3>
+        <button onclick="closeDataBackupModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3.5 text-xs">
+        <!-- Real-Time Firebase Firestore Cloud Sync Status -->
+        <div class="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-emerald-300 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Real-Time Firebase Cloud Sync (iPhone &harr; Desktop)
+            </span>
+            <span id="modal-cloud-badge" class="text-[10px] font-mono text-emerald-400">Active</span>
+          </div>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Connected to Firebase Firestore (<code class="text-cyan-300">swim-app-2b43e</code>). Every device opening this URL syncs automatically in real time with zero manual steps.
+          </p>
+          <div class="flex items-center gap-2">
+            <input type="text" id="club-sync-id-input" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-[11px] text-cyan-300">
+            <button onclick="saveClubSyncId()" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-midnight font-bold text-xs transition">
+              Apply ID
+            </button>
+          </div>
+          <div id="cloud-sync-debug-msg" class="text-[10px] font-mono text-slate-400 break-all"></div>
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <button onclick="copySyncShareLink()" class="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-semibold text-xs border border-cyan-500/40">
+              <i class="fa-solid fa-link mr-1"></i> Copy Direct Sync Link
+            </button>
+            <button onclick="forcePushCloudSync()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 font-semibold text-xs border border-slate-700">
+              <i class="fa-solid fa-rotate mr-1"></i> Force Push Now
+            </button>
+          </div>
+        </div>
+
+        <button onclick="downloadBackupJSON()" class="w-full py-2.5 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-midnight font-bold flex items-center justify-center gap-2 transition">
+          <i class="fa-solid fa-download"></i> Download Full Club Roster (.json)
+        </button>
+
+        <div class="space-y-1.5 pt-2 border-t border-slate-800">
+          <label class="block text-[11px] font-bold text-slate-400">Paste Roster JSON to Restore:</label>
+          <textarea id="import-json-area" rows="3" placeholder='{"monty": {...}}' class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 font-mono text-[11px] text-slate-300"></textarea>
+          <button onclick="importBackupJSON()" class="w-full py-2 px-4 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold transition">
+            Import &amp; Apply JSON
+          </button>
+        </div>
+
+        <div class="pt-2 border-t border-slate-800 flex justify-between items-center">
+          <span class="text-slate-500 text-[11px]">Factory Reset All Swimmers:</span>
+          <button onclick="resetToDefaults()" class="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-semibold border border-rose-500/30">
+            Reset Defaults
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Non-blocking Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 pointer-events-none max-w-sm"></div>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT DATA & LOGIC ENGINE                                            -->
+  <!-- ========================================================================= -->
+  <script>
+    window.STORAGE_KEY = 'ttsSwimData_v12';
+    window.AUDIT_KEY = 'ttsSwimAudit_v12';
+    const STORAGE_KEY = window.STORAGE_KEY;
+    const AUDIT_KEY = window.AUDIT_KEY;
+
+    const ALL_COMPETITIVE_EVENTS = [
+      { event: '50m Freestyle', distance: 50, stroke: 'Free' },
+      { event: '100m Freestyle', distance: 100, stroke: 'Free' },
+      { event: '200m Freestyle', distance: 200, stroke: 'Free' },
+      { event: '400m Freestyle', distance: 400, stroke: 'Free' },
+      { event: '50m Backstroke', distance: 50, stroke: 'Back' },
+      { event: '100m Backstroke', distance: 100, stroke: 'Back' },
+      { event: '200m Backstroke', distance: 200, stroke: 'Back' },
+      { event: '50m Breaststroke', distance: 50, stroke: 'Breast' },
+      { event: '100m Breaststroke', distance: 100, stroke: 'Breast' },
+      { event: '200m Breaststroke', distance: 200, stroke: 'Breast' },
+      { event: '50m Butterfly', distance: 50, stroke: 'Fly' },
+      { event: '100m Butterfly', distance: 100, stroke: 'Fly' },
+      { event: '200m Butterfly', distance: 200, stroke: 'Fly' },
+      { event: '100m IM', distance: 100, stroke: 'IM' },
+      { event: '200m IM', distance: 200, stroke: 'IM' },
+      { event: '400m IM', distance: 400, stroke: 'IM' }
+    ];
+
+    const defaultAthletesData = {
+      monty: {
+        id: 'monty',
+        name: 'Monty Day',
+        age: 12,
+        dob: '2014-10-15',
+        club: 'Tanglin Merlions (TTS-VD)',
+        specialty: 'Freestyle & Butterfly All-Rounder',
+        accent: '#00d2ff',
+        quickStats: [
+          { label: '50m Free (SCM)', val: '28.73', sub: 'AAA Standard (Top 6%)' },
+          { label: '100m Free (SCM)', val: '1:03.21', sub: 'AA Standard' },
+          { label: '100m Fly (SCM)', val: '1:10.26', sub: 'AA Standard' },
+          { label: '200m Free (SCM)', val: '2:19.70', sub: 'AA Standard (-3.20s Drop)' }
+        ],
+        pbs: [
+          { event: '50m Freestyle', course: '25m SCM', time: '28.73', std: 'AAA', pct: 88, note: '12th SNSC Sprint PB' },
+          { event: '50m Freestyle', course: '50m LCM', time: '29.65', std: 'AA', pct: 83, note: 'SNAG Long Course PB' },
+          { event: '100m Freestyle', course: '25m SCM', time: '1:03.21', std: 'AA', pct: 82, note: '29.88 / 33.33 split' },
+          { event: '100m Freestyle', course: '50m LCM', time: '1:05.10', std: 'AA', pct: 80, note: '31.20 / 33.90 split' },
+          { event: '200m Freestyle', course: '25m SCM', time: '2:19.70', std: 'AA', pct: 80, note: '31.09 / 35.08 / 35.96 / 37.57' },
+          { event: '200m Freestyle', course: '50m LCM', time: '2:24.85', std: 'A', pct: 76, note: 'Even negative-split target' },
+          { event: '400m Freestyle', course: '25m SCM', time: '4:58.40', std: 'A', pct: 75, note: 'Distance aerobic base' },
+          { event: '50m Butterfly', course: '25m SCM', time: '31.45', std: 'AA', pct: 81, note: 'Explosive 15m breakout' },
+          { event: '50m Butterfly', course: '50m LCM', time: '32.80', std: 'A', pct: 77, note: 'Clean two-beat timing' },
+          { event: '100m Butterfly', course: '25m SCM', time: '1:10.26', std: 'AA', pct: 79, note: '32.60 / 37.66 split' },
+          { event: '50m Backstroke', course: '25m SCM', time: '34.15', std: 'A', pct: 76, note: 'Fast underwater breakout' },
+          { event: '100m Backstroke', course: '25m SCM', time: '1:14.20', std: 'A', pct: 75, note: 'Consistent flag count' },
+          { event: '50m Breaststroke', course: '25m SCM', time: '39.80', std: 'BB', pct: 71, note: 'IM breaststroke leg' },
+          { event: '100m IM', course: '25m SCM', time: '1:13.40', std: 'AA', pct: 78, note: 'Strong back-to-breast turn' },
+          { event: '200m IM', course: '25m SCM', time: '2:39.90', std: 'A', pct: 75, note: '4-stroke medley balance' }
+        ],
+        history: {
+          '50m Freestyle': [
+            { meet: 'TTS Time Trial', date: '2025-11-10', time: 29.85 },
+            { meet: 'SNAG Qualifier', date: '2026-03-14', time: 29.18 },
+            { meet: '12th SNSC SCM', date: '2026-09-20', time: 28.73 }
+          ],
+          '100m Freestyle': [
+            { meet: 'TTS Time Trial', date: '2025-11-10', time: 65.80 },
+            { meet: 'SNAG Qualifier', date: '2026-03-14', time: 64.15 },
+            { meet: '12th SNSC SCM', date: '2026-09-20', time: 63.21 }
+          ],
+          '200m Freestyle': [
+            { meet: 'SNAG Qualifier', date: '2026-03-14', time: 142.90 },
+            { meet: '12th SNSC SCM', date: '2026-09-20', time: 139.70 }
+          ]
+        },
+        technicalSynopsis: `
+          <p><strong>Biomechanical Strengths:</strong> High-elbow Early Vertical Forearm (EVF) catch holds water cleanly through the mid-pull, generating strong distance-per-stroke on the opening 100m of his 200m Free (31.09s / 35.08s) and explosive top-end speed in 50m Free (28.73s AAA).</p>
+          <p><strong>Key Developmental Priorities:</strong> Maintain tighter streamline depth past the 10m mark on walls 3–7 in the 200m/400m Free and prevent slight head-lift during late-race bilateral breaths.</p>
+        `,
+        videoLog: [
+          { title: '12th SNSC 200m Free Heat (2:19.70)', date: '2026-09-20', note: 'Strong front-end speed; 3rd 50m pacing focus' }
+        ],
+        huegillLoop: [
+          { step: '1. Vision & Benchmark', desc: 'Target sub-28.20 50m Free & sub-2:17.50 200m Free for SNAG A-Finals.' },
+          { step: '2. Streamline & Underwaters', desc: '4–5 tight dolphin kicks off every wall before first freestyle pull.' },
+          { step: '3. EVF Catch Mechanics', desc: 'Anchor fingertips down early without dropping the elbow on fatigue.' },
+          { step: '4. Negative-Split Pacing', desc: 'Control first 50m at 92% effort; build stroke tempo on laps 3 & 4.' },
+          { step: '5. Finish Lunge', desc: 'No breath inside the final 5m flags; drive head down into wall.' }
+        ]
+      },
+      rupert: {
+        id: 'rupert',
+        name: 'Rupert Day',
+        age: 11,
+        dob: '2015-04-12',
+        club: 'Tanglin Merlions (TTS-VD)',
+        specialty: 'Sprint Free & Breaststroke Power',
+        accent: '#f59e0b',
+        quickStats: [
+          { label: '50m Free (SCM)', val: '32.82', sub: 'A Standard (New PB!)' },
+          { label: '50m Breast (SCM)', val: '44.58', sub: 'A Standard' },
+          { label: '50m Fly (SCM)', val: '42.98', sub: 'BB Standard' },
+          { label: '100m Free (SCM)', val: '1:14.84', sub: 'BB Standard' }
+        ],
+        pbs: [
+          { event: '50m Freestyle', course: '25m SCM', time: '32.82', std: 'A', pct: 76, note: '12th SNSC Sprint PB' },
+          { event: '50m Freestyle', course: '50m LCM', time: '33.75', std: 'A', pct: 74, note: 'Long Course PB' },
+          { event: '100m Freestyle', course: '25m SCM', time: '1:14.84', std: 'BB', pct: 70, note: '35.10 / 39.74 split' },
+          { event: '100m Freestyle', course: '50m LCM', time: '1:17.20', std: 'BB', pct: 68, note: '36.40 / 40.80 split' },
+          { event: '200m Freestyle', course: '25m SCM', time: '2:46.50', std: 'BB', pct: 67, note: 'Aerobic endurance builder' },
+          { event: '50m Breaststroke', course: '25m SCM', time: '44.58', std: 'A', pct: 75, note: 'Strong heel recovery & glide' },
+          { event: '50m Breaststroke', course: '50m LCM', time: '46.10', std: 'BB', pct: 72, note: 'Long Course Breast PB' },
+          { event: '100m Breaststroke', course: '25m SCM', time: '1:38.90', std: 'BB', pct: 70, note: '46.80 / 52.10 split' },
+          { event: '50m Butterfly', course: '25m SCM', time: '42.98', std: 'BB', pct: 68, note: 'Two-beat rhythm timing' },
+          { event: '50m Backstroke', course: '25m SCM', time: '41.60', std: 'BB', pct: 69, note: 'Clean backstroke start' },
+          { event: '100m Backstroke', course: '25m SCM', time: '1:29.40', std: 'B', pct: 65, note: 'Steady hip rotation' },
+          { event: '100m IM', course: '25m SCM', time: '1:27.80', std: 'BB', pct: 69, note: '4-stroke transition focus' }
+        ],
+        history: {
+          '50m Freestyle': [
+            { meet: 'TTS Time Trial', date: '2025-11-10', time: 34.90 },
+            { meet: 'SNAG Qualifier', date: '2026-03-14', time: 33.65 },
+            { meet: '12th SNSC SCM', date: '2026-09-20', time: 32.82 }
+          ],
+          '50m Breaststroke': [
+            { meet: 'SNAG Qualifier', date: '2026-03-14', time: 45.90 },
+            { meet: '12th SNSC SCM', date: '2026-09-20', time: 44.58 }
+          ]
+        },
+        technicalSynopsis: `
+          <p><strong>Biomechanical Strengths:</strong> Explosive reaction off the blocks and clean breaststroke pullout timing. Shows sharp improvement in 50m Free tempo (32.82s) with low head position during breaths.</p>
+          <p><strong>Key Developmental Priorities:</strong> Narrow knee separation on breaststroke kick catch and sustain continuous 6-beat flutter kick through the final 15m of 50m/100m Freestyle.</p>
+        `,
+        videoLog: [
+          { title: '12th SNSC 50m Free Sprint (32.82)', date: '2026-09-20', note: 'Clean streamline breakout; fast final 10m' }
+        ],
+        huegillLoop: [
+          { step: '1. Vision & Benchmark', desc: 'Break 32.00s in 50m Free and 43.50s in 50m Breaststroke.' },
+          { step: '2. Breaststroke Pullout', desc: 'Hold full 2-second streamline glide after underwater pull-down.' },
+          { step: '3. Head-Down Breathing', desc: 'Keep one goggle in the water on freestyle breaths to protect hip line.' },
+          { step: '4. Fast Turn Transitions', desc: 'Tuck knees tight and plant feet high on the wall with zero hesitation.' },
+          { step: '5. Finish Lunge', desc: 'Full arm extension into the touchpad without gliding.' }
+        ]
+      },
+      rory: {
+        id: 'rory',
+        name: 'Rory Walker',
+        age: 12,
+        dob: '2014-04-22',
+        club: 'Tanglin Merlions (TTS-VD)',
+        specialty: 'Backstroke & Freestyle Endurance',
+        accent: '#10b981',
+        quickStats: [
+          { label: '50m Free (SCM)', val: '30.95', sub: 'A Standard' },
+          { label: '100m Back (SCM)', val: '1:16.40', sub: 'A Standard' },
+          { label: '50m Back (SCM)', val: '35.80', sub: 'A Standard' },
+          { label: '100m Free (SCM)', val: '1:08.15', sub: 'A Standard' }
+        ],
+        pbs: [
+          { event: '50m Freestyle', course: '25m SCM', time: '30.95', std: 'A', pct: 78, note: 'Consistent sub-31 sprint' },
+          { event: '50m Freestyle', course: '50m LCM', time: '31.85', std: 'A', pct: 75, note: 'Long Course Free PB' },
+          { event: '100m Freestyle', course: '25m SCM', time: '1:08.15', std: 'A', pct: 76, note: 'Even 50m pacing' },
+          { event: '100m Freestyle', course: '50m LCM', time: '1:10.40', std: 'A', pct: 74, note: '33.80 / 36.60 split' },
+          { event: '200m Freestyle', course: '25m SCM', time: '2:31.20', std: 'A', pct: 74, note: 'Strong aerobic threshold' },
+          { event: '50m Backstroke', course: '25m SCM', time: '35.80', std: 'A', pct: 77, note: 'High hip posture' },
+          { event: '50m Backstroke', course: '50m LCM', time: '37.10', std: 'A', pct: 74, note: 'Clean backstroke start' },
+          { event: '100m Backstroke', course: '25m SCM', time: '1:16.40', std: 'A', pct: 76, note: 'Strong underwater flags' },
+          { event: '100m Backstroke', course: '50m LCM', time: '1:19.25', std: 'BB', pct: 72, note: '38.40 / 40.85 split' },
+          { event: '50m Butterfly', course: '25m SCM', time: '35.20', std: 'BB', pct: 72, note: 'Short-axis speed work' },
+          { event: '100m IM', course: '25m SCM', time: '1:19.50', std: 'A', pct: 74, note: 'Backstroke leg advantage' }
+        ],
+        history: {
+          '50m Freestyle': [{ meet: 'SNSC SCM', date: '2026-09-20', time: 30.95 }]
+        },
+        technicalSynopsis: '',
+        videoLog: [],
+        huegillLoop: [
+          { step: '1. Vision & Benchmark', desc: 'Target sub-1:14.00 100m Backstroke & sub-30.20 50m Free.' },
+          { step: '2. Backstroke Flag Count', desc: 'Lock exact stroke count from backstroke flags to wall.' },
+          { step: '3. Hip Rotation Drive', desc: 'Connect core rotation directly to deep pinky-first entry.' }
+        ]
+      },
+      george: {
+        id: 'george',
+        name: 'George Hillman',
+        age: 11,
+        dob: '2015-08-18',
+        club: 'Tanglin Merlions (TTS-VD)',
+        specialty: 'National-Rank 50m Breaststroke & Sprint Free',
+        accent: '#6366f1',
+        quickStats: [
+          { label: '50m Breast (LCM)', val: '35.46', sub: 'AAAA Elite Standard (Top 1%)' },
+          { label: '50m Free (SCM)', val: '31.76', sub: 'AA Standard' },
+          { label: '50m Fly (SCM)', val: '35.48', sub: 'AA Standard' },
+          { label: '100m Free (SCM)', val: '1:10.73', sub: 'A Standard' }
+        ],
+        pbs: [
+          { event: '50m Breaststroke', course: '50m LCM', time: '35.46', std: 'AAAA', pct: 95, note: '4 performances • Elite LCM mark' },
+          { event: '50m Breaststroke', course: '25m SCM', time: '57.78', std: 'B', pct: 60, note: '1 performance (early mark)' },
+          { event: '100m Breaststroke', course: '50m LCM', time: '1:36.66', std: 'BB', pct: 68, note: '2 performances' },
+          { event: '100m Breaststroke', course: '25m SCM', time: '1:53.20', std: 'B', pct: 60, note: '2 performances' },
+          { event: '50m Freestyle', course: '25m SCM', time: '31.76', std: 'AA', pct: 81, note: '10 performances' },
+          { event: '50m Freestyle', course: '50m LCM', time: '32.24', std: 'AA', pct: 80, note: '5 performances' },
+          { event: '100m Freestyle', course: '25m SCM', time: '1:10.73', std: 'A', pct: 75, note: '4 performances' },
+          { event: '100m Freestyle', course: '50m LCM', time: '1:13.77', std: 'A', pct: 73, note: '5 performances' },
+          { event: '200m Freestyle', course: '50m LCM', time: '2:45.42', std: 'BB', pct: 67, note: '6 performances' },
+          { event: '200m Freestyle', course: '25m SCM', time: '2:46.80', std: 'BB', pct: 66, note: '1 performance' },
+          { event: '50m Butterfly', course: '25m SCM', time: '35.48', std: 'AA', pct: 81, note: '7 performances' },
+          { event: '50m Butterfly', course: '50m LCM', time: '38.35', std: 'A', pct: 74, note: '4 performances' },
+          { event: '100m Butterfly', course: '50m LCM', time: '2:03.77', std: 'B', pct: 60, note: '1 performance' },
+          { event: '50m Backstroke', course: '25m SCM', time: '38.27', std: 'A', pct: 74, note: '10 performances' },
+          { event: '50m Backstroke', course: '50m LCM', time: '40.91', std: 'BB', pct: 68, note: '2 performances' },
+          { event: '100m Backstroke', course: '25m SCM', time: '1:22.88', std: 'BB', pct: 70, note: '5 performances' },
+          { event: '100m Backstroke', course: '50m LCM', time: '1:26.03', std: 'BB', pct: 68, note: '5 performances' },
+          { event: '100m IM', course: '25m SCM', time: '1:27.17', std: 'BB', pct: 68, note: '2 performances' },
+          { event: '200m IM', course: '50m LCM', time: '3:11.70', std: 'B', pct: 62, note: '3 performances' }
+        ],
+        history: {
+          '50m Breaststroke': [{ meet: 'LCM Championship', date: '2026-08-15', time: 35.46 }],
+          '50m Freestyle': [{ meet: 'SNSC SCM', date: '2026-09-20', time: 31.76 }]
+        },
+        technicalSynopsis: '',
+        videoLog: [],
+        huegillLoop: [
+          { step: '1. Vision & Benchmark', desc: 'Target sub-35.00 LCM 50m Breast & sub-1:32.00 100m Breast.' },
+          { step: '2. Breaststroke Tempo Control', desc: 'Hold long glide on first 50m of 100m Breast before building rate.' },
+          { step: '3. Sprint Freestyle Turnover', desc: 'Drive high-elbow catch to break 31.00s in 50m Free.' }
+        ]
+      },
+      noah: {
+        id: 'noah',
+        name: 'Noah Caines',
+        age: 12,
+        dob: '2014-06-10',
+        club: 'Tanglin Merlions (TTS-VD)',
+        specialty: '100m/50m Breaststroke & IM All-Rounder',
+        accent: '#ec4899',
+        quickStats: [
+          { label: '50m Breast (SCM)', val: '40.45', sub: 'A Standard' },
+          { label: '100m Breast (SCM)', val: '1:29.55', sub: 'BB Standard (Sub-1:30)' },
+          { label: '50m Free (SCM)', val: '32.54', sub: 'BB Standard' },
+          { label: '100m IM (SCM)', val: '1:28.11', sub: 'BB Standard' }
+        ],
+        pbs: [
+          { event: '50m Breaststroke', course: '25m SCM', time: '40.45', std: 'A', pct: 76, note: '12 performances' },
+          { event: '50m Breaststroke', course: '50m LCM', time: '42.37', std: 'A', pct: 74, note: '6 performances' },
+          { event: '100m Breaststroke', course: '25m SCM', time: '1:29.55', std: 'BB', pct: 71, note: '7 performances • Sub-1:30' },
+          { event: '100m Breaststroke', course: '50m LCM', time: '1:37.08', std: 'BB', pct: 68, note: '2 performances' },
+          { event: '50m Freestyle', course: '25m SCM', time: '32.54', std: 'BB', pct: 71, note: '9 performances' },
+          { event: '50m Freestyle', course: '50m LCM', time: '33.22', std: 'BB', pct: 70, note: '4 performances' },
+          { event: '100m Freestyle', course: '25m SCM', time: '1:13.88', std: 'BB', pct: 69, note: '3 performances' },
+          { event: '100m Freestyle', course: '50m LCM', time: '1:14.93', std: 'BB', pct: 68, note: '5 performances' },
+          { event: '200m Freestyle', course: '50m LCM', time: '2:48.24', std: 'B', pct: 65, note: '1 performance' },
+          { event: '50m Backstroke', course: '25m SCM', time: '42.45', std: 'B', pct: 64, note: '4 performances' },
+          { event: '50m Backstroke', course: '50m LCM', time: '50.69', std: 'B', pct: 60, note: '1 performance' },
+          { event: '100m Backstroke', course: '50m LCM', time: '1:40.07', std: 'B', pct: 61, note: '2 performances' },
+          { event: '50m Butterfly', course: '25m SCM', time: '43.85', std: 'B', pct: 64, note: '1 performance' },
+          { event: '50m Butterfly', course: '50m LCM', time: '53.31', std: 'B', pct: 60, note: '1 performance' },
+          { event: '100m IM', course: '25m SCM', time: '1:28.11', std: 'BB', pct: 68, note: '3 performances' }
+        ],
+        history: {
+          '50m Breaststroke': [{ meet: 'SNSC SCM', date: '2026-09-20', time: 40.45 }],
+          '100m Breaststroke': [{ meet: 'SNSC SCM', date: '2026-09-20', time: 89.55 }]
+        },
+        technicalSynopsis: '',
+        videoLog: [],
+        huegillLoop: [
+          { step: '1. Vision & Benchmark', desc: 'Target sub-39.50 50m Breast & sub-1:27.00 100m Breast.' },
+          { step: '2. Tighter SCM Turns', desc: 'Two-hand touch and rapid elbow-back drop turn on breaststroke walls.' },
+          { step: '3. Free Sprint Speed', desc: 'Push 50m Free under 31.80s to boost IM anchor leg.' }
+        ]
+      },
+      garrick: {
+        id: 'garrick',
+        name: 'Garrick Suckling',
+        age: 10,
+        dob: '2016-05-14',
+        club: 'Tanglin Merlions (TTS-VD)',
+        specialty: '50m Butterfly & Breaststroke Specialist (10U)',
+        accent: '#a855f7',
+        quickStats: [
+          { label: '50m Fly (SCM)', val: '36.91', sub: 'AA Standard (10U)' },
+          { label: '50m Breast (LCM)', val: '40.43', sub: 'AAA Standard (10U)' },
+          { label: '50m Free (SCM)', val: '34.50', sub: 'A Standard' },
+          { label: '100m IM (SCM)', val: '1:25.81', sub: 'A Standard' }
+        ],
+        pbs: [
+          { event: '50m Butterfly', course: '25m SCM', time: '36.91', std: 'AA', pct: 82, note: '8 performances' },
+          { event: '50m Butterfly', course: '50m LCM', time: '39.00', std: 'AA', pct: 80, note: '1 performance' },
+          { event: '50m Breaststroke', course: '50m LCM', time: '40.43', std: 'AAA', pct: 87, note: '3 performances' },
+          { event: '50m Breaststroke', course: '25m SCM', time: '46.12', std: 'A', pct: 74, note: '2 performances' },
+          { event: '100m Breaststroke', course: '50m LCM', time: '1:38.12', std: 'A', pct: 75, note: '1 performance' },
+          { event: '50m Freestyle', course: '25m SCM', time: '34.50', std: 'A', pct: 75, note: '8 performances' },
+          { event: '50m Freestyle', course: '50m LCM', time: '36.27', std: 'BB', pct: 70, note: '2 performances' },
+          { event: '100m Freestyle', course: '25m SCM', time: '1:18.97', std: 'BB', pct: 71, note: '3 performances' },
+          { event: '100m Freestyle', course: '50m LCM', time: '1:20.91', std: 'BB', pct: 69, note: '5 performances' },
+          { event: '200m Freestyle', course: '50m LCM', time: '2:54.12', std: 'BB', pct: 69, note: '2 performances' },
+          { event: '200m Freestyle', course: '25m SCM', time: '2:55.82', std: 'BB', pct: 68, note: '1 performance' },
+          { event: '50m Backstroke', course: '25m SCM', time: '40.61', std: 'A', pct: 74, note: '7 performances' },
+          { event: '50m Backstroke', course: '50m LCM', time: '42.91', std: 'BB', pct: 70, note: '3 performances' },
+          { event: '100m Backstroke', course: '50m LCM', time: '1:29.31', std: 'BB', pct: 70, note: '4 performances' },
+          { event: '100m Backstroke', course: '25m SCM', time: '1:31.14', std: 'BB', pct: 68, note: '2 performances' },
+          { event: '100m IM', course: '25m SCM', time: '1:25.81', std: 'A', pct: 76, note: '3 performances' },
+          { event: '200m IM', course: '50m LCM', time: '3:24.21', std: 'B', pct: 63, note: '1 performance' }
+        ],
+        history: {
+          '50m Butterfly': [{ meet: 'SNSC SCM', date: '2026-09-20', time: 36.91 }],
+          '50m Breaststroke': [{ meet: 'LCM Meet', date: '2026-08-15', time: 40.43 }]
+        },
+        technicalSynopsis: '',
+        videoLog: [],
+        huegillLoop: [
+          { step: '1. Vision & Benchmark', desc: 'Target sub-35.80 50m Fly & sub-1:23.50 100m IM.' },
+          { step: '2. Low Butterfly Breath', desc: 'Chin skims surface on breath; hands enter shoulder-width.' },
+          { step: '3. Smooth 100m Free Rhythm', desc: 'Hold long strokes on first 50m before building kick.' }
+        ]
+      },
+      stellan: {
+        id: 'stellan',
+        name: 'Stellan Suckling',
+        age: 10,
+        dob: '2016-05-14',
+        club: 'Tanglin Merlions (TTS-VD)',
+        specialty: '100m IM, Backstroke & Breaststroke (10U)',
+        accent: '#14b8a6',
+        quickStats: [
+          { label: '50m Breast (LCM)', val: '39.48', sub: 'AAA Standard (10U)' },
+          { label: '50m Back (SCM)', val: '39.87', sub: 'A Standard (Sub-40)' },
+          { label: '100m IM (SCM)', val: '1:25.62', sub: 'A Standard' },
+          { label: '50m Free (SCM)', val: '34.74', sub: 'A Standard' }
+        ],
+        pbs: [
+          { event: '50m Breaststroke', course: '50m LCM', time: '39.48', std: 'AAA', pct: 88, note: '3 performances • Sub-40 LCM' },
+          { event: '50m Breaststroke', course: '25m SCM', time: '43.96', std: 'A', pct: 76, note: '6 performances' },
+          { event: '100m Breaststroke', course: '50m LCM', time: '1:35.65', std: 'A', pct: 77, note: '2 performances' },
+          { event: '50m Backstroke', course: '25m SCM', time: '39.87', std: 'A', pct: 76, note: '9 performances • Sub-40 SCM' },
+          { event: '50m Backstroke', course: '50m LCM', time: '40.66', std: 'A', pct: 75, note: '3 performances' },
+          { event: '100m Backstroke', course: '50m LCM', time: '1:28.98', std: 'BB', pct: 71, note: '4 performances' },
+          { event: '100m Backstroke', course: '25m SCM', time: '1:30.87', std: 'BB', pct: 69, note: '2 performances' },
+          { event: '50m Freestyle', course: '25m SCM', time: '34.74', std: 'A', pct: 74, note: '6 performances' },
+          { event: '50m Freestyle', course: '50m LCM', time: '36.66', std: 'BB', pct: 69, note: '2 performances' },
+          { event: '100m Freestyle', course: '50m LCM', time: '1:22.38', std: 'BB', pct: 68, note: '5 performances' },
+          { event: '100m Freestyle', course: '25m SCM', time: '1:22.46', std: 'BB', pct: 68, note: '2 performances' },
+          { event: '200m Freestyle', course: '50m LCM', time: '2:59.97', std: 'BB', pct: 67, note: '2 performances • Sub-3:00' },
+          { event: '50m Butterfly', course: '25m SCM', time: '40.55', std: 'A', pct: 74, note: '5 performances' },
+          { event: '50m Butterfly', course: '50m LCM', time: '41.20', std: 'A', pct: 73, note: '1 performance' },
+          { event: '100m IM', course: '25m SCM', time: '1:25.62', std: 'A', pct: 76, note: '3 performances' },
+          { event: '200m IM', course: '25m SCM', time: '3:10.79', std: 'BB', pct: 68, note: '1 performance' },
+          { event: '200m IM', course: '50m LCM', time: '3:16.49', std: 'BB', pct: 66, note: '1 performance' }
+        ],
+        history: {
+          '50m Breaststroke': [{ meet: 'LCM Meet', date: '2026-08-15', time: 39.48 }],
+          '100m IM': [{ meet: 'SNSC SCM', date: '2026-09-20', time: 85.62 }]
+        },
+        technicalSynopsis: '',
+        videoLog: [],
+        huegillLoop: [
+          { step: '1. Vision & Benchmark', desc: 'Target sub-1:23.00 100m IM & sub-38.80 50m Breast.' },
+          { step: '2. Back-to-Breast Crossover', desc: 'Commit to crisp backstroke-to-breast turn without slowing into wall.' },
+          { step: '3. Freestyle Kick Finish', desc: 'Drive 6-beat kick on final 25m of IM and 100m Free.' }
+        ]
+      }
+    };
+
+    function loadSavedState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return JSON.parse(JSON.stringify(defaultAthletesData));
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') return JSON.parse(JSON.stringify(defaultAthletesData));
+        Object.keys(defaultAthletesData).forEach(k => {
+          if (!parsed[k]) parsed[k] = JSON.parse(JSON.stringify(defaultAthletesData[k]));
+        });
+        return parsed;
+      } catch (e) {
+        return JSON.parse(JSON.stringify(defaultAthletesData));
+      }
+    }
+
+    let athletesData = loadSavedState();
+    let currentSwimmer = 'monty';
+    let splitChartInstance = null;
+
+    function persistState(skipCloud = false) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(athletesData));
+        localStorage.setItem(STORAGE_KEY + '_updatedAt', String(Date.now()));
+      } catch (e) {}
+      if (!skipCloud && typeof window.pushStateToCloud === 'function') {
+        window.pushStateToCloud();
+      }
+    }
+
+    function showToast(msg, type = 'success') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const el = document.createElement('div');
+      const colors = type === 'error'
+        ? 'bg-rose-950/95 border-rose-500 text-rose-200'
+        : type === 'warning'
+        ? 'bg-amber-950/95 border-amber-500 text-amber-200'
+        : 'bg-slate-900/95 border-cyan-500 text-cyan-200';
+      el.className = `pointer-events-auto px-4 py-2.5 rounded-xl border shadow-xl text-xs font-semibold flex items-center gap-2 transition-all ${colors}`;
+      el.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>${msg}</span>`;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
+      }, 3400);
+    }
+
+    function parseTimeToSeconds(str) {
+      if (typeof str === 'number') return str > 0 ? str : null;
+      if (!str) return null;
+      const clean = String(str).trim();
+      if (clean.includes(':')) {
+        const parts = clean.split(':');
+        const mins = parseFloat(parts[0]);
+        const secs = parseFloat(parts[1]);
+        if (isNaN(mins) || isNaN(secs)) return null;
+        return mins * 60 + secs;
+      }
+      const val = parseFloat(clean);
+      return isNaN(val) || val <= 0 ? null : val;
+    }
+
+    function formatSecondsToTime(sec) {
+      if (!sec || isNaN(sec)) return '--';
+      if (sec < 60) return sec.toFixed(2);
+      const mins = Math.floor(sec / 60);
+      const rem = (sec - mins * 60).toFixed(2).padStart(5, '0');
+      return `${mins}:${rem}`;
+    }
+
+    function calculateStandard(event, timeStr, course, age = 11) {
+      const sec = parseTimeToSeconds(timeStr);
+      if (!sec) return { std: 'B', pct: 60 };
+      const evLow = (event || '').toLowerCase();
+      let refBase = 32.0;
+      if (evLow.includes('50m free')) refBase = 30.5;
+      else if (evLow.includes('100m free')) refBase = 67.0;
+      else if (evLow.includes('200m free')) refBase = 146.0;
+      else if (evLow.includes('400m free')) refBase = 310.0;
+      else if (evLow.includes('50m breast')) refBase = 41.5;
+      else if (evLow.includes('100m breast')) refBase = 91.0;
+      else if (evLow.includes('50m fly')) refBase = 34.5;
+      else if (evLow.includes('100m fly')) refBase = 77.0;
+      else if (evLow.includes('50m back')) refBase = 36.5;
+      else if (evLow.includes('100m back')) refBase = 79.0;
+      else if (evLow.includes('100m im')) refBase = 78.0;
+      else if (evLow.includes('200m im')) refBase = 168.0;
+
+      const ageAdj = 1 + Math.max(0, 12 - (age || 11)) * 0.045;
+      const courseAdj = (course || '').includes('LCM') ? 1.028 : 1.0;
+      const ratio = (refBase * ageAdj * courseAdj) / sec;
+
+      if (ratio >= 1.12) return { std: 'AAAA', pct: 95 };
+      if (ratio >= 1.05) return { std: 'AAA', pct: 88 };
+      if (ratio >= 0.99) return { std: 'AA', pct: 81 };
+      if (ratio >= 0.93) return { std: 'A', pct: 75 };
+      if (ratio >= 0.86) return { std: 'BB', pct: 68 };
+      return { std: 'B', pct: 61 };
+    }
+
+    function getDOBNarrative(ath) {
+      if (!ath || !ath.dob) return `Age ${ath?.age || 11} Competitive Swimmer`;
+      const parts = ath.dob.split('-');
+      if (parts.length < 2) return `Age ${ath.age}`;
+      const birthYear = parseInt(parts[0], 10);
+      const birthMonthIdx = parseInt(parts[1], 10) - 1;
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const mName = months[birthMonthIdx] || '';
+      const turnedAge = 2026 - birthYear;
+      return `Turned ${turnedAge} in ${mName} 2026`;
+    }
+
+    function getEffectiveTechnicalSynopsis(ath) {
+      if (!ath) return '<p>No technical observations recorded yet.</p>';
+      const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      const latestVideo = Array.isArray(ath.videoLog) && ath.videoLog.length > 0 ? ath.videoLog[0] : null;
+
+      let hasRecentVideo = false;
+      let daysAgoLabel = '';
+      if (latestVideo) {
+        const vidTs = latestVideo.uploadedAt
+          ? Number(latestVideo.uploadedAt)
+          : (latestVideo.date ? Date.parse(latestVideo.date) : 0);
+        if (vidTs && (now - vidTs) <= FIVE_DAYS_MS) {
+          hasRecentVideo = true;
+          const daysOld = Math.max(0, Math.floor((now - vidTs) / (24 * 60 * 60 * 1000)));
+          daysAgoLabel = daysOld === 0 ? 'Uploaded Today' : `Uploaded ${daysOld}d ago`;
+        }
+      }
+
+      const isGenericPlaceholder = !ath.technicalSynopsis || ath.technicalSynopsis.includes('Ready for Meet Mobile screenshot scans');
+
+      if (hasRecentVideo && !isGenericPlaceholder) {
+        return `
+          <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300 flex items-center justify-between gap-2 mb-2">
+            <span><i class="fa-solid fa-video mr-1.5"></i><strong>Active Video Analysis (${daysAgoLabel}):</strong> Showing latest footage inputs (valid for 5 days).</span>
+          </div>
+          ${ath.technicalSynopsis}
+        `;
+      }
+
+      const pbs = ath.pbs || [];
+      if (!pbs.length) {
+        return `
+          <p><strong>Baseline Athlete Profile (${ath.specialty}):</strong> No official race times or recent video footage (last 5 days) have been logged yet for ${ath.name}.</p>
+          <p><strong>Recommended Next Steps:</strong> Upload Meet Mobile screenshots or add manual baseline times across 50m and 100m events to unlock automated split-drop diagnostics, stroke specialization profiling, and custom race-craft priorities.</p>
+        `;
+      }
+
+      const sortedByPct = [...pbs].sort((a, b) => (b.pct || 0) - (a.pct || 0));
+      const topEvent = sortedByPct[0];
+      const secondEvent = sortedByPct[1];
+      const thirdEvent = sortedByPct[2];
+
+      const free50 = pbs.find(p => p.event.toLowerCase() === '50m freestyle' && p.course.includes('SCM')) || pbs.find(p => p.event.toLowerCase() === '50m freestyle');
+      const free100 = pbs.find(p => p.event.toLowerCase() === '100m freestyle' && p.course.includes('SCM')) || pbs.find(p => p.event.toLowerCase() === '100m freestyle');
+      const free200 = pbs.find(p => p.event.toLowerCase() === '200m freestyle' && p.course.includes('SCM')) || pbs.find(p => p.event.toLowerCase() === '200m freestyle');
+      let enduranceInsight = '';
+      if (free50 && free100) {
+        const s50 = parseTimeToSeconds(free50.time);
+        const s100 = parseTimeToSeconds(free100.time);
+        if (s50 && s100) {
+          const dropOff = (s100 - s50 * 2).toFixed(2);
+          enduranceInsight = parseFloat(dropOff) <= 6.2
+            ? `Demonstrates strong anaerobic speed-endurance conversion between 50m Free (${free50.time}) and 100m Free (${free100.time}), holding a tight +${dropOff}s second-50m differential.`
+            : `Displays explosive front-end sprint speed in 50m Free (${free50.time}) with a +${dropOff}s conversion into 100m Free (${free100.time})—indicating high upside from back-half kick sustain and underwater turn efficiency.`;
+          if (free200) {
+            const s200 = parseTimeToSeconds(free200.time);
+            if (s200) {
+              const avg50in200 = (s200 / 4).toFixed(2);
+              enduranceInsight += ` Across 200m Free (${free200.time}), ${ath.name.split(' ')[0]} averages <strong>${avg50in200}s per 50m</strong> (+${(avg50in200 - s50).toFixed(2)}s off sprint pace), highlighting aerobic threshold capacity.`;
+            }
+          }
+        }
+      }
+
+      const coursePairs = [];
+      const uniqueEvents = [...new Set(pbs.map(p => p.event))];
+      uniqueEvents.forEach(ev => {
+        const scm = pbs.find(p => p.event === ev && p.course.includes('SCM'));
+        const lcm = pbs.find(p => p.event === ev && p.course.includes('LCM'));
+        if (scm && lcm) {
+          const diff = parseTimeToSeconds(lcm.time) - parseTimeToSeconds(scm.time);
+          if (!isNaN(diff)) coursePairs.push({ ev, scm: scm.time, lcm: lcm.time, diff });
+        }
+      });
+
+      let courseInsight = '';
+      if (coursePairs.length > 0) {
+        const primaryPair = coursePairs.find(c => c.ev === topEvent.event) || coursePairs[0];
+        const diffStr = primaryPair.diff >= 0 ? `+${primaryPair.diff.toFixed(2)}s` : `${primaryPair.diff.toFixed(2)}s`;
+        courseInsight = primaryPair.diff <= 1.25
+          ? `Exhibits efficient long-course open-water propulsion in <strong>${primaryPair.ev}</strong> (${primaryPair.lcm} LCM vs ${primaryPair.scm} SCM, only ${diffStr} variance), confirming strong mid-pool stroke power independent of wall push-offs.`
+          : `Shows a <strong>${diffStr}</strong> differential between 25m SCM (${primaryPair.scm}) and 50m LCM (${primaryPair.lcm}) in <strong>${primaryPair.ev}</strong>, underscoring the opportunity to preserve stroke length and hip elevation through the middle 25m of 50m pools.`;
+      }
+
+      const strokeSet = new Set(pbs.map(p => {
+        const l = p.event.toLowerCase();
+        if (l.includes('free')) return 'Freestyle';
+        if (l.includes('back')) return 'Backstroke';
+        if (l.includes('breast')) return 'Breaststroke';
+        if (l.includes('fly')) return 'Butterfly';
+        if (l.includes('im')) return 'IM';
+        return null;
+      }).filter(Boolean));
+      const imPB = pbs.find(p => p.event.toLowerCase().includes('100m im') || p.event.toLowerCase().includes('200m im'));
+      const versatilityInsight = strokeSet.size >= 4
+        ? `Competing across <strong>${strokeSet.size} stroke disciplines</strong> (${Array.from(strokeSet).join(', ')})${imPB ? ` with a benchmark <strong>${imPB.event} of ${imPB.time} (${imPB.std})</strong>` : ''}, providing strong neuromuscular balance and medley relay versatility.`
+        : `Currently focused on <strong>${Array.from(strokeSet).join(' & ')}</strong> events; expanding secondary stroke racing will build balanced shoulder stability and IM readiness.`;
+
+      const evLow = topEvent.event.toLowerCase();
+      let strokePriority = 'Focus on holding a tight streamline for 4–5 dolphin kicks off every turn wall, anchoring an Early Vertical Forearm (EVF) catch, and avoiding late breaths inside the final 5m flags.';
+      if (evLow.includes('breast')) {
+        strokePriority = 'Maximize underwater pullout glide distance off every wall, keep knees narrow during the heel recovery catch, and shoot hands forward rapidly into a flat streamline with minimal vertical head lift.';
+      } else if (evLow.includes('fly')) {
+        strokePriority = 'Keep chin low skimming the water surface on breaths so hip rhythm stays flat, initiate each stroke cycle with a crisp two-beat chest press, and drive strong underwater dolphin kicks off turns.';
+      } else if (evLow.includes('back')) {
+        strokePriority = 'Lock exact stroke counts from the backstroke flags into every turn wall, drive steady shoulder rotation through pinky-first entry, and extend underwater dolphin kicks off each push-off.';
+      } else if (evLow.includes('im')) {
+        strokePriority = 'Sharpen backstroke-to-breaststroke crossover turn execution, maintain streamlined breaststroke pullouts under fatigue, and commit to an immediate 6-beat freestyle kick surge on the final anchor lap.';
+      }
+
+      const staleNote = latestVideo
+        ? `No new video uploaded in the last 5 days (last clip: ${latestVideo.date}) — auto-synthesized from ${pbs.length} official records.`
+        : `Auto-synthesized from ${pbs.length} official Meet Mobile records (no video uploaded in last 5 days).`;
+
+      return `
+        <div class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800/90 text-[11px] text-cyan-300/90 flex items-center gap-2 mb-2">
+          <i class="fa-solid fa-chart-pie text-cyan-400"></i>
+          <span><strong>Historical Data &amp; Split Synthesis:</strong> ${staleNote}</span>
+        </div>
+        <p><strong>1. Primary Event &amp; Benchmark Hierarchy:</strong> ${ath.name}'s highest-ranked benchmark is <strong>${topEvent.event} (${topEvent.time} ${topEvent.course} — ${topEvent.std} Standard)</strong>${secondEvent ? `, supported by <strong>${secondEvent.event} (${secondEvent.time} ${secondEvent.course}, ${secondEvent.std})</strong>` : ''}${thirdEvent ? ` and <strong>${thirdEvent.event} (${thirdEvent.time} ${thirdEvent.course}, ${thirdEvent.std})</strong>` : ''}.</p>
+        ${enduranceInsight ? `<p><strong>2. Speed-Endurance &amp; Pacing Conversion:</strong> ${enduranceInsight}</p>` : ''}
+        ${courseInsight ? `<p><strong>3. Short-Course (SCM) vs. Long-Course (LCM) Profile:</strong> ${courseInsight}</p>` : ''}
+        <p><strong>4. Stroke Versatility &amp; Medley Readiness:</strong> ${versatilityInsight}</p>
+        <p><strong>5. Targeted Race-Craft Priorities:</strong> ${strokePriority}</p>
+      `;
+    }
+
+    function getAuditLog() {
+      try {
+        const raw = localStorage.getItem(AUDIT_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function getActiveUserName() {
+      return localStorage.getItem('ttsActiveUserName') || 'Parent / Coach';
+    }
+
+    function saveActiveUserName() {
+      const val = (document.getElementById('active-user-name-input')?.value || '').trim();
+      if (val) {
+        localStorage.setItem('ttsActiveUserName', val);
+        showToast(`Logging activity as "${val}"`);
+      }
+    }
+
+    function updateAuditBadge() {
+      const badge = document.getElementById('audit-badge-count');
+      if (badge) badge.textContent = getAuditLog().length;
+    }
+
+    function logActivity(actionType, swimmerName, details) {
+      const logs = getAuditLog();
+      logs.unshift({
+        ts: new Date().toLocaleString('en-SG', { dateStyle: 'short', timeStyle: 'short' }),
+        user: getActiveUserName(),
+        type: actionType,
+        swimmer: swimmerName || 'Club',
+        details: details || ''
+      });
+      try {
+        localStorage.setItem(AUDIT_KEY, JSON.stringify(logs.slice(0, 150)));
+      } catch (e) {}
+      updateAuditBadge();
+    }
+
+    function openAuditModal() {
+      const userInp = document.getElementById('active-user-name-input');
+      if (userInp) userInp.value = getActiveUserName();
+
+      const swimFilter = document.getElementById('audit-swimmer-filter');
+      if (swimFilter) {
+        swimFilter.innerHTML = `<option value="ALL">All Swimmers</option>` +
+          Object.values(athletesData).map(a => `<option value="${a.name}">${a.name}</option>`).join('');
+      }
+      renderAuditLogTable();
+      document.getElementById('audit-modal')?.classList.remove('hidden');
+    }
+
+    function closeAuditModal() {
+      document.getElementById('audit-modal')?.classList.add('hidden');
+    }
+
+    function renderAuditLogTable() {
+      const tbody = document.getElementById('audit-table-body');
+      const countLabel = document.getElementById('audit-count-label');
+      if (!tbody) return;
+
+      const q = (document.getElementById('audit-search-filter')?.value || '').toLowerCase();
+      const typeF = document.getElementById('audit-type-filter')?.value || 'ALL';
+      const swimF = document.getElementById('audit-swimmer-filter')?.value || 'ALL';
+
+      const filtered = getAuditLog().filter(item => {
+        if (typeF !== 'ALL' && item.type !== typeF) return false;
+        if (swimF !== 'ALL' && item.swimmer !== swimF) return false;
+        if (q && !`${item.user} ${item.type} ${item.swimmer} ${item.details}`.toLowerCase().includes(q)) return false;
+        return true;
+      });
+
+      if (countLabel) countLabel.textContent = `${filtered.length} records logged`;
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-500">No matching activity records found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(row => `
+        <tr class="hover:bg-slate-900/60">
+          <td class="py-2 px-3 font-mono text-[11px] text-slate-400 whitespace-nowrap">${row.ts}</td>
+          <td class="py-2 px-3 text-white font-semibold">${row.user}</td>
+          <td class="py-2 px-3"><span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">${row.type}</span></td>
+          <td class="py-2 px-3 text-cyan-300 font-semibold">${row.swimmer}</td>
+          <td class="py-2 px-3 text-slate-300">${row.details}</td>
+        </tr>
+      `).join('');
+    }
+
+    function exportAuditLogCSV() {
+      const rows = [['Timestamp', 'Author', 'Action', 'Swimmer', 'Details']];
+      getAuditLog().forEach(r => rows.push([r.ts, r.user, r.type, r.swimmer, `"${(r.details || '').replace(/"/g, '""')}"`]));
+      const csv = rows.map(r => r.join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tts_activity_audit_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast('Exported Activity Log CSV');
+    }
+
+    function clearAuditLog() {
+      localStorage.removeItem(AUDIT_KEY);
+      updateAuditBadge();
+      renderAuditLogTable();
+      showToast('Cleared activity log.');
+    }
+
+    function refreshSwimmerTabs() {
+      const bar = document.getElementById('swimmer-tabs-bar');
+      if (!bar) return;
+
+      const swimmerBtns = Object.values(athletesData).map(ath => {
+        const active = currentSwimmer === ath.id;
+        return `
+          <button onclick="setSwimmerMode('${ath.id}')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-2 border ${
+            active
+              ? 'bg-slate-800 text-white border-cyan-400/70 shadow-lg'
+              : 'bg-slate-900/60 text-slate-400 hover:text-white border-slate-800'
+          }">
+            <span class="w-2 h-2 rounded-full" style="background:${ath.accent || '#00d2ff'}"></span>
+            <span>${ath.name}</span>
+          </button>
+        `;
+      }).join('');
+
+      const h2hActive = currentSwimmer === 'headtohead';
+      const h2hBtn = `
+        <button onclick="setSwimmerMode('headtohead')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 border ml-auto ${
+          h2hActive
+            ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400 shadow-lg'
+            : 'bg-slate-900/60 text-slate-400 hover:text-white border-slate-800'
+        }">
+          <i class="fa-solid fa-bolt text-cyan-400"></i>
+          <span>Head-to-Head Arena</span>
+        </button>
+      `;
+
+      bar.innerHTML = swimmerBtns + h2hBtn;
+    }
+
+    function setSwimmerMode(mode) {
+      currentSwimmer = mode;
+      refreshSwimmerTabs();
+
+      const singleEl = document.getElementById('single-swimmer-view');
+      const h2hEl = document.getElementById('head-to-head-view');
+
+      if (mode === 'headtohead') {
+        singleEl?.classList.add('hidden');
+        h2hEl?.classList.remove('hidden');
+        renderHeadToHead();
+      } else {
+        h2hEl?.classList.add('hidden');
+        singleEl?.classList.remove('hidden');
+        renderSwimmer(mode);
+      }
+
+      try {
+        if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+          const url = new URL(window.location.href);
+          url.searchParams.set('swimmer', mode);
+          window.history.replaceState({}, '', url);
+        }
+      } catch (e) {}
+    }
+
+    function computeStandardSplits(distance, totalSec, isGoal = false) {
+      const splitUnit = 50;
+      const numSplits = Math.max(1, Math.round(distance / splitUnit));
+      const labels = [];
+      const weights = [];
+
+      for (let i = 0; i < numSplits; i++) {
+        const endDist = (i + 1) * splitUnit;
+        labels.push(`${endDist}m`);
+        if (numSplits === 1) {
+          weights.push(1.0);
+        } else if (i === 0) {
+          weights.push(isGoal ? 0.935 : 0.92);
+        } else if (i === numSplits - 1 && numSplits >= 4) {
+          weights.push(isGoal ? 1.015 : 1.035);
+        } else {
+          weights.push(1 + (i * (isGoal ? 0.015 : 0.024)));
+        }
+      }
+
+      const sumW = weights.reduce((a, b) => a + b, 0);
+      const splits = weights.map(w => +((w / sumW) * totalSec).toFixed(2));
+      const currentSum = splits.reduce((a, b) => a + b, 0);
+      splits[splits.length - 1] = +(splits[splits.length - 1] + (totalSec - currentSum)).toFixed(2);
+
+      return { labels, splits, splitUnit };
+    }
+
+    function generateSuggestedTargetsHTML(ath) {
+      const pbs = ath.pbs || [];
+      if (!pbs.length) {
+        return `<p class="text-xs text-slate-400">Add personal bests via Screenshot OCR or Manual Time entry to unlock algorithmic target race times.</p>`;
+      }
+
+      const rows = pbs.map(pb => {
+        const sec = parseTimeToSeconds(pb.time);
+        if (!sec) return '';
+        const nextSec = sec * 0.982;
+        const peakSec = sec * 0.962;
+
+        const distMatch = pb.event.match(/(25|50|100|200|400|800|1500)\s*m?\b/i);
+        const dist = distMatch ? parseInt(distMatch[1], 10) : 50;
+        const { splits } = computeStandardSplits(dist, nextSec, true);
+        const splitDisplay = splits.map(s => formatSecondsToTime(s)).join(' / ');
+
+        const evLow = pb.event.toLowerCase();
+        let focusCue = 'Controlled front-end tempo; strong underwater breakouts';
+        if (evLow.includes('50m')) focusCue = 'Zero-breath final 5m lunge & explosive 15m breakout';
+        else if (evLow.includes('100m')) focusCue = 'Hold stroke length 1st 50m; build kick rate 2nd 50m';
+        else if (evLow.includes('200m') || evLow.includes('400m')) focusCue = 'Even 50m rhythm across middle laps; strong final 50m kick';
+        else if (evLow.includes('im')) focusCue = 'Crisp back-to-breast crossover turn & fast free anchor';
+
+        return `
+          <tr class="hover:bg-slate-900/50 transition">
+            <td class="py-2.5 px-3 font-bold text-white">${pb.event} <span class="text-[10px] text-slate-400 font-mono">(${pb.course})</span></td>
+            <td class="py-2.5 px-3 font-mono text-slate-300">${pb.time}</td>
+            <td class="py-2.5 px-3 font-mono font-bold text-cyan-400">${formatSecondsToTime(nextSec)}</td>
+            <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">${formatSecondsToTime(peakSec)}</td>
+            <td class="py-2.5 px-3 font-mono text-[11px] text-slate-300">${splitDisplay}</td>
+            <td class="py-2.5 px-3 text-[11px] text-slate-400 hidden md:table-cell">${focusCue}</td>
+            <td class="py-2.5 px-3 text-right">
+              <button onclick="loadTargetIntoCalculator('${pb.event}', '${formatSecondsToTime(nextSec)}')" class="px-2.5 py-1 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-[11px] font-bold transition">
+                Calc &rarr;
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      return `
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="text-[10px] uppercase font-bold text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="py-2 px-3">Event</th>
+                <th class="py-2 px-3">Standing PB</th>
+                <th class="py-2 px-3">Next Milestone (-1.8%)</th>
+                <th class="py-2 px-3">Peak Season (-3.8%)</th>
+                <th class="py-2 px-3">Full 50m Split Architecture</th>
+                <th class="py-2 px-3 hidden md:table-cell">Tactical Race Focus</th>
+                <th class="py-2 px-3 text-right">Pacing</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">${rows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function loadTargetIntoCalculator(eventName, targetTimeStr) {
+      const evSel = document.getElementById('calc-event-select');
+      const goalInp = document.getElementById('calc-goal-time');
+      if (evSel) {
+        evSel.value = eventName;
+        handlePacingEventChange();
+      }
+      if (goalInp) goalInp.value = targetTimeStr;
+      runSplitCalculator();
+      evSel?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showToast(`Loaded ${eventName} target (${targetTimeStr}) into Pacing Calculator`);
+    }
+
+    function renderSwimmer(swimmerId) {
+      const container = document.getElementById('single-swimmer-view');
+      const ath = athletesData[swimmerId];
+      if (!container || !ath) return;
+
+      const accent = ath.accent || '#00d2ff';
+      const dobNarrative = getDOBNarrative(ath);
+
+      const quickStatsHTML = (ath.quickStats || []).map(st => `
+        <div class="glass-card rounded-2xl p-4 border border-slate-800/90 relative overflow-hidden">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">${st.label}</div>
+          <div class="font-display font-black text-2xl sm:text-3xl text-white mt-1" style="color:${accent}">${st.val}</div>
+          <div class="text-[11px] text-slate-300 mt-1 font-medium">${st.sub}</div>
+        </div>
+      `).join('');
+
+      const pbRowsHTML = (ath.pbs || []).map((pb, idx) => {
+        const stdBadgeCol = pb.std === 'AAAA' ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+          : pb.std === 'AAA' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+          : pb.std === 'AA' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+          : pb.std === 'A' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+          : 'bg-slate-800 text-slate-300 border-slate-700';
+
+        const stdTierMeaning = pb.std === 'AAAA' ? 'Top 2% • National Elite'
+          : pb.std === 'AAA' ? 'Top 6% • Zone / Championship'
+          : pb.std === 'AA' ? 'Top 15% • Regional A-Final'
+          : pb.std === 'A' ? 'Top 35% • Competitive Age-Group'
+          : pb.std === 'BB' ? 'Top 55% • Developing Club'
+          : 'Entry / Base Benchmark';
+
+        const barColor = pb.std === 'AAAA' ? '#a855f7'
+          : pb.std === 'AAA' ? '#f59e0b'
+          : pb.std === 'AA' ? '#00d2ff'
+          : pb.std === 'A' ? '#10b981'
+          : '#64748b';
+
+        return `
+          <tr class="hover:bg-slate-900/60 transition">
+            <td class="py-2.5 px-3 font-bold text-white">${pb.event}</td>
+            <td class="py-2.5 px-3 font-mono text-[11px] text-slate-400">${pb.course}</td>
+            <td class="py-2.5 px-3 font-mono font-extrabold text-cyan-300 text-sm">${pb.time}</td>
+            <td class="py-2.5 px-3">
+              <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${stdBadgeCol} min-w-[44px] text-center">${pb.std}</span>
+                  <div class="hidden sm:block w-16 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                    <div class="h-1.5 rounded-full" style="width:${pb.pct || 70}%; background:${barColor}"></div>
+                  </div>
+                </div>
+                <span class="text-[10px] text-slate-400 font-medium">${stdTierMeaning}</span>
+              </div>
+            </td>
+            <td class="py-2.5 px-3 text-slate-400 text-[11px] hidden sm:table-cell">${pb.note || ''}</td>
+            <td class="py-2.5 px-3 text-right">
+              <button onclick="openManualPBModal('${ath.id}', ${idx})" title="Edit / Override Time" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-300 transition">
+                <i class="fa-solid fa-pen text-[11px]"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const eventOptionsHTML = ALL_COMPETITIVE_EVENTS.map(ev =>
+        `<option value="${ev.event}">${ev.event}</option>`
+      ).join('');
+
+      const huegillHTML = (ath.huegillLoop || []).map(item => `
+        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800/90">
+          <div class="text-xs font-extrabold text-white">${item.step}</div>
+          <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">${item.desc}</p>
+        </div>
+      `).join('');
+
+      const videoLogBadges = (ath.videoLog || []).slice(0, 4).map(v => `
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200">
+          <i class="fa-solid fa-film text-amber-400"></i> ${v.title} <span class="text-slate-400 font-mono">(${v.date})</span>
+        </span>
+      `).join('');
+
+      container.innerHTML = `
+        <!-- Hero Swimmer Banner -->
+        <div class="glass-card rounded-2xl p-5 sm:p-6 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4" style="border-top: 3px solid ${accent}">
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 class="font-display font-black text-2xl sm:text-3xl text-white tracking-tight">${ath.name}</h2>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-slate-800 text-white border border-slate-700">Age ${ath.age}</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">${dobNarrative}</span>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-300 font-medium">${ath.club} • <span class="text-slate-400">${ath.specialty}</span></p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openEditSwimmerModal('${ath.id}')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-user-pen text-cyan-400"></i> Edit Profile / DOB
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Hero Stat Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          ${quickStatsHTML}
+        </div>
+
+        <!-- Coach's Video Observations & Technical Synopsis -->
+        <div class="glass-card rounded-2xl p-5 sm:p-6 border border-slate-800 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-video text-gold-400"></i>
+              <h3 class="font-display font-bold text-white text-base">Coach's Video Observations &amp; Technical Synopsis</h3>
+            </div>
+            <button onclick="openVideoModal('${ath.id}')" class="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-video"></i> Upload Video / AI Bridge
+            </button>
+          </div>
+          <div class="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-2">
+            ${getEffectiveTechnicalSynopsis(ath)}
+          </div>
+          ${videoLogBadges ? `<div class="pt-2 flex flex-wrap gap-2">${videoLogBadges}</div>` : ''}
+        </div>
+
+        <!-- Official Personal Bests & USA Swimming Benchmark -->
+        <div class="glass-card rounded-2xl p-5 sm:p-6 border border-slate-800 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-medal text-cyan-400"></i>
+              <h3 class="font-display font-bold text-white text-base">Official Personal Bests &amp; USA Swimming Standard Benchmark</h3>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="openManualPBModal('${ath.id}', -1)" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-plus"></i> Manual Time
+              </button>
+              <button onclick="openScanModal('${ath.id}')" class="px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 text-xs font-bold flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-images"></i> Scan Screenshot
+              </button>
+            </div>
+          </div>
+
+          <!-- USA Swimming Motivational Standards Key / Legend -->
+          <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-wrap items-center gap-2 text-[11px]">
+            <span class="font-extrabold text-slate-300 uppercase tracking-wider mr-1"><i class="fa-solid fa-circle-info text-cyan-400 mr-1"></i> USA Swimming Standard Key:</span>
+            <span class="px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-300 border border-purple-500/30 font-semibold"><strong>AAAA</strong> = Top 2% (National Elite)</span>
+            <span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold"><strong>AAA</strong> = Top 6% (Zone / Championship)</span>
+            <span class="px-2 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-semibold"><strong>AA</strong> = Top 15% (Regional A-Final)</span>
+            <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold"><strong>A</strong> = Top 35% (Competitive Standard)</span>
+            <span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 font-semibold"><strong>BB</strong> = Top 55% (Developing Club)</span>
+            <span class="px-2 py-0.5 rounded-md bg-slate-900 text-slate-400 border border-slate-800 font-semibold"><strong>B</strong> = Base Benchmark</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="text-[10px] uppercase font-bold text-slate-400 border-b border-slate-800">
+                <tr>
+                  <th class="py-2 px-3">Event</th>
+                  <th class="py-2 px-3">Course</th>
+                  <th class="py-2 px-3">Personal Best</th>
+                  <th class="py-2 px-3">Motivational Tier</th>
+                  <th class="py-2 px-3 hidden sm:table-cell">Meet / Split Note</th>
+                  <th class="py-2 px-3 text-right">Override</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/60">
+                ${pbRowsHTML}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Suggested Target Race Times & Progression Ladder -->
+        <div class="glass-card rounded-2xl p-5 sm:p-6 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-emerald-400"></i>
+              <h3 class="font-display font-bold text-white text-base">Suggested Target Race Times &amp; Progression Ladder</h3>
+            </div>
+            <span class="text-[11px] text-slate-400 font-mono">Auto-computed from standing PBs</span>
+          </div>
+          ${generateSuggestedTargetsHTML(ath)}
+        </div>
+
+        <!-- Pacing Architecture Calculator & Split Degradation Curve -->
+        <div class="glass-card rounded-2xl p-5 sm:p-6 border border-slate-800 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-chart-line text-cyan-400"></i>
+              <h3 class="font-display font-bold text-white text-base">Pacing Architecture Calculator &amp; Split Degradation Curve</h3>
+            </div>
+            <span class="text-[11px] text-slate-400">All 16 competitive events enabled</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1">Competitive Event</label>
+              <select id="calc-event-select" onchange="handlePacingEventChange()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white font-semibold">
+                ${eventOptionsHTML}
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1">Current Baseline Time</label>
+              <input type="text" id="calc-current-time" value="28.73" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-slate-200 font-mono font-bold">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1">Target Goal Time</label>
+              <input type="text" id="calc-goal-time" value="28.10" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-cyan-400 font-mono font-bold">
+            </div>
+            <div class="flex items-end">
+              <button onclick="runSplitCalculator()" class="w-full py-2 px-4 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-midnight font-extrabold transition">
+                Calculate Splits
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
+            <div id="calc-splits-output" class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-xs space-y-2"></div>
+            <div class="h-56 bg-slate-950/60 rounded-xl p-3 border border-slate-800">
+              <canvas id="split-degradation-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5-Step High-Performance Race Execution Loop -->
+        <div class="glass-card rounded-2xl p-5 sm:p-6 border border-slate-800 space-y-3">
+          <h3 class="font-display font-bold text-white text-base flex items-center gap-2 border-b border-slate-800 pb-3">
+            <i class="fa-solid fa-arrows-spin text-cyan-400"></i> 5-Step High-Performance Race Execution Loop
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            ${huegillHTML}
+          </div>
+        </div>
+      `;
+
+      const defaultEv = ath.pbs?.[0]?.event || '50m Freestyle';
+      const evSel = document.getElementById('calc-event-select');
+      if (evSel) evSel.value = defaultEv;
+      handlePacingEventChange();
+    }
+
+    function handlePacingEventChange() {
+      const ath = athletesData[currentSwimmer];
+      const evName = document.getElementById('calc-event-select')?.value || '50m Freestyle';
+      const curInp = document.getElementById('calc-current-time');
+      const goalInp = document.getElementById('calc-goal-time');
+      if (!ath || !curInp || !goalInp) return;
+
+      const foundPB = (ath.pbs || []).find(p => p.event.toLowerCase() === evName.toLowerCase());
+      const evMeta = ALL_COMPETITIVE_EVENTS.find(e => e.event === evName) || { distance: 50 };
+      const fallbackBase = (evMeta.distance / 50) * 33.5;
+      const baseSec = foundPB ? parseTimeToSeconds(foundPB.time) : fallbackBase;
+
+      curInp.value = formatSecondsToTime(baseSec);
+      goalInp.value = formatSecondsToTime(baseSec * 0.98);
+      runSplitCalculator();
+    }
+
+    function runSplitCalculator() {
+      const evName = document.getElementById('calc-event-select')?.value || '50m Freestyle';
+      const curSec = parseTimeToSeconds(document.getElementById('calc-current-time')?.value) || 32.0;
+      const goalSec = parseTimeToSeconds(document.getElementById('calc-goal-time')?.value) || 31.2;
+      const evMeta = ALL_COMPETITIVE_EVENTS.find(e => e.event === evName) || { distance: 50 };
+
+      const baseObj = computeStandardSplits(evMeta.distance, curSec, false);
+      const goalObj = computeStandardSplits(evMeta.distance, goalSec, true);
+      const labels = goalObj.labels;
+      const normCur = baseObj.splits;
+      const normGoal = goalObj.splits;
+
+      const outBox = document.getElementById('calc-splits-output');
+      if (outBox) {
+        const delta = (curSec - goalSec).toFixed(2);
+        const gridColsClass = labels.length >= 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2';
+        outBox.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span class="font-bold text-white">${evName} (${goalObj.splitUnit}m Split Standard)</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono font-bold">Delta: -${delta}s</span>
+          </div>
+          <div class="grid ${gridColsClass} gap-2 pt-1">
+            ${labels.map((lbl, idx) => `
+              <div class="p-2 rounded-lg bg-slate-950 border border-slate-800">
+                <div class="text-[10px] text-slate-400 font-bold">${lbl}</div>
+                <div class="font-mono font-extrabold text-cyan-400 text-xs">${formatSecondsToTime(normGoal[idx])}s</div>
+                <div class="font-mono text-[10px] text-slate-500">Base: ${formatSecondsToTime(normCur[idx])}s</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      renderSplitChart(labels, normCur, normGoal);
+    }
+
+    function renderSplitChart(labels, curSplits, goalSplits) {
+      const canvas = document.getElementById('split-degradation-chart');
+      if (!canvas) return;
+      if (typeof window.Chart === 'undefined') {
+        canvas.parentElement.innerHTML = `<div class="h-full flex items-center justify-center text-xs text-slate-400">Split chart ready (offline mode)</div>`;
+        return;
+      }
+      if (splitChartInstance) splitChartInstance.destroy();
+      splitChartInstance = new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Baseline Splits (s)',
+              data: curSplits,
+              borderColor: '#64748b',
+              borderDash: [5, 5],
+              tension: 0.3
+            },
+            {
+              label: 'Target Goal Splits (s)',
+              data: goalSplits,
+              borderColor: '#00d2ff',
+              backgroundColor: 'rgba(0, 210, 255, 0.15)',
+              fill: true,
+              tension: 0.3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 11 } } } },
+          scales: {
+            x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+          }
+        }
+      });
+    }
+
+    // ---------------------------------------------------------------------------
+    // HEAD-TO-HEAD ARENA
+    // ---------------------------------------------------------------------------
+    function renderHeadToHead() {
+      const container = document.getElementById('head-to-head-view');
+      if (!container) return;
+      const list = Object.values(athletesData);
+      const opts = list.map(a => `<option value="${a.id}">${a.name} (${a.age}yo)</option>`).join('');
+
+      container.innerHTML = `
+        <div class="glass-card rounded-2xl p-5 sm:p-6 border border-cyan-500/30 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div>
+              <h2 class="font-display font-black text-xl text-white flex items-center gap-2">
+                <i class="fa-solid fa-bolt text-cyan-400"></i> TTS Club Head-to-Head Comparison Arena
+              </h2>
+              <p class="text-xs text-slate-400">Compare any two swimmers side-by-side across all events</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1">Swimmer A</label>
+              <select id="h2h-swimmer-a" onchange="updateHeadToHeadComparison()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-bold">${opts}</select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1">Swimmer B</label>
+              <select id="h2h-swimmer-b" onchange="updateHeadToHeadComparison()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-bold">${opts}</select>
+            </div>
+          </div>
+
+          <div id="h2h-comparison-table" class="overflow-x-auto"></div>
+        </div>
+      `;
+
+      const selB = document.getElementById('h2h-swimmer-b');
+      if (selB && list.length > 1) selB.value = list[1].id;
+      updateHeadToHeadComparison();
+    }
+
+    function updateHeadToHeadComparison() {
+      const idA = document.getElementById('h2h-swimmer-a')?.value;
+      const idB = document.getElementById('h2h-swimmer-b')?.value;
+      const box = document.getElementById('h2h-comparison-table');
+      const a = athletesData[idA];
+      const b = athletesData[idB];
+      if (!box || !a || !b) return;
+
+      const eventSet = new Set([...(a.pbs || []).map(p => p.event), ...(b.pbs || []).map(p => p.event)]);
+      const rows = Array.from(eventSet).map(ev => {
+        const pbA = (a.pbs || []).find(p => p.event === ev);
+        const pbB = (b.pbs || []).find(p => p.event === ev);
+        const secA = pbA ? parseTimeToSeconds(pbA.time) : null;
+        const secB = pbB ? parseTimeToSeconds(pbB.time) : null;
+        let diffHTML = '<span class="text-slate-500">--</span>';
+        if (secA && secB) {
+          const d = (secA - secB).toFixed(2);
+          diffHTML = secA < secB
+            ? `<span class="text-cyan-400 font-bold">${a.name.split(' ')[0]} -${Math.abs(d)}s</span>`
+            : `<span class="text-amber-400 font-bold">${b.name.split(' ')[0]} -${Math.abs(d)}s</span>`;
+        }
+        return `
+          <tr class="hover:bg-slate-900/50">
+            <td class="py-2.5 px-3 font-bold text-white">${ev}</td>
+            <td class="py-2.5 px-3 font-mono text-cyan-300 font-bold">${pbA ? `${pbA.time} (${pbA.course})` : '--'}</td>
+            <td class="py-2.5 px-3 font-mono text-amber-300 font-bold">${pbB ? `${pbB.time} (${pbB.course})` : '--'}</td>
+            <td class="py-2.5 px-3 text-xs">${diffHTML}</td>
+          </tr>
+        `;
+      }).join('');
+
+      box.innerHTML = `
+        <table class="w-full text-left text-xs">
+          <thead class="text-[10px] uppercase font-bold text-slate-400 border-b border-slate-800">
+            <tr>
+              <th class="py-2 px-3">Event</th>
+              <th class="py-2 px-3">${a.name}</th>
+              <th class="py-2 px-3">${b.name}</th>
+              <th class="py-2 px-3">Advantage</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/60">${rows}</tbody>
+        </table>
+      `;
+    }
+
+    // ---------------------------------------------------------------------------
+    // MODALS: ADD SWIMMER, MANUAL PB OVERRIDE, ROSTER & EDIT DOB
+    // ---------------------------------------------------------------------------
+    function updateScannerSwimmerDropdown() {
+      const ids = ['field-swimmer', 'video-swimmer-select', 'manual-pb-swimmer'];
+      const html = Object.values(athletesData).map(a => `<option value="${a.id}">${a.name} (Age ${a.age})</option>`).join('');
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+      });
+    }
+
+    function openInstallModal() {
+      document.getElementById('install-modal')?.classList.remove('hidden');
+    }
+    function closeInstallModal() {
+      document.getElementById('install-modal')?.classList.add('hidden');
+    }
+
+    function openAddSwimmerModal() {
+      if (document.getElementById('new-swimmer-name')) document.getElementById('new-swimmer-name').value = '';
+      if (document.getElementById('new-swimmer-dob')) document.getElementById('new-swimmer-dob').value = '';
+      document.getElementById('add-swimmer-modal')?.classList.remove('hidden');
+    }
+
+    function closeAddSwimmerModal() {
+      document.getElementById('add-swimmer-modal')?.classList.add('hidden');
+    }
+
+    function saveNewSwimmer() {
+      const name = (document.getElementById('new-swimmer-name')?.value || '').trim();
+      if (!name) {
+        showToast('Please enter the swimmer’s full name.', 'warning');
+        return;
+      }
+      const age = parseInt(document.getElementById('new-swimmer-age')?.value || '11', 10) || 11;
+      const dob = (document.getElementById('new-swimmer-dob')?.value || '').trim();
+      const club = (document.getElementById('new-swimmer-club')?.value || 'Tanglin Merlions (TTS-VD)').trim();
+      const specVal = document.getElementById('new-swimmer-specialty')?.value || 'free_sprint';
+      const color = document.querySelector('input[name="swimmer-color"]:checked')?.value || '#00d2ff';
+
+      const specLabels = {
+        free_sprint: 'Freestyle Sprint Specialist',
+        free_distance: 'Freestyle Mid/Distance Specialist',
+        breast: 'Breaststroke Specialist',
+        fly: 'Butterfly Specialist',
+        back: 'Backstroke Specialist',
+        im: 'Individual Medley (IM) All-Rounder'
+      };
+
+      const slugBase = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'swimmer';
+      const id = athletesData[slugBase] ? `${slugBase}_${Date.now().toString().slice(-4)}` : slugBase;
+
+      athletesData[id] = {
+        id,
+        name,
+        age,
+        dob,
+        club,
+        specialty: specLabels[specVal] || 'Competitive Age-Group Swimmer',
+        accent: color,
+        quickStats: [
+          { label: '50m Free', val: '--', sub: 'Baseline Pending' },
+          { label: '100m Free', val: '--', sub: 'Baseline Pending' },
+          { label: 'Primary Stroke', val: '--', sub: 'Baseline Pending' },
+          { label: '100m IM', val: '--', sub: 'Baseline Pending' }
+        ],
+        pbs: [],
+        history: {},
+        technicalSynopsis: '',
+        videoLog: [],
+        huegillLoop: [
+          { step: '1. Vision & Benchmark', desc: 'Establish official baseline PBs across 50m and 100m events.' },
+          { step: '2. Tight Streamlines', desc: 'Hold streamlined dolphin kicks off every start and turn wall.' },
+          { step: '3. High-Elbow Catch', desc: 'Anchor fingertips early and accelerate hand exit past the hip.' }
+        ]
+      };
+
+      logActivity('Swimmer Added', name, `Created swimmer profile (Age ${age}, ${club})`);
+      persistState();
+      refreshSwimmerTabs();
+      updateScannerSwimmerDropdown();
+      closeAddSwimmerModal();
+      setSwimmerMode(id);
+      showToast(`Created profile for ${name}!`);
+    }
+
+    function openManualPBModal(swimmerId, pbIndex = -1) {
+      updateScannerSwimmerDropdown();
+      const targetId = swimmerId || currentSwimmer;
+      const ath = athletesData[targetId];
+      if (!ath) return;
+
+      document.getElementById('manual-pb-swimmer').value = targetId;
+      document.getElementById('manual-pb-index').value = pbIndex;
+      const delBtn = document.getElementById('btn-delete-pb');
+
+      if (pbIndex >= 0 && ath.pbs[pbIndex]) {
+        const pb = ath.pbs[pbIndex];
+        document.getElementById('manual-pb-title').textContent = `Edit ${pb.event} Time`;
+        document.getElementById('manual-pb-event').value = pb.event;
+        document.getElementById('manual-pb-course').value = pb.course;
+        document.getElementById('manual-pb-time').value = pb.time;
+        document.getElementById('manual-pb-note').value = pb.note || '';
+        delBtn?.classList.remove('hidden');
+      } else {
+        document.getElementById('manual-pb-title').textContent = 'Add Manual Race Time';
+        document.getElementById('manual-pb-event').value = '';
+        document.getElementById('manual-pb-course').value = '25m SCM';
+        document.getElementById('manual-pb-time').value = '';
+        document.getElementById('manual-pb-note').value = 'Manual entry';
+        delBtn?.classList.add('hidden');
+      }
+
+      document.getElementById('manual-pb-modal')?.classList.remove('hidden');
+    }
+
+    function closeManualPBModal() {
+      document.getElementById('manual-pb-modal')?.classList.add('hidden');
+    }
+
+    function saveManualPB() {
+      const swimmerId = document.getElementById('manual-pb-swimmer')?.value;
+      const idx = parseInt(document.getElementById('manual-pb-index')?.value || '-1', 10);
+      const rawEv = (document.getElementById('manual-pb-event')?.value || '').trim();
+      const event = normalizeEventName(rawEv);
+      const course = document.getElementById('manual-pb-course')?.value || '25m SCM';
+      const time = (document.getElementById('manual-pb-time')?.value || '').trim();
+      const note = (document.getElementById('manual-pb-note')?.value || '').trim();
+
+      const ath = athletesData[swimmerId];
+      if (!ath || !event || !time || !parseTimeToSeconds(time)) {
+        showToast('Please enter a valid event name and race time (e.g. 32.82).', 'warning');
+        return;
+      }
+
+      const stdObj = calculateStandard(event, time, course, ath.age);
+      const entry = { event, course, time, std: stdObj.std, pct: stdObj.pct, note };
+
+      if (idx >= 0 && ath.pbs[idx]) {
+        ath.pbs[idx] = entry;
+      } else {
+        const existing = ath.pbs.findIndex(p => p.event.toLowerCase() === event.toLowerCase() && p.course === course);
+        if (existing >= 0) ath.pbs[existing] = entry;
+        else ath.pbs.unshift(entry);
+      }
+
+      const shortEv = event.toLowerCase().replace('freestyle', 'free').replace('breaststroke', 'breast').replace('butterfly', 'fly').replace('backstroke', 'back');
+      (ath.quickStats || []).forEach(st => {
+        if (st.label.toLowerCase().includes(shortEv)) {
+          st.val = time;
+          st.sub = `${stdObj.std} Standard`;
+        }
+      });
+
+      logActivity('PB Updated', ath.name, `Manual override ${event} (${course}): ${time}`);
+      persistState();
+      closeManualPBModal();
+      setSwimmerMode(swimmerId);
+      showToast(`Saved ${event} (${time}) for ${ath.name}`);
+    }
+
+    function deleteManualPB() {
+      const swimmerId = document.getElementById('manual-pb-swimmer')?.value;
+      const idx = parseInt(document.getElementById('manual-pb-index')?.value || '-1', 10);
+      const ath = athletesData[swimmerId];
+      if (!ath || idx < 0 || !ath.pbs[idx]) return;
+      const removed = ath.pbs.splice(idx, 1)[0];
+      logActivity('PB Updated', ath.name, `Removed ${removed.event} (${removed.time})`);
+      persistState();
+      closeManualPBModal();
+      setSwimmerMode(swimmerId);
+      showToast(`Removed ${removed.event} from ${ath.name}`);
+    }
+
+    function openRosterModal() {
+      const box = document.getElementById('roster-list-container');
+      if (box) {
+        box.innerHTML = Object.values(athletesData).map(ath => `
+          <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <span class="w-3 h-3 rounded-full" style="background:${ath.accent || '#00d2ff'}"></span>
+              <div>
+                <div class="text-xs font-bold text-white">${ath.name} <span class="text-slate-400 font-normal">• Age ${ath.age}</span></div>
+                <div class="text-[11px] text-slate-400">${getDOBNarrative(ath)} • ${ath.pbs?.length || 0} PBs</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="closeRosterModal(); setSwimmerMode('${ath.id}');" class="px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 text-xs font-bold">View</button>
+              <button onclick="closeRosterModal(); openEditSwimmerModal('${ath.id}');" class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 text-xs font-bold">Edit</button>
+              ${Object.keys(athletesData).length > 1 ? `<button onclick="deleteSwimmerProfile('${ath.id}')" class="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>` : ''}
+            </div>
+          </div>
+        `).join('');
+      }
+      document.getElementById('roster-modal')?.classList.remove('hidden');
+    }
+
+    function closeRosterModal() {
+      document.getElementById('roster-modal')?.classList.add('hidden');
+    }
+
+    function openEditSwimmerModal(swimmerId) {
+      const ath = athletesData[swimmerId];
+      if (!ath) return;
+      document.getElementById('edit-swimmer-id').value = ath.id;
+      document.getElementById('edit-swimmer-name').value = ath.name;
+      document.getElementById('edit-swimmer-dob').value = ath.dob || '';
+      document.getElementById('edit-swimmer-age').value = ath.age;
+      document.getElementById('edit-swimmer-club').value = ath.club || '';
+      document.getElementById('edit-swimmer-specialty').value = ath.specialty || '';
+      document.getElementById('edit-swimmer-modal')?.classList.remove('hidden');
+    }
+
+    function closeEditSwimmerModal() {
+      document.getElementById('edit-swimmer-modal')?.classList.add('hidden');
+    }
+
+    function saveEditedSwimmer() {
+      const id = document.getElementById('edit-swimmer-id')?.value;
+      const ath = athletesData[id];
+      if (!ath) return;
+      const newName = (document.getElementById('edit-swimmer-name')?.value || '').trim();
+      if (!newName) return;
+
+      ath.name = newName;
+      ath.dob = (document.getElementById('edit-swimmer-dob')?.value || '').trim();
+      ath.age = parseInt(document.getElementById('edit-swimmer-age')?.value || ath.age, 10) || ath.age;
+      ath.club = (document.getElementById('edit-swimmer-club')?.value || ath.club).trim();
+      ath.specialty = (document.getElementById('edit-swimmer-specialty')?.value || ath.specialty).trim();
+
+      logActivity('Swimmer Added', ath.name, `Updated profile / DOB (${ath.dob || 'Age ' + ath.age})`);
+      persistState();
+      refreshSwimmerTabs();
+      updateScannerSwimmerDropdown();
+      closeEditSwimmerModal();
+      setSwimmerMode(id);
+      showToast(`Updated ${ath.name}'s profile!`);
+    }
+
+    function deleteSwimmerProfile(id) {
+      if (Object.keys(athletesData).length <= 1) return;
+      const name = athletesData[id]?.name || id;
+      delete athletesData[id];
+      logActivity('Swimmer Added', name, 'Removed swimmer profile from roster');
+      persistState();
+      refreshSwimmerTabs();
+      updateScannerSwimmerDropdown();
+      openRosterModal();
+      if (currentSwimmer === id) setSwimmerMode(Object.keys(athletesData)[0]);
+      showToast(`Removed ${name}`);
+    }
+
+    // ---------------------------------------------------------------------------
+    // BATCH SCREENSHOT OCR SCANNER (TESSERACT.JS)
+    // ---------------------------------------------------------------------------
+    let batchResults = [];
+
+    function openScanModal(swimmerId) {
+      updateScannerSwimmerDropdown();
+      const target = swimmerId || (athletesData[currentSwimmer] ? currentSwimmer : Object.keys(athletesData)[0]);
+      const sel = document.getElementById('field-swimmer');
+      if (sel && target) sel.value = target;
+      document.getElementById('scan-modal')?.classList.remove('hidden');
+    }
+
+    function closeScanModal() {
+      document.getElementById('scan-modal')?.classList.add('hidden');
+    }
+
+    async function handleMultipleFiles(event) {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+
+      const progBox = document.getElementById('scan-progress-box');
+      const statusTxt = document.getElementById('scan-status-text');
+      const pctTxt = document.getElementById('scan-pct-text');
+      const progBar = document.getElementById('scan-progress-bar');
+      progBox?.classList.remove('hidden');
+
+      batchResults = [];
+      for (let i = 0; i < files.length; i++) {
+        const pct = Math.round(((i + 0.5) / files.length) * 100);
+        if (statusTxt) statusTxt.textContent = `Scanning screenshot ${i + 1} of ${files.length}...`;
+        if (pctTxt) pctTxt.textContent = `${pct}%`;
+        if (progBar) progBar.style.width = `${pct}%`;
+
+        let text = '';
+        try {
+          if (window.Tesseract) {
+            const res = await window.Tesseract.recognize(files[i], 'eng');
+            text = res?.data?.text || '';
+          }
+        } catch (e) {}
+
+        const parsed = parseMeetMobileOCRText(text, files[i].name);
+        batchResults.push({ filename: files[i].name, ...parsed });
+      }
+
+      if (statusTxt) statusTxt.textContent = `Completed ${files.length} screenshot(s)!`;
+      if (pctTxt) pctTxt.textContent = '100%';
+      if (progBar) progBar.style.width = '100%';
+
+      selectBatchItem(0);
+    }
+
+    function parseMeetMobileOCRText(text, filename = '') {
+      const combined = `${filename}\n${text}`;
+      const evMatch = combined.match(/\b(50|100|200|400)\s*(?:m|meter|metre)?\s*(Free(?:style)?|Breast(?:stroke)?|Fly|Butterfly|Back(?:stroke)?|IM|Medley)\b/i);
+      const eventName = evMatch ? normalizeEventName(`${evMatch[1]}m ${evMatch[2]}`) : '50m Freestyle';
+      const course = /\bLCM\b|50m/i.test(combined) ? '50m LCM' : '25m SCM';
+      const times = combined.match(/\b\d{1,2}:\d{2}\.\d{2}\b|\b\d{2}\.\d{2}\b/g) || [];
+      return {
+        event: eventName,
+        course,
+        time: times[0] || '',
+        splits: times.slice(1).join(', '),
+        notes: 'Meet Mobile OCR Import'
+      };
+    }
+
+    function selectBatchItem(idx) {
+      const item = batchResults[idx];
+      if (!item) return;
+      document.getElementById('field-event').value = item.event || '';
+      document.getElementById('field-course').value = item.course || '25m SCM';
+      document.getElementById('field-time').value = item.time || '';
+      document.getElementById('field-splits').value = item.splits || '';
+      document.getElementById('field-notes').value = item.notes || '';
+    }
+
+    function commitScannedResult() {
+      const swimmerId = document.getElementById('field-swimmer')?.value;
+      const ath = athletesData[swimmerId];
+      const event = normalizeEventName(document.getElementById('field-event')?.value || '');
+      const course = document.getElementById('field-course')?.value || '25m SCM';
+      const time = (document.getElementById('field-time')?.value || '').trim();
+      const splits = (document.getElementById('field-splits')?.value || '').trim();
+      const notes = (document.getElementById('field-notes')?.value || '').trim();
+
+      if (!ath || !event || !parseTimeToSeconds(time)) {
+        showToast('Please verify the Event and Final Time before saving.', 'warning');
+        return;
+      }
+
+      const stdObj = calculateStandard(event, time, course, ath.age);
+      const entry = {
+        event,
+        course,
+        time,
+        std: stdObj.std,
+        pct: stdObj.pct,
+        note: splits ? `${notes} (${splits})` : notes
+      };
+
+      const idx = ath.pbs.findIndex(p => p.event.toLowerCase() === event.toLowerCase() && p.course === course);
+      if (idx >= 0) ath.pbs[idx] = entry;
+      else ath.pbs.unshift(entry);
+
+      logActivity('OCR Scan', ath.name, `Committed ${event} (${course}): ${time}`);
+      persistState();
+      closeScanModal();
+      setSwimmerMode(swimmerId);
+      showToast(`Saved ${event} (${time}) to ${ath.name}'s profile!`);
+    }
+
+    // ---------------------------------------------------------------------------
+    // EXTERNAL AI VIDEO COACH BRIDGE & STRUCTURED PASTE-BACK PARSER
+    // ---------------------------------------------------------------------------
+    let parsedExternalAI = null;
+
+    function normalizeEventName(raw) {
+      if (!raw) return '';
+      let s = raw.trim();
+      const lower = s.toLowerCase();
+      const distMatch = lower.match(/\b(25|50|100|200|400|800|1500)\b/);
+      if (!distMatch) return s;
+      const dist = distMatch[1];
+      if (lower.includes('free')) return `${dist}m Freestyle`;
+      if (lower.includes('breast')) return `${dist}m Breaststroke`;
+      if (lower.includes('fly') || lower.includes('butter')) return `${dist}m Butterfly`;
+      if (lower.includes('back')) return `${dist}m Backstroke`;
+      if (lower.includes('im') || lower.includes('medley')) return `${dist}m IM`;
+      return s;
+    }
+
+    function updateExternalAIPrompt() {
+      const swimmerId = document.getElementById('video-swimmer-select')?.value;
+      const ath = athletesData[swimmerId] || Object.values(athletesData)[0];
+      const laneCtx = (document.getElementById('video-additional-notes')?.value || '').trim();
+      const promptBox = document.getElementById('external-ai-prompt-box');
+      if (!promptBox || !ath) return;
+
+      const standingPBs = (ath.pbs || []).slice(0, 5).map(p => `${p.event} (${p.course}): ${p.time}`).join(', ');
+      const contextLine = laneCtx ? laneCtx : 'Not specified (identify the primary swimmer in focus)';
+
+      promptBox.value = `I am uploading a swim race video of ${ath.name} (Age ${ath.age}, ${ath.club}).
+Race / Lane Context: ${contextLine}
+Standing Personal Bests: ${standingPBs || 'None recorded yet'}
+
+Please watch the video carefully and analyze their stroke mechanics (catch/pull efficiency, body alignment, kick tempo), underwater streamline/breakouts, breathing posture, turn execution, and finish.
+
+Format your response strictly using this exact structure so I can paste it into their performance dashboard:
+EVENT: [e.g., 50m Breaststroke]
+COURSE: [25m SCM or 50m LCM]
+TIME: [Race time if visible on scoreboard/clock, otherwise N/A]
+STROKE_RATE: [Estimated SPM, e.g., 46 SPM]
+STRENGTHS: [2-3 concise sentences on observed biomechanical strengths]
+PRIORITIES: [2 concise sentences on concrete technical areas to improve]
+SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
+    }
+
+    function copyTextFallback(text) {
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      temp.style.position = 'fixed';
+      temp.style.opacity = '0';
+      document.body.appendChild(temp);
+      temp.select();
+      try {
+        document.execCommand('copy');
+      } catch (e) {}
+      temp.remove();
+    }
+
+    function copyExternalAIPrompt() {
+      const promptBox = document.getElementById('external-ai-prompt-box');
+      if (!promptBox) return;
+      copyTextFallback(promptBox.value);
+      showToast('Coaching prompt copied to clipboard!');
+    }
+
+    function launchExternalAI(platform) {
+      copyExternalAIPrompt();
+      const urls = {
+        gemini: 'https://gemini.google.com/app',
+        chatgpt: 'https://chatgpt.com/',
+        claude: 'https://claude.ai/new',
+        grok: 'https://grok.com/'
+      };
+      const names = {
+        gemini: 'Google Gemini',
+        chatgpt: 'ChatGPT',
+        claude: 'Claude',
+        grok: 'Grok',
+        other: 'your preferred AI app'
+      };
+
+      if (platform === 'other') {
+        showToast('Prompt copied! Open any AI app, upload your swim video, and paste the prompt.');
+        return;
+      }
+
+      showToast(`Prompt copied! Opening ${names[platform]} — upload your video & paste.`);
+      window.open(urls[platform], '_blank', 'noopener,noreferrer');
+    }
+
+    function switchVideoToScreenshotFallback() {
+      const selectedSwimmer = document.getElementById('video-swimmer-select')?.value;
+      closeVideoModal();
+      openScanModal(selectedSwimmer);
+    }
+
+    function parseExternalAIOutput(notifyUser = false) {
+      const raw = (document.getElementById('external-ai-paste-box')?.value || '').trim();
+      const previewCard = document.getElementById('parsed-ai-preview-card');
+      const previewBody = document.getElementById('parsed-preview-body');
+      const spmBadge = document.getElementById('parsed-spm-badge');
+
+      if (!raw) {
+        parsedExternalAI = null;
+        previewCard?.classList.add('hidden');
+        return;
+      }
+
+      const extractField = (key) => {
+        const regex = new RegExp(`(?:^|\\n)\\s*(?:\\*\\*)?${key}(?:\\*\\*)?\\s*:\\s*([\\s\\S]*?)(?=\\n\\s*(?:\\*\\*)?(?:EVENT|COURSE|TIME|STROKE_RATE|STRENGTHS|PRIORITIES|SUMMARY_TAG)(?:\\*\\*)?\\s*:|$)`, 'i');
+        const m = raw.match(regex);
+        return m ? m[1].replace(/\*\*/g, '').trim() : '';
+      };
+
+      const detectedEvent = normalizeEventName(extractField('EVENT'));
+      const rawCourse = extractField('COURSE').toUpperCase();
+      const detectedTimeRaw = extractField('TIME');
+      const strokeRate = extractField('STROKE_RATE');
+      let strengths = extractField('STRENGTHS');
+      let priorities = extractField('PRIORITIES');
+      const summaryTag = extractField('SUMMARY_TAG');
+
+      if (!strengths && !priorities) {
+        const cleanLines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+        strengths = cleanLines.slice(0, 2).join(' ');
+        priorities = cleanLines.slice(2, 4).join(' ') || 'Maintain tight streamline off every turn wall and sustain kick tempo through the final 15 meters.';
+      }
+
+      const evInput = document.getElementById('video-race-event');
+      const courseSelect = document.getElementById('video-race-course');
+      const timeInput = document.getElementById('video-race-time');
+
+      if (evInput && detectedEvent) evInput.value = detectedEvent;
+      if (courseSelect && rawCourse) {
+        if (rawCourse.includes('LCM') || rawCourse.includes('50M')) courseSelect.value = '50m LCM';
+        else if (rawCourse.includes('SCY') || rawCourse.includes('25Y')) courseSelect.value = '25y SCY';
+        else if (rawCourse.includes('SCM') || rawCourse.includes('25M')) courseSelect.value = '25m SCM';
+      }
+      if (timeInput && detectedTimeRaw && !/^n\/?a$/i.test(detectedTimeRaw) && /\d/.test(detectedTimeRaw)) {
+        const timeMatch = detectedTimeRaw.match(/\d{1,2}:\d{2}\.\d{2}|\d{2}\.\d{2}/);
+        if (timeMatch) timeInput.value = timeMatch[0];
+      }
+
+      parsedExternalAI = {
+        detectedEvent,
+        strokeRate,
+        strengths,
+        priorities,
+        summaryTag
+      };
+
+      if (previewCard && previewBody) {
+        previewCard.classList.remove('hidden');
+        if (spmBadge) spmBadge.textContent = strokeRate ? `Cadence: ${strokeRate}` : 'Structured Critique Parsed';
+        previewBody.innerHTML = `
+          ${strengths ? `<p><strong class="text-cyan-300">Strengths:</strong> ${strengths}</p>` : ''}
+          ${priorities ? `<p><strong class="text-amber-300">Priorities:</strong> ${priorities}</p>` : ''}
+        `;
+      }
+
+      if (notifyUser) {
+        showToast('Parsed AI analysis! Review fields below and click Save Analysis.');
+      }
+    }
+
+    function openVideoModal(swimmerId) {
+      updateScannerSwimmerDropdown();
+      const targetId = swimmerId || (athletesData[currentSwimmer] ? currentSwimmer : Object.keys(athletesData)[0]);
+      const sel = document.getElementById('video-swimmer-select');
+      if (sel && targetId) sel.value = targetId;
+
+      if (document.getElementById('video-additional-notes')) document.getElementById('video-additional-notes').value = '';
+      if (document.getElementById('external-ai-paste-box')) document.getElementById('external-ai-paste-box').value = '';
+      if (document.getElementById('video-race-event')) document.getElementById('video-race-event').value = '';
+      if (document.getElementById('video-race-time')) document.getElementById('video-race-time').value = '';
+      document.getElementById('parsed-ai-preview-card')?.classList.add('hidden');
+
+      parsedExternalAI = null;
+      updateExternalAIPrompt();
+      document.getElementById('video-modal')?.classList.remove('hidden');
+    }
+
+    function closeVideoModal() {
+      document.getElementById('video-modal')?.classList.add('hidden');
+    }
+
+    function commitVideoAnalysis() {
+      const swimmerId = document.getElementById('video-swimmer-select')?.value;
+      const ath = athletesData[swimmerId];
+      if (!ath) return;
+
+      parseExternalAIOutput(false);
+
+      const rawRaceEvent = (document.getElementById('video-race-event')?.value || (parsedExternalAI?.detectedEvent || '')).trim();
+      const raceEvent = normalizeEventName(rawRaceEvent);
+      const raceCourse = document.getElementById('video-race-course')?.value || '25m SCM';
+      const raceTimeStr = (document.getElementById('video-race-time')?.value || '').trim();
+      const additionalNotes = (document.getElementById('video-additional-notes')?.value || '').trim();
+
+      if (!parsedExternalAI && !raceEvent && !additionalNotes) {
+        showToast('Paste the AI output or enter a race event before saving.', 'warning');
+        return;
+      }
+
+      const contextTitle = parsedExternalAI?.summaryTag || (raceEvent ? `${raceEvent} AI Video Analysis` : 'AI Video Analysis');
+      let pbHighlightHTML = '';
+      let isNewPB = false;
+
+      if (raceEvent && raceTimeStr && !/^n\/?a$/i.test(raceTimeStr)) {
+        const newSec = parseTimeToSeconds(raceTimeStr);
+        if (newSec) {
+          const stdObj = calculateStandard(raceEvent, raceTimeStr, raceCourse, ath.age);
+          const existingIdx = ath.pbs.findIndex(p =>
+            normalizeEventName(p.event).toLowerCase() === raceEvent.toLowerCase() && p.course === raceCourse
+          );
+
+          if (existingIdx >= 0) {
+            const oldSec = parseTimeToSeconds(ath.pbs[existingIdx].time);
+            if (!oldSec || newSec <= oldSec) {
+              const drop = oldSec ? (oldSec - newSec).toFixed(2) : '0.00';
+              ath.pbs[existingIdx] = {
+                event: raceEvent,
+                course: raceCourse,
+                time: raceTimeStr,
+                std: stdObj.std,
+                pct: stdObj.pct,
+                note: `Video Verified PB (-${drop}s drop)`
+              };
+              isNewPB = true;
+              pbHighlightHTML = `<p class="text-emerald-300 font-semibold">Personal Best Upgrade: Dropped -${drop}s in ${raceEvent} (${raceCourse}) to <strong>${raceTimeStr}</strong> [${stdObj.std} Standard].</p>`;
+              logActivity('PB Updated', ath.name, `Video PB in ${raceEvent} (${raceCourse}): ${raceTimeStr} (-${drop}s)`);
+            } else {
+              pbHighlightHTML = `<p class="text-slate-300">Video Race Time Logged: <strong>${raceTimeStr}</strong> in ${raceEvent} (${raceCourse}) vs standing PB of ${ath.pbs[existingIdx].time}.</p>`;
+            }
+          } else {
+            ath.pbs.unshift({
+              event: raceEvent,
+              course: raceCourse,
+              time: raceTimeStr,
+              std: stdObj.std,
+              pct: stdObj.pct,
+              note: `Video Verified PB`
+            });
+            isNewPB = true;
+            pbHighlightHTML = `<p class="text-emerald-300 font-semibold">New Verified Mark: Recorded <strong>${raceTimeStr}</strong> in ${raceEvent} (${raceCourse}) [${stdObj.std} Standard].</p>`;
+            logActivity('PB Updated', ath.name, `New Video PB in ${raceEvent} (${raceCourse}): ${raceTimeStr}`);
+          }
+
+          if (!ath.history) ath.history = {};
+          if (!ath.history[raceEvent]) ath.history[raceEvent] = [];
+          ath.history[raceEvent].push({
+            meet: contextTitle,
+            date: new Date().toISOString().slice(0, 10),
+            time: newSec
+          });
+
+          const shortEv = raceEvent.toLowerCase()
+            .replace('freestyle', 'free')
+            .replace('breaststroke', 'breast')
+            .replace('butterfly', 'fly')
+            .replace('backstroke', 'back');
+          (ath.quickStats || []).forEach(st => {
+            if (st.label.toLowerCase().includes(shortEv)) {
+              const curStatSec = parseTimeToSeconds(st.val);
+              if (!curStatSec || newSec <= curStatSec) {
+                st.val = raceTimeStr;
+                st.sub = `${stdObj.std} Standard (Video PB!)`;
+              }
+            }
+          });
+        }
+      }
+
+      const customNotesHTML = additionalNotes
+        ? `<p class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-700/80 text-slate-200 text-xs"><strong class="text-cyan-400"><i class="fa-solid fa-eye mr-1"></i>Clip &amp; Lane Context:</strong> ${additionalNotes.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`
+        : '';
+
+      const spmTag = parsedExternalAI?.strokeRate ? ` • Cadence: ${parsedExternalAI.strokeRate}` : '';
+      const strengthsText = parsedExternalAI?.strengths || 'Strong body alignment, controlled breathing posture, and steady stroke rhythm across the race.';
+      const prioritiesText = parsedExternalAI?.priorities || 'Maintain tight streamline off every turn wall and drive strong leg kick tempo through the final 15 meters.';
+
+      ath.technicalSynopsis = `
+        <p><strong>AI Video Analysis (${contextTitle}${raceEvent ? ` • ${raceEvent}` : ''}${spmTag}):</strong> ${strengthsText}</p>
+        ${customNotesHTML}
+        ${pbHighlightHTML}
+        <p><strong>Key Developmental Priorities:</strong> ${prioritiesText}</p>
+      `;
+
+      if (!ath.videoLog) ath.videoLog = [];
+      ath.videoLog.unshift({
+        title: `${contextTitle}${raceTimeStr ? ` (${raceTimeStr})` : ''}`,
+        date: new Date().toISOString().slice(0, 10),
+        uploadedAt: Date.now(),
+        note: parsedExternalAI?.summaryTag || additionalNotes || 'External AI video analysis imported'
+      });
+
+      logActivity('Video Analysis', ath.name, `Imported AI video critique "${contextTitle}"${isNewPB ? ` (New PB: ${raceTimeStr})` : ''}`);
+      persistState();
+      closeVideoModal();
+      setSwimmerMode(swimmerId);
+      showToast(isNewPB
+        ? `Saved AI Video Critique & New ${raceEvent} PB (${raceTimeStr}) for ${ath.name}!`
+        : `Saved AI Video Critique for ${ath.name}!`
+      );
+    }
+
+    // ---------------------------------------------------------------------------
+    // DATA BACKUP, EXPORT & FACTORY RESET HANDLERS
+    // ---------------------------------------------------------------------------
+    function openDataBackupModal() {
+      const syncInp = document.getElementById('club-sync-id-input');
+      if (syncInp) syncInp.value = window.getClubSyncId ? window.getClubSyncId() : '';
+      const badge = document.getElementById('modal-cloud-badge');
+      if (badge) {
+        badge.textContent = window.isCloudConnected ? 'Live Cloud Connected' : 'Connecting...';
+      }
+      const dbg = document.getElementById('cloud-sync-debug-msg');
+      if (dbg && window.cloudSyncEndpointUrl) {
+        dbg.textContent = `Firestore Path: ${window.cloudSyncEndpointUrl}`;
+      }
+      document.getElementById('backup-modal')?.classList.remove('hidden');
+    }
+
+    function saveClubSyncId() {
+      const raw = (document.getElementById('club-sync-id-input')?.value || '').trim();
+      if (!raw) {
+        showToast('Enter a valid Club Sync ID.', 'warning');
+        return;
+      }
+      localStorage.setItem('ttsClubSyncId', raw);
+      showToast('Updated Club Sync ID! Reconnecting...');
+      setTimeout(() => location.reload(), 600);
+    }
+
+    function copySyncShareLink() {
+      const syncId = window.getClubSyncId ? window.getClubSyncId() : '';
+      let shareUrl = window.location.href;
+      try {
+        const u = new URL(window.location.href);
+        if (syncId) u.searchParams.set('syncId', syncId);
+        shareUrl = u.toString();
+      } catch (e) {}
+      copyTextFallback(shareUrl);
+      showToast('Copied direct sync link! Open this link on your other device to pair.');
+    }
+
+    function forcePushCloudSync() {
+      if (typeof window.pushStateToCloud === 'function') {
+        window.pushStateToCloud(true);
+        showToast('Synced latest roster & video updates across devices!');
+      }
+    }
+
+    function closeDataBackupModal() {
+      document.getElementById('backup-modal')?.classList.add('hidden');
+    }
+
+    function downloadBackupJSON() {
+      const payload = JSON.stringify(athletesData, null, 2);
+      const blob = new Blob([payload], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tts_swimming_roster_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast('Downloaded full club roster JSON backup.');
+    }
+
+    function importBackupJSON() {
+      const raw = (document.getElementById('import-json-area')?.value || '').trim();
+      if (!raw) {
+        showToast('Paste valid JSON into the box first.', 'warning');
+        return;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') throw new Error('Invalid JSON');
+        athletesData = parsed;
+        persistState();
+        refreshSwimmerTabs();
+        updateScannerSwimmerDropdown();
+        const firstId = Object.keys(athletesData)[0] || 'monty';
+        setSwimmerMode(firstId);
+        closeDataBackupModal();
+        showToast('Successfully imported club roster JSON!');
+      } catch (e) {
+        showToast('Invalid JSON format. Please check and try again.', 'error');
+      }
+    }
+
+    function resetToDefaults() {
+      localStorage.removeItem('ttsSwimData_v10');
+      athletesData = JSON.parse(JSON.stringify(defaultAthletesData));
+      persistState();
+      refreshSwimmerTabs();
+      updateScannerSwimmerDropdown();
+      setSwimmerMode('monty');
+      closeDataBackupModal();
+      showToast('Restored default TTS Swimming Dashboard profiles.');
+    }
+
+    // ---------------------------------------------------------------------------
+    // INITIALIZE APPLICATION ON DOM READY & WINDOW LOAD
+    // ---------------------------------------------------------------------------
+    function initDashboardApp() {
+      try {
+        refreshSwimmerTabs();
+        updateScannerSwimmerDropdown();
+        updateAuditBadge();
+
+        let initialMode = 'monty';
+        try {
+          if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+            const params = new URLSearchParams(window.location.search);
+            const qSwimmer = params.get('swimmer');
+            if (qSwimmer && (qSwimmer === 'headtohead' || athletesData[qSwimmer])) {
+              initialMode = qSwimmer;
+            }
+          }
+        } catch (e) {}
+
+        setSwimmerMode(initialMode);
+        logActivity('Page Visit', athletesData[initialMode]?.name || 'Club Overview', 'Opened TTS Swimming Dashboard');
+
+        if (typeof window.updateCloudStatusUI === 'function') {
+          window.updateCloudStatusUI('local', 'Local Sync Ready');
+        }
+      } catch (err) {
+        console.error('Dashboard initialization error:', err);
+        const mainEl = document.getElementById('single-swimmer-view');
+        if (mainEl) {
+          mainEl.classList.remove('hidden');
+          mainEl.innerHTML = `
+            <div class="glass-card rounded-2xl p-6 border border-rose-500/40 text-center space-y-3">
+              <div class="text-rose-400 font-bold text-sm">Dashboard Recovery Mode</div>
+              <p class="text-xs text-slate-300">A cached data mismatch interrupted rendering (${err.message}).</p>
+              <button onclick="resetToDefaults(); location.reload();" class="px-4 py-2 rounded-lg bg-cyan-500 text-midnight font-bold text-xs">
+                Reset Cache &amp; Reload
+              </button>
+            </div>
+          `;
+        }
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initDashboardApp);
+    } else {
+      initDashboardApp();
+    }
+    window.addEventListener('load', () => {
+      const container = document.getElementById('single-swimmer-view');
+      if (container && !container.innerHTML.trim()) {
+        initDashboardApp();
+      }
+    });
+  </script>
+
+  <!-- ========================================================================= -->
+  <!-- REAL-TIME CROSS-DEVICE CLOUD SYNC MODULE (FIREBASE FIRESTORE)             -->
+  <!-- ========================================================================= -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+    import { getFirestore, doc, onSnapshot, setDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+    const MODULE_STORAGE_KEY = window.STORAGE_KEY || 'ttsSwimData_v12';
+    const MODULE_AUDIT_KEY = window.AUDIT_KEY || 'ttsSwimAudit_v12';
+    const DEFAULT_CLUB_DOC_ID = 'active_club_dataset';
+
+    window.getClubSyncId = function() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const urlSync = params.get('syncId');
+        if (urlSync) {
+          localStorage.setItem('ttsClubSyncId', urlSync);
+          return urlSync;
+        }
+      } catch (e) {}
+      const saved = localStorage.getItem('ttsClubSyncId');
+      if (!saved || saved.includes('019a7c8e') || saved.startsWith('tts-swim-daykris76')) {
+        localStorage.setItem('ttsClubSyncId', DEFAULT_CLUB_DOC_ID);
+        return DEFAULT_CLUB_DOC_ID;
+      }
+      return saved;
+    };
+
+    window.isCloudConnected = false;
+    window.cloudSyncEndpointUrl = '';
+    let db = null;
+    let rosterDocRef = null;
+    let lastSyncedUpdatedAt = Number(localStorage.getItem(MODULE_STORAGE_KEY + '_updatedAt') || 0);
+
+    async function initRealtimeCloudSync() {
+      try {
+        let firebaseConfig = window.EMBEDDED_FIREBASE_CONFIG || null;
+        let appId = 'tts-swim-club-shared';
+
+        if (!firebaseConfig && typeof __firebase_config !== 'undefined' && __firebase_config) {
+          firebaseConfig = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
+        }
+        if (typeof __app_id !== 'undefined' && __app_id) {
+          appId = __app_id;
+        }
+
+        if (!firebaseConfig || !firebaseConfig.apiKey) {
+          window.updateCloudStatusUI('local', 'Local Sync Ready');
+          return;
+        }
+
+        window.updateCloudStatusUI('syncing', 'Connecting Cloud...');
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        db = getFirestore(app);
+
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        onAuthStateChanged(auth, (user) => {
+          if (!user) return;
+          const docId = window.getClubSyncId().replace(/[^a-zA-Z0-9_-]/g, '_');
+          const pathSegments = ['artifacts', appId, 'public', 'data', 'roster_state', docId];
+          window.cloudSyncEndpointUrl = pathSegments.join('/');
+          rosterDocRef = doc(db, ...pathSegments);
+
+          onSnapshot(rosterDocRef, (snap) => {
+            window.isCloudConnected = true;
+            window.updateCloudStatusUI('connected', 'Live Cloud Sync');
+
+            if (snap.exists()) {
+              const cloudData = snap.data();
+              const cloudTs = Number(cloudData.updatedAt || 0);
+              if (cloudData.athletes && cloudTs > lastSyncedUpdatedAt) {
+                lastSyncedUpdatedAt = cloudTs;
+                athletesData = cloudData.athletes;
+                if (Array.isArray(cloudData.auditLog)) {
+                  localStorage.setItem(MODULE_AUDIT_KEY, JSON.stringify(cloudData.auditLog));
+                  updateAuditBadge();
+                }
+                persistState(true);
+                refreshSwimmerTabs();
+                updateScannerSwimmerDropdown();
+                setSwimmerMode(currentSwimmer);
+                showToast('Synced latest updates from another device!');
+              }
+            } else {
+              window.pushStateToCloud(true);
+            }
+          }, (err) => {
+            console.warn('Firestore snapshot listener warning:', err);
+            window.isCloudConnected = false;
+            window.updateCloudStatusUI('local', 'Local Cached');
+          });
+        });
+      } catch (err) {
+        console.warn('Firebase initialization warning:', err);
+        window.isCloudConnected = false;
+        window.updateCloudStatusUI('local', 'Local Cached');
+      }
+    }
+
+    window.pushStateToCloud = async function(immediate = false) {
+      const runPush = async () => {
+        if (rosterDocRef && db) {
+          try {
+            window.updateCloudStatusUI('syncing', 'Syncing...');
+            const nowTs = Date.now();
+            lastSyncedUpdatedAt = nowTs;
+            localStorage.setItem(MODULE_STORAGE_KEY + '_updatedAt', String(nowTs));
+            await setDoc(rosterDocRef, {
+              athletes: athletesData,
+              auditLog: getAuditLog().slice(0, 60),
+              updatedAt: nowTs,
+              updatedBy: getActiveUserName()
+            }, { merge: true });
+            window.updateCloudStatusUI('connected', 'Live Cloud Sync');
+          } catch (e) {
+            console.warn('Firestore write warning:', e);
+            window.updateCloudStatusUI('local', 'Local Cached');
+          }
+        }
+      };
+
+      if (immediate) {
+        await runPush();
+      } else {
+        clearTimeout(window.cloudSyncTimer);
+        window.cloudSyncTimer = setTimeout(runPush, 350);
+      }
+    };
+
+    initRealtimeCloudSync();
+  </script>
+</body>
+</html>
