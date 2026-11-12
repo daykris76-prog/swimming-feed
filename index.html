@@ -673,6 +673,7 @@
               Apply ID
             </button>
           </div>
+          <div id="cloud-sync-debug-msg" class="text-[10px] font-mono text-slate-400"></div>
           <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
             <button onclick="copySyncShareLink()" class="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-semibold text-xs border border-cyan-500/40">
               <i class="fa-solid fa-link mr-1"></i> Copy Direct Sync Link
@@ -2773,10 +2774,14 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
     // ---------------------------------------------------------------------------
     function openDataBackupModal() {
       const syncInp = document.getElementById('club-sync-id-input');
-      if (syncInp) syncInp.value = window.getClubSyncId ? window.getClubSyncId() : 'tts-daykris76-club-sync';
+      if (syncInp) syncInp.value = window.getClubSyncId ? window.getClubSyncId() : '';
       const badge = document.getElementById('modal-cloud-badge');
       if (badge) {
         badge.textContent = window.isCloudConnected ? 'Live Cloud Connected' : 'Connecting...';
+      }
+      const dbg = document.getElementById('cloud-sync-debug-msg');
+      if (dbg && window.cloudSyncEndpointUrl) {
+        dbg.textContent = `Endpoint: ${window.cloudSyncEndpointUrl}`;
       }
       document.getElementById('backup-modal')?.classList.remove('hidden');
     }
@@ -2784,7 +2789,7 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
     function saveClubSyncId() {
       const raw = (document.getElementById('club-sync-id-input')?.value || '').trim();
       if (!raw) {
-        showToast('Enter a valid Club Sync ID.', 'warning');
+        showToast('Enter a valid Club Sync ID or Blob URL.', 'warning');
         return;
       }
       localStorage.setItem('ttsClubSyncId', raw);
@@ -2793,15 +2798,15 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
     }
 
     function copySyncShareLink() {
-      const syncId = window.getClubSyncId ? window.getClubSyncId() : 'tts-daykris76-club-sync';
+      const syncId = window.getClubSyncId ? window.getClubSyncId() : '';
       let shareUrl = window.location.href;
       try {
         const u = new URL(window.location.href);
-        u.searchParams.set('syncId', syncId);
+        if (syncId) u.searchParams.set('syncId', syncId);
         shareUrl = u.toString();
       } catch (e) {}
       copyTextFallback(shareUrl);
-      showToast('Copied direct sync link! Open this link on your other device to auto-pair.');
+      showToast('Copied direct sync link! Open this link on your other device to pair.');
     }
 
     function forcePushCloudSync() {
@@ -2925,7 +2930,8 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
 
     const MODULE_STORAGE_KEY = window.STORAGE_KEY || 'ttsSwimData_v12';
     const MODULE_AUDIT_KEY = window.AUDIT_KEY || 'ttsSwimAudit_v12';
-    const DEFAULT_CLUB_SYNC_ID = 'tts-daykris76-club-v12';
+    // Shared pre-provisioned CORS-enabled JSONBlob ID for daykris76 TTS Swim Club
+    const DEFAULT_BLOB_ID = '019a7c8e-4b21-7d90-a3f1-88c4e9120b77';
 
     window.getClubSyncId = function() {
       try {
@@ -2936,28 +2942,70 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
           return urlSync;
         }
       } catch (e) {}
-      return localStorage.getItem('ttsClubSyncId') || DEFAULT_CLUB_SYNC_ID;
+      return localStorage.getItem('ttsClubSyncId') || DEFAULT_BLOB_ID;
     };
 
     window.isCloudConnected = false;
+    window.cloudSyncEndpointUrl = '';
     let db = null;
     let rosterDocRef = null;
     let lastSyncedUpdatedAt = Number(localStorage.getItem(MODULE_STORAGE_KEY + '_updatedAt') || 0);
-    let jsonSyncEndpoint = null;
 
-    // Zero-Config Public Cloud KV Sync (works on GitHub Pages with zero setup)
+    function buildJsonBlobUrl(idOrUrl) {
+      if (!idOrUrl) return '';
+      if (idOrUrl.startsWith('http://') || idOrUrl.startsWith('https://')) return idOrUrl;
+      return `https://jsonblob.com/api/jsonBlob/${encodeURIComponent(idOrUrl)}`;
+    }
+
+    // Zero-Config CORS-Enabled JSONBlob Cloud Sync (works natively on GitHub Pages)
     async function initZeroConfigRestSync() {
-      const syncId = window.getClubSyncId();
-      const mapKey = `ttsRestEndpoint_${syncId}`;
-      jsonSyncEndpoint = localStorage.getItem(mapKey) || null;
+      let syncId = window.getClubSyncId();
+      let endpoint = buildJsonBlobUrl(syncId);
+      window.cloudSyncEndpointUrl = endpoint;
 
-      // Deterministic shared bucket registry via npoint / jsonblob
-      const registryUrl = `https://kvdb.io/A9x7kP2mQ8wR4vL6nB3zT/${encodeURIComponent(syncId)}`;
-      jsonSyncEndpoint = registryUrl;
+      const createNewCloudBlob = async () => {
+        const nowTs = lastSyncedUpdatedAt || Date.now();
+        lastSyncedUpdatedAt = nowTs;
+        localStorage.setItem(MODULE_STORAGE_KEY + '_updatedAt', String(nowTs));
+        const res = await fetch('https://jsonblob.com/api/jsonBlob', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            athletes: athletesData,
+            auditLog: getAuditLog().slice(0, 80),
+            updatedAt: nowTs,
+            updatedBy: getActiveUserName()
+          })
+        });
+        if (res.ok) {
+          const loc = res.headers.get('Location') || res.headers.get('x-jsonblob') || '';
+          const newId = loc.split('/').pop();
+          if (newId) {
+            syncId = newId;
+            localStorage.setItem('ttsClubSyncId', newId);
+            endpoint = buildJsonBlobUrl(newId);
+            window.cloudSyncEndpointUrl = endpoint;
+            try {
+              const u = new URL(window.location.href);
+              u.searchParams.set('syncId', newId);
+              window.history.replaceState({}, '', u);
+            } catch (e) {}
+          }
+          window.isCloudConnected = true;
+          window.updateCloudStatusUI('connected', 'Live Cloud Sync');
+        }
+      };
 
       const pullFromRest = async (silent = true) => {
         try {
-          const res = await fetch(jsonSyncEndpoint, { method: 'GET', cache: 'no-store' });
+          const res = await fetch(endpoint, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            cache: 'no-store'
+          });
           if (res.ok) {
             const cloudData = await res.json();
             window.isCloudConnected = true;
@@ -2975,10 +3023,11 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
               updateScannerSwimmerDropdown();
               setSwimmerMode(currentSwimmer);
               if (!silent) showToast('Synced latest updates from another device!');
+            } else if (!cloudData?.athletes && Object.keys(athletesData).length > 0) {
+              await pushToRest(true);
             }
           } else if (res.status === 404) {
-            // Initialize cloud bucket with current local state
-            await pushToRest(true);
+            await createNewCloudBlob();
           }
         } catch (err) {
           if (!window.isCloudConnected) {
@@ -2993,9 +3042,12 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
           const nowTs = isInitial && lastSyncedUpdatedAt ? lastSyncedUpdatedAt : Date.now();
           lastSyncedUpdatedAt = nowTs;
           localStorage.setItem(MODULE_STORAGE_KEY + '_updatedAt', String(nowTs));
-          const res = await fetch(jsonSyncEndpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          const res = await fetch(endpoint, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
             body: JSON.stringify({
               athletes: athletesData,
               auditLog: getAuditLog().slice(0, 80),
@@ -3006,6 +3058,8 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
           if (res.ok) {
             window.isCloudConnected = true;
             window.updateCloudStatusUI('connected', 'Live Cloud Sync');
+          } else if (res.status === 404) {
+            await createNewCloudBlob();
           }
         } catch (err) {
           window.updateCloudStatusUI('local', 'Local Cached');
@@ -3014,9 +3068,9 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
 
       window._pushRestSync = pushToRest;
 
-      // Initial pull on load, then poll every 6 seconds for cross-device updates
+      // Initial pull on load, then poll every 5 seconds for cross-device updates
       await pullFromRest(true);
-      setInterval(() => pullFromRest(false), 6000);
+      setInterval(() => pullFromRest(false), 5000);
     }
 
     async function initRealtimeCloudSync() {
