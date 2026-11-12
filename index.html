@@ -11,7 +11,6 @@
   <meta name="apple-mobile-web-app-title" content="TTS Swim">
   <meta name="theme-color" content="#070d17">
   <link rel="apple-touch-icon" href="https://placehold.co/192x192/06b6d4/ffffff?text=TTS+Swim">
-  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22TTS%20Swimming%20Dashboard%22%2C%22short_name%22%3A%22TTS%20Swim%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23070d17%22%2C%22theme_color%22%3A%22%23070d17%22%7D">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -645,7 +644,7 @@
             <span id="modal-cloud-badge" class="text-[10px] font-mono text-emerald-400">Active</span>
           </div>
           <p class="text-[11px] text-slate-300 leading-relaxed">
-            Your iPhone and desktop sync automatically via your shared Club Sync ID below—using HTTP body storage so full rosters and video critiques sync cleanly without size limits.
+            Your iPhone and desktop sync automatically via your shared Club Channel ID below using CORS-open HTTP body sync—no login or API keys required.
           </p>
           <div class="flex items-center gap-2">
             <input type="text" id="club-sync-id-input" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-[11px] text-cyan-300">
@@ -2758,7 +2757,7 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
     }
 
     // ---------------------------------------------------------------------------
-    // INITIALIZE APPLICATION ON DOM READY
+    // INITIALIZE APPLICATION ON DOM READY & WINDOW LOAD
     // ---------------------------------------------------------------------------
     function initDashboardApp() {
       try {
@@ -2806,10 +2805,16 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
     } else {
       initDashboardApp();
     }
+    window.addEventListener('load', () => {
+      const container = document.getElementById('single-swimmer-view');
+      if (container && !container.innerHTML.trim()) {
+        initDashboardApp();
+      }
+    });
   </script>
 
   <!-- ========================================================================= -->
-  <!-- REAL-TIME CROSS-DEVICE CLOUD SYNC MODULE (TWO-TIER HTTP BODY + FIREBASE)  -->
+  <!-- REAL-TIME CROSS-DEVICE CLOUD SYNC MODULE (CORS-OPEN NTFY PUB/SUB + FB)    -->
   <!-- ========================================================================= -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
@@ -2818,9 +2823,7 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
 
     const MODULE_STORAGE_KEY = window.STORAGE_KEY || 'ttsSwimData_v12';
     const MODULE_AUDIT_KEY = window.AUDIT_KEY || 'ttsSwimAudit_v12';
-    const DEFAULT_CLUB_SYNC_KEY = 'tts-swim-daykris76-ptr-v12';
-    const KV_APP_TOKEN = 'ttsswimdaykris76';
-    const JSONBLOB_API = 'https://jsonblob.com/api/jsonBlob';
+    const DEFAULT_CLUB_SYNC_TOPIC = 'tts-swim-daykris76-club-sync-v12';
 
     window.getClubSyncId = function() {
       try {
@@ -2832,9 +2835,9 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
         }
       } catch (e) {}
       const saved = localStorage.getItem('ttsClubSyncId');
-      if (!saved || saved === '019a7c8e-4b21-7d90-a3f1-88c4e9120b77' || saved === 'tts-swim-daykris76-club-v12') {
-        localStorage.setItem('ttsClubSyncId', DEFAULT_CLUB_SYNC_KEY);
-        return DEFAULT_CLUB_SYNC_KEY;
+      if (!saved || saved.includes('019a7c8e') || saved === 'tts-swim-daykris76-ptr-v12' || saved === 'tts-swim-daykris76-club-v12') {
+        localStorage.setItem('ttsClubSyncId', DEFAULT_CLUB_SYNC_TOPIC);
+        return DEFAULT_CLUB_SYNC_TOPIC;
       }
       return saved;
     };
@@ -2845,91 +2848,58 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
     let rosterDocRef = null;
     let lastSyncedUpdatedAt = Number(localStorage.getItem(MODULE_STORAGE_KEY + '_updatedAt') || 0);
 
-    // Two-Tier Zero-Config Cloud Sync:
-    // 1) Stores only a tiny 36-char pointer ID in keyvalue.immanuel.co (avoids URL length limits)
-    // 2) Stores the full 12+ KB athlete roster in jsonblob.com via HTTP PUT body
+    // CORS-Open HTTP Body Pub/Sub Sync (ntfy.sh):
+    // Works directly on GitHub Pages & iPhone Safari without API keys, URL limits, or blocked Location headers
     async function initZeroConfigRestSync() {
-      const syncKey = window.getClubSyncId().replace(/[^a-zA-Z0-9_-]/g, '_');
-      const ptrGetUrl = `https://keyvalue.immanuel.co/api/KeyVal/GetValue/${KV_APP_TOKEN}/${syncKey}`;
-      let activeBlobId = localStorage.getItem('ttsResolvedBlobId_' + syncKey) || '';
-
-      const resolveSharedBlobId = async () => {
-        if (activeBlobId && activeBlobId.length >= 16) return activeBlobId;
-        try {
-          const res = await fetch(`${ptrGetUrl}?_t=${Date.now()}`, { method: 'GET', cache: 'no-store' });
-          if (res.ok) {
-            let txt = await res.text();
-            if (txt && txt.startsWith('"')) {
-              try { txt = JSON.parse(txt); } catch (e) {}
-            }
-            if (txt && txt !== 'null' && txt !== '""' && txt.trim().length >= 16 && txt.trim().length < 80) {
-              activeBlobId = txt.trim();
-              localStorage.setItem('ttsResolvedBlobId_' + syncKey, activeBlobId);
-              return activeBlobId;
-            }
-          }
-        } catch (e) {}
-
-        // Provision a brand-new JSONBlob via HTTP POST body and register its tiny 36-char ID pointer
-        try {
-          const initPayload = JSON.stringify({
-            athletes: athletesData,
-            auditLog: getAuditLog().slice(0, 60),
-            updatedAt: lastSyncedUpdatedAt || Date.now(),
-            updatedBy: getActiveUserName()
-          });
-          const createRes = await fetch('https://jsonblob.com/api/jsonBlob', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: initPayload
-          });
-          if (createRes.ok) {
-            const loc = createRes.headers.get('Location') || createRes.headers.get('x-jsonblob') || '';
-            const idMatch = loc.match(/([a-zA-Z0-9-]+)$/);
-            if (idMatch && idMatch[1]) {
-              activeBlobId = idMatch[1];
-              localStorage.setItem('ttsResolvedBlobId_' + syncKey, activeBlobId);
-              await fetch(`https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/${KV_APP_TOKEN}/${syncKey}/${encodeURIComponent(activeBlobId)}`, { method: 'POST' });
-              return activeBlobId;
-            }
-          }
-        } catch (e) {}
-        return '';
-      };
+      const topic = window.getClubSyncId().replace(/[^a-zA-Z0-9_-]/g, '-');
+      const publishUrl = `https://ntfy.sh/${topic}`;
+      const pollUrl = `https://ntfy.sh/${topic}/json?poll=1&since=all`;
+      window.cloudSyncEndpointUrl = publishUrl;
 
       const pullFromRest = async (silent = true) => {
         try {
-          const blobId = await resolveSharedBlobId();
-          if (!blobId) return;
-          const blobUrl = `https://jsonblob.com/api/jsonBlob/${blobId}`;
-          window.cloudSyncEndpointUrl = blobUrl;
-
-          const res = await fetch(`${blobUrl}?_t=${Date.now()}`, {
+          const res = await fetch(`${pollUrl}&_t=${Date.now()}`, {
             method: 'GET',
-            headers: { 'Accept': 'application/json' },
             cache: 'no-store'
           });
-          if (res.ok) {
-            const cloudData = await res.json();
-            window.isCloudConnected = true;
-            window.updateCloudStatusUI('connected', 'Live Cloud Sync');
+          if (!res.ok) return;
 
-            const cloudTs = Number(cloudData?.updatedAt || 0);
-            if (cloudData?.athletes && cloudTs > lastSyncedUpdatedAt) {
-              lastSyncedUpdatedAt = cloudTs;
-              athletesData = cloudData.athletes;
-              if (Array.isArray(cloudData.auditLog)) {
-                localStorage.setItem(MODULE_AUDIT_KEY, JSON.stringify(cloudData.auditLog));
-                updateAuditBadge();
+          window.isCloudConnected = true;
+          window.updateCloudStatusUI('connected', 'Live Cloud Sync');
+
+          const rawText = await res.text();
+          if (!rawText || !rawText.trim()) return;
+
+          // Parse NDJSON lines from ntfy.sh and pick the newest valid roster snapshot
+          let newestPayload = null;
+          let newestTs = lastSyncedUpdatedAt;
+          const lines = rawText.trim().split('\n');
+          for (const line of lines) {
+            try {
+              const envelope = JSON.parse(line);
+              if (envelope && envelope.event === 'message' && envelope.message) {
+                const candidate = JSON.parse(envelope.message);
+                const cTs = Number(candidate?.updatedAt || 0);
+                if (candidate?.athletes && cTs > newestTs) {
+                  newestTs = cTs;
+                  newestPayload = candidate;
+                }
               }
-              persistState(true);
-              refreshSwimmerTabs();
-              updateScannerSwimmerDropdown();
-              setSwimmerMode(currentSwimmer);
-              if (!silent) showToast('Synced latest updates from another device!');
-            } else if (!cloudData?.athletes && Object.keys(athletesData).length > 0) {
-              await pushToRest(true);
+            } catch (e) {}
+          }
+
+          if (newestPayload && newestTs > lastSyncedUpdatedAt) {
+            lastSyncedUpdatedAt = newestTs;
+            athletesData = newestPayload.athletes;
+            if (Array.isArray(newestPayload.auditLog)) {
+              localStorage.setItem(MODULE_AUDIT_KEY, JSON.stringify(newestPayload.auditLog));
+              updateAuditBadge();
             }
+            persistState(true);
+            refreshSwimmerTabs();
+            updateScannerSwimmerDropdown();
+            setSwimmerMode(currentSwimmer);
+            if (!silent) showToast('Synced latest updates from another device!');
           }
         } catch (err) {
           if (!window.isCloudConnected) {
@@ -2940,19 +2910,14 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
 
       const pushToRest = async (isInitial = false) => {
         try {
-          const blobId = await resolveSharedBlobId();
-          if (!blobId) return;
-          const blobUrl = `https://jsonblob.com/api/jsonBlob/${blobId}`;
-          window.cloudSyncEndpointUrl = blobUrl;
-
           window.updateCloudStatusUI('syncing', 'Syncing...');
           const nowTs = isInitial && lastSyncedUpdatedAt ? lastSyncedUpdatedAt : Date.now();
           lastSyncedUpdatedAt = nowTs;
           localStorage.setItem(MODULE_STORAGE_KEY + '_updatedAt', String(nowTs));
 
-          const res = await fetch(blobUrl, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          const res = await fetch(publishUrl, {
+            method: 'POST',
+            headers: { 'Title': 'TTS Swim State Sync' },
             body: JSON.stringify({
               athletes: athletesData,
               auditLog: getAuditLog().slice(0, 60),
