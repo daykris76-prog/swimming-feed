@@ -1274,10 +1274,12 @@
       const sortedByPct = [...pbs].sort((a, b) => (b.pct || 0) - (a.pct || 0));
       const topEvent = sortedByPct[0];
       const secondEvent = sortedByPct[1];
+      const thirdEvent = sortedByPct[2];
 
-      // Compare 50m vs 100m Freestyle speed endurance ratio if available
-      const free50 = pbs.find(p => p.event.toLowerCase() === '50m freestyle');
-      const free100 = pbs.find(p => p.event.toLowerCase() === '100m freestyle');
+      // Compare 50m vs 100m & 200m Freestyle speed endurance ratio if available
+      const free50 = pbs.find(p => p.event.toLowerCase() === '50m freestyle' && p.course.includes('SCM')) || pbs.find(p => p.event.toLowerCase() === '50m freestyle');
+      const free100 = pbs.find(p => p.event.toLowerCase() === '100m freestyle' && p.course.includes('SCM')) || pbs.find(p => p.event.toLowerCase() === '100m freestyle');
+      const free200 = pbs.find(p => p.event.toLowerCase() === '200m freestyle' && p.course.includes('SCM')) || pbs.find(p => p.event.toLowerCase() === '200m freestyle');
       let enduranceInsight = '';
       if (free50 && free100) {
         const s50 = parseTimeToSeconds(free50.time);
@@ -1285,36 +1287,65 @@
         if (s50 && s100) {
           const dropOff = (s100 - s50 * 2).toFixed(2);
           enduranceInsight = parseFloat(dropOff) <= 6.2
-            ? `Strong anaerobic speed-endurance conversion between 50m Free (${free50.time}) and 100m Free (${free100.time}), holding a tight +${dropOff}s second-50m differential.`
-            : `Explosive front-end speed in 50m Free (${free50.time}) with a +${dropOff}s conversion into 100m Free (${free100.time})—indicating high upside from back-half kick sustain and underwater turn efficiency.`;
+            ? `Demonstrates strong anaerobic speed-endurance conversion between 50m Free (${free50.time}) and 100m Free (${free100.time}), holding a tight +${dropOff}s second-50m differential.`
+            : `Displays explosive front-end sprint speed in 50m Free (${free50.time}) with a +${dropOff}s conversion into 100m Free (${free100.time})—indicating high upside from back-half kick sustain and underwater turn efficiency.`;
+          if (free200) {
+            const s200 = parseTimeToSeconds(free200.time);
+            if (s200) {
+              const avg50in200 = (s200 / 4).toFixed(2);
+              enduranceInsight += ` Across 200m Free (${free200.time}), ${ath.name.split(' ')[0]} averages <strong>${avg50in200}s per 50m</strong> (+${(avg50in200 - s50).toFixed(2)}s off sprint pace), highlighting aerobic threshold capacity.`;
+            }
+          }
         }
       }
 
-      // Compare SCM vs LCM conversion if both courses exist for their top stroke
-      const sameEventCourses = pbs.filter(p => p.event === topEvent.event);
-      let courseInsight = '';
-      if (sameEventCourses.length >= 2) {
-        const scm = sameEventCourses.find(p => p.course.includes('SCM'));
-        const lcm = sameEventCourses.find(p => p.course.includes('LCM'));
+      // Compare SCM vs LCM conversion across matching events
+      const coursePairs = [];
+      const uniqueEvents = [...new Set(pbs.map(p => p.event))];
+      uniqueEvents.forEach(ev => {
+        const scm = pbs.find(p => p.event === ev && p.course.includes('SCM'));
+        const lcm = pbs.find(p => p.event === ev && p.course.includes('LCM'));
         if (scm && lcm) {
-          const diff = (parseTimeToSeconds(lcm.time) - parseTimeToSeconds(scm.time)).toFixed(2);
-          courseInsight = parseFloat(diff) < 1.2
-            ? `Demonstrates strong long-course open-water propulsion in ${topEvent.event} (${lcm.time} LCM vs ${scm.time} SCM, only +${diff}s gap), showing minimal reliance on wall push-offs.`
-            : `Shows a +${diff}s differential between 25m SCM (${scm.time}) and 50m LCM (${lcm.time}) in ${topEvent.event}, highlighting the importance of maintaining stroke length and hip posture through the middle 25m of long-course pools.`;
+          const diff = parseTimeToSeconds(lcm.time) - parseTimeToSeconds(scm.time);
+          if (!isNaN(diff)) coursePairs.push({ ev, scm: scm.time, lcm: lcm.time, diff });
         }
+      });
+
+      let courseInsight = '';
+      if (coursePairs.length > 0) {
+        const primaryPair = coursePairs.find(c => c.ev === topEvent.event) || coursePairs[0];
+        const diffStr = primaryPair.diff >= 0 ? `+${primaryPair.diff.toFixed(2)}s` : `${primaryPair.diff.toFixed(2)}s`;
+        courseInsight = primaryPair.diff <= 1.25
+          ? `Exhibits efficient long-course open-water propulsion in <strong>${primaryPair.ev}</strong> (${primaryPair.lcm} LCM vs ${primaryPair.scm} SCM, only ${diffStr} variance), confirming strong mid-pool stroke power independent of wall push-offs.`
+          : `Shows a <strong>${diffStr}</strong> differential between 25m SCM (${primaryPair.scm}) and 50m LCM (${primaryPair.lcm}) in <strong>${primaryPair.ev}</strong>, underscoring the opportunity to preserve stroke length and hip elevation through the middle 25m of 50m pools.`;
       }
+
+      // Multi-stroke versatility & IM readiness
+      const strokeSet = new Set(pbs.map(p => {
+        const l = p.event.toLowerCase();
+        if (l.includes('free')) return 'Freestyle';
+        if (l.includes('back')) return 'Backstroke';
+        if (l.includes('breast')) return 'Breaststroke';
+        if (l.includes('fly')) return 'Butterfly';
+        if (l.includes('im')) return 'IM';
+        return null;
+      }).filter(Boolean));
+      const imPB = pbs.find(p => p.event.toLowerCase().includes('100m im') || p.event.toLowerCase().includes('200m im'));
+      const versatilityInsight = strokeSet.size >= 4
+        ? `Competing across <strong>${strokeSet.size} stroke disciplines</strong> (${Array.from(strokeSet).join(', ')})${imPB ? ` with a benchmark <strong>${imPB.event} of ${imPB.time} (${imPB.std})</strong>` : ''}, providing strong neuromuscular balance and medley relay versatility.`
+        : `Currently focused on <strong>${Array.from(strokeSet).join(' & ')}</strong> events; expanding secondary stroke racing will build balanced shoulder stability and IM readiness.`;
 
       // Stroke-specific technical priorities based on their #1 event
       const evLow = topEvent.event.toLowerCase();
-      let strokePriority = 'Focus on holding a tight streamline for 4–5 dolphin kicks off every turn wall and avoiding late breaths inside the final 5m flags.';
+      let strokePriority = 'Focus on holding a tight streamline for 4–5 dolphin kicks off every turn wall, anchoring an Early Vertical Forearm (EVF) catch, and avoiding late breaths inside the final 5m flags.';
       if (evLow.includes('breast')) {
-        strokePriority = 'Maximize underwater pullout glide distance off every wall, keep knees narrow during the heel recovery catch, and shoot hands forward rapidly into a flat streamline.';
+        strokePriority = 'Maximize underwater pullout glide distance off every wall, keep knees narrow during the heel recovery catch, and shoot hands forward rapidly into a flat streamline with minimal vertical head lift.';
       } else if (evLow.includes('fly')) {
-        strokePriority = 'Keep chin low skimming the water surface on breaths so hip rhythm stays flat, and initiate each stroke cycle with a crisp two-beat chest press.';
+        strokePriority = 'Keep chin low skimming the water surface on breaths so hip rhythm stays flat, initiate each stroke cycle with a crisp two-beat chest press, and drive strong underwater dolphin kicks off turns.';
       } else if (evLow.includes('back')) {
-        strokePriority = 'Lock exact stroke counts from the backstroke flags into every turn wall, drive steady shoulder rotation, and extend underwater dolphin kicks off each push-off.';
+        strokePriority = 'Lock exact stroke counts from the backstroke flags into every turn wall, drive steady shoulder rotation through pinky-first entry, and extend underwater dolphin kicks off each push-off.';
       } else if (evLow.includes('im')) {
-        strokePriority = 'Sharpen backstroke-to-breaststroke crossover turn execution and commit to an immediate 6-beat freestyle kick surge on the final anchor lap.';
+        strokePriority = 'Sharpen backstroke-to-breaststroke crossover turn execution, maintain streamlined breaststroke pullouts under fatigue, and commit to an immediate 6-beat freestyle kick surge on the final anchor lap.';
       }
 
       const staleNote = latestVideo
@@ -1326,8 +1357,11 @@
           <i class="fa-solid fa-chart-pie text-cyan-400"></i>
           <span><strong>Historical Data &amp; Split Synthesis:</strong> ${staleNote}</span>
         </div>
-        <p><strong>Primary Event &amp; Stroke Profile:</strong> ${ath.name}'s highest-ranked benchmark is <strong>${topEvent.event} (${topEvent.time} ${topEvent.course} — ${topEvent.std} Standard)</strong>${secondEvent ? `, backed by strong multi-event versatility in <strong>${secondEvent.event} (${secondEvent.time} ${secondEvent.course})</strong>` : ''}. ${enduranceInsight || courseInsight}</p>
-        <p><strong>Targeted Race-Craft Priorities:</strong> ${strokePriority}</p>
+        <p><strong>1. Primary Event &amp; Benchmark Hierarchy:</strong> ${ath.name}'s highest-ranked benchmark is <strong>${topEvent.event} (${topEvent.time} ${topEvent.course} — ${topEvent.std} Standard)</strong>${secondEvent ? `, supported by <strong>${secondEvent.event} (${secondEvent.time} ${secondEvent.course}, ${secondEvent.std})</strong>` : ''}${thirdEvent ? ` and <strong>${thirdEvent.event} (${thirdEvent.time} ${thirdEvent.course}, ${thirdEvent.std})</strong>` : ''}.</p>
+        ${enduranceInsight ? `<p><strong>2. Speed-Endurance &amp; Pacing Conversion:</strong> ${enduranceInsight}</p>` : ''}
+        ${courseInsight ? `<p><strong>3. Short-Course (SCM) vs. Long-Course (LCM) Profile:</strong> ${courseInsight}</p>` : ''}
+        <p><strong>4. Stroke Versatility &amp; Medley Readiness:</strong> ${versatilityInsight}</p>
+        <p><strong>5. Targeted Race-Craft Priorities:</strong> ${strokePriority}</p>
       `;
     }
 
@@ -1509,17 +1543,19 @@
     }
 
     function computeStandardSplits(distance, totalSec, isGoal = false) {
-      // Standardize splits on 50m segments for >= 100m races (and 25m segments for 50m sprints)
-      const splitUnit = distance >= 100 ? 50 : 25;
-      const numSplits = Math.max(2, Math.round(distance / splitUnit));
+      // Standardize splits on 50m segments across all race distances
+      const splitUnit = 50;
+      const numSplits = Math.max(1, Math.round(distance / splitUnit));
       const labels = [];
       const weights = [];
 
       for (let i = 0; i < numSplits; i++) {
         const endDist = (i + 1) * splitUnit;
-        labels.push(distance >= 100 ? `${i + 1}${i === 0 ? 'st' : i === 1 ? 'nd' : i === 2 ? 'rd' : 'th'} 50m (${endDist}m)` : `${endDist}m`);
-        if (i === 0) {
-          // Dive start advantage on opening split
+        labels.push(`${endDist}m`);
+        if (numSplits === 1) {
+          weights.push(1.0);
+        } else if (i === 0) {
+          // Dive start advantage on opening 50m
           weights.push(isGoal ? 0.935 : 0.92);
         } else if (i === numSplits - 1 && numSplits >= 4) {
           // Final 50m finish push
@@ -1551,11 +1587,10 @@
         const nextSec = sec * 0.982; // ~1.8% immediate milestone drop
         const peakSec = sec * 0.962; // ~3.8% peak season drop
 
-        const distMatch = pb.event.match(/\b(50|100|200|400|800|1500)\b/);
+        const distMatch = pb.event.match(/(25|50|100|200|400|800|1500)\s*m?\b/i);
         const dist = distMatch ? parseInt(distMatch[1], 10) : 50;
         const { splits } = computeStandardSplits(dist, nextSec, true);
         const splitDisplay = splits.map(s => formatSecondsToTime(s)).join(' / ');
-        const splitUnitLabel = dist >= 100 ? '50m splits' : '25m splits';
 
         const evLow = pb.event.toLowerCase();
         let focusCue = 'Controlled front-end tempo; strong underwater breakouts';
@@ -1570,10 +1605,7 @@
             <td class="py-2.5 px-3 font-mono text-slate-300">${pb.time}</td>
             <td class="py-2.5 px-3 font-mono font-bold text-cyan-400">${formatSecondsToTime(nextSec)}</td>
             <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">${formatSecondsToTime(peakSec)}</td>
-            <td class="py-2.5 px-3 font-mono text-[11px] text-slate-300">
-              <div>${splitDisplay}</div>
-              <div class="text-[9px] text-slate-500 uppercase">${splitUnitLabel}</div>
-            </td>
+            <td class="py-2.5 px-3 font-mono text-[11px] text-slate-300">${splitDisplay}</td>
             <td class="py-2.5 px-3 text-[11px] text-slate-400 hidden md:table-cell">${focusCue}</td>
             <td class="py-2.5 px-3 text-right">
               <button onclick="loadTargetIntoCalculator('${pb.event}', '${formatSecondsToTime(nextSec)}')" class="px-2.5 py-1 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-[11px] font-bold transition">
@@ -1593,7 +1625,7 @@
                 <th class="py-2 px-3">Standing PB</th>
                 <th class="py-2 px-3">Next Milestone (-1.8%)</th>
                 <th class="py-2 px-3">Peak Season (-3.8%)</th>
-                <th class="py-2 px-3">Full Target Splits (50m Std)</th>
+                <th class="py-2 px-3">Full 50m Split Architecture</th>
                 <th class="py-2 px-3 hidden md:table-cell">Tactical Race Focus</th>
                 <th class="py-2 px-3 text-right">Pacing</th>
               </tr>
@@ -1688,13 +1720,6 @@
           <div class="text-xs font-extrabold text-white">${item.step}</div>
           <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">${item.desc}</p>
         </div>
-      `).join('');
-
-      const habitsHTML = (ath.habitBricks || []).map((hb, idx) => `
-        <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-900/70 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
-          <input type="checkbox" ${hb.done ? 'checked' : ''} onchange="toggleHabitBrick('${ath.id}', ${idx})" class="mt-0.5 accent-cyan-400 rounded">
-          <span class="text-xs ${hb.done ? 'line-through text-slate-500' : 'text-slate-200 font-medium'}">${hb.text}</span>
-        </label>
       `).join('');
 
       const videoLogBadges = (ath.videoLog || []).slice(0, 4).map(v => `
@@ -1842,24 +1867,13 @@
           </div>
         </div>
 
-        <!-- Huegill Performance Loop & Daily Habit Bricks -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div class="lg:col-span-2 glass-card rounded-2xl p-5 sm:p-6 border border-slate-800 space-y-3">
-            <h3 class="font-display font-bold text-white text-base flex items-center gap-2 border-b border-slate-800 pb-3">
-              <i class="fa-solid fa-arrows-spin text-cyan-400"></i> 5-Step High-Performance Race Execution Loop
-            </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              ${huegillHTML}
-            </div>
-          </div>
-
-          <div class="glass-card rounded-2xl p-5 sm:p-6 border border-slate-800 space-y-3">
-            <h3 class="font-display font-bold text-white text-base flex items-center gap-2 border-b border-slate-800 pb-3">
-              <i class="fa-solid fa-layer-group text-emerald-400"></i> Daily Habit Bricks
-            </h3>
-            <div class="space-y-2">
-              ${habitsHTML}
-            </div>
+        <!-- 5-Step High-Performance Race Execution Loop -->
+        <div class="glass-card rounded-2xl p-5 sm:p-6 border border-slate-800 space-y-3">
+          <h3 class="font-display font-bold text-white text-base flex items-center gap-2 border-b border-slate-800 pb-3">
+            <i class="fa-solid fa-arrows-spin text-cyan-400"></i> 5-Step High-Performance Race Execution Loop
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            ${huegillHTML}
           </div>
         </div>
       `;
