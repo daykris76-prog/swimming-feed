@@ -1336,18 +1336,25 @@
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
-            // Ensure all default swimmers exist if not deleted
+            // Ensure all default swimmers exist and have required arrays
             Object.keys(defaultAthletesData).forEach(k => {
-              if (!parsed[k]) parsed[k] = JSON.parse(JSON.stringify(defaultAthletesData[k]));
+              if (!parsed[k] || typeof parsed[k] !== 'object') {
+                parsed[k] = JSON.parse(JSON.stringify(defaultAthletesData[k]));
+              } else {
+                if (!Array.isArray(parsed[k].pbs)) parsed[k].pbs = defaultAthletesData[k].pbs;
+                if (!Array.isArray(parsed[k].quickStats)) parsed[k].quickStats = defaultAthletesData[k].quickStats;
+                if (!Array.isArray(parsed[k].habits)) parsed[k].habits = defaultAthletesData[k].habits;
+              }
             });
             return parsed;
           }
         }
       } catch (e) {
-        console.warn('Error loading localStorage state:', e);
+        console.warn('Error loading localStorage state, resetting to defaults:', e);
+        try { localStorage.removeItem('ttsSwimData_v10'); } catch (_) {}
       }
       const fresh = JSON.parse(JSON.stringify(defaultAthletesData));
-      localStorage.setItem('ttsSwimData_v10', JSON.stringify(fresh));
+      try { localStorage.setItem('ttsSwimData_v10', JSON.stringify(fresh)); } catch (_) {}
       return fresh;
     }
 
@@ -2321,6 +2328,14 @@
       const ctx = document.getElementById('splitDegradationCanvas');
       if (!ctx) return;
 
+      if (typeof window.Chart === 'undefined') {
+        const parent = ctx.parentElement;
+        if (parent) {
+          parent.innerHTML = `<div class="h-full flex items-center justify-center text-xs text-slate-400 border border-dashed border-slate-800 rounded-xl p-4 text-center">Chart visualization unavailable offline. Lap split calculations above remain active.</div>`;
+        }
+        return;
+      }
+
       if (splitChartInstance) {
         splitChartInstance.destroy();
       }
@@ -2637,6 +2652,7 @@
 
       const ctx = document.getElementById('h2hTrajectoryCanvas');
       if (!ctx) return;
+      if (typeof window.Chart === 'undefined') return;
       if (h2hTrajectoryChartInstance) h2hTrajectoryChartInstance.destroy();
 
       const h1 = (a1.history && a1.history[eventName]) || (sec1 ? [{ meet: 'Current PB', date: '2026-10-01', time: sec1 }] : []);
@@ -3272,6 +3288,19 @@
         }
       } catch (err) {
         console.error('Dashboard initialization error:', err);
+        const mainEl = document.getElementById('single-swimmer-view');
+        if (mainEl) {
+          mainEl.classList.remove('hidden');
+          mainEl.innerHTML = `
+            <div class="glass-card rounded-2xl p-6 border border-rose-500/40 text-center space-y-3">
+              <div class="text-rose-400 font-bold text-sm">Dashboard Recovery Mode</div>
+              <p class="text-xs text-slate-300">A cached data mismatch interrupted rendering (${err.message}).</p>
+              <button onclick="resetToDefaults(); location.reload();" class="px-4 py-2 rounded-lg bg-cyan-500 text-midnight font-bold text-xs">
+                Reset Cache &amp; Reload
+              </button>
+            </div>
+          `;
+        }
       }
     }
 
