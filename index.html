@@ -723,7 +723,26 @@
           </div>
           <div>
             <label class="block text-[11px] font-bold text-slate-400 mb-1">Video Title / Meet Context</label>
-            <input type="text" id="video-event-context" placeholder="e.g. 50m Free Finals (32.82s)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white">
+            <input type="text" id="video-event-context" oninput="autoDetectVideoMetaFromText(this.value)" placeholder="e.g. 50m Breaststroke Finals (43.20)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white">
+          </div>
+        </div>
+
+        <!-- Prominent Race Event & PB Auto-Sync Box (Moved to top so it is immediately visible) -->
+        <div class="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-emerald-300 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-medal"></i> Race Event &amp; New PB Auto-Sync
+            </span>
+            <span class="text-[10px] text-emerald-400/80">Auto-updates PB table, stats &amp; commentary if faster</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <input type="text" id="video-race-event" list="competitive-events-list" placeholder="Event (e.g. 50m Breaststroke)" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-semibold focus:border-emerald-400 focus:outline-none">
+            <select id="video-race-course" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:border-emerald-400 focus:outline-none">
+              <option value="25m SCM">25m SCM</option>
+              <option value="50m LCM">50m LCM</option>
+              <option value="25y SCY">25y SCY</option>
+            </select>
+            <input type="text" id="video-race-time" placeholder="New Time (e.g. 43.15)" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-cyan-400 font-mono font-bold focus:border-emerald-400 focus:outline-none">
           </div>
         </div>
 
@@ -814,17 +833,12 @@
           </div>
         </div>
 
-        <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
-          <div class="font-bold text-emerald-400 text-[11px] uppercase tracking-wider">Optional: Auto-Update PB if Faster</div>
-          <div class="grid grid-cols-3 gap-2">
-            <input type="text" id="video-race-event" list="competitive-events-list" placeholder="Event (e.g. 50m Freestyle)" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-white">
-            <select id="video-race-course" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-white">
-              <option value="25m SCM">25m SCM</option>
-              <option value="50m LCM">50m LCM</option>
-              <option value="25y SCY">25y SCY</option>
-            </select>
-            <input type="text" id="video-race-time" placeholder="Time (e.g. 32.82)" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-cyan-400 font-mono font-bold">
-          </div>
+        <!-- Free-Text Additional Video Context Field -->
+        <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1.5">
+          <label for="video-additional-notes" class="block font-bold text-slate-200 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-comment-dots text-cyan-400"></i> Additional Video &amp; Race Context (Optional)
+          </label>
+          <textarea id="video-additional-notes" rows="2" placeholder="e.g. Swimmer is in Lane 3 (navy cap); great underwater breakout off turn 1, slight breath on final stroke..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-slate-200 text-xs focus:outline-none focus:border-cyan-500 placeholder:text-slate-500"></textarea>
         </div>
       </div>
 
@@ -2858,11 +2872,71 @@
     let extractedPoseMetrics = null;
     let poseLandmarkerInstance = null;
 
+    function normalizeEventName(raw) {
+      if (!raw) return '';
+      const lower = raw.toLowerCase().trim();
+      const distMatch = lower.match(/\b(50|100|200|400)\b/);
+      const dist = distMatch ? distMatch[1] : '';
+
+      let stroke = '';
+      if (lower.includes('breast')) stroke = 'Breaststroke';
+      else if (lower.includes('free')) stroke = 'Freestyle';
+      else if (lower.includes('back')) stroke = 'Backstroke';
+      else if (lower.includes('fly') || lower.includes('butterfly')) stroke = 'Butterfly';
+      else if (lower.includes('im') || lower.includes('medley')) stroke = 'IM';
+
+      if (dist && stroke) return `${dist}m ${stroke}`;
+      return raw.trim();
+    }
+
+    function autoDetectVideoMetaFromText(text) {
+      if (!text) return;
+      const evInput = document.getElementById('video-race-event');
+      const timeInput = document.getElementById('video-race-time');
+      const courseSel = document.getElementById('video-race-course');
+
+      // Auto-detect swimmer name if mentioned in filename/title
+      const lower = text.toLowerCase();
+      const swimmerSel = document.getElementById('video-swimmer-select');
+      if (swimmerSel) {
+        Object.values(athletesData).forEach(ath => {
+          const firstName = ath.name.split(' ')[0].toLowerCase();
+          if (firstName.length > 2 && lower.includes(firstName)) {
+            swimmerSel.value = ath.id;
+          }
+        });
+      }
+
+      // Auto-detect event (e.g. "50 breast", "50m breaststroke", "100 free")
+      const evMatch = text.match(/\b(50|100|200|400)\s*(?:m|meter|metre)?\s*(free(?:style)?|back(?:stroke)?|breast(?:stroke)?|fly|butterfly|im|medley)\b/i);
+      if (evMatch && evInput && !evInput.value.trim()) {
+        evInput.value = normalizeEventName(evMatch[0]);
+      }
+
+      // Auto-detect course
+      if (courseSel) {
+        if (/\blcm\b/i.test(text)) courseSel.value = '50m LCM';
+        else if (/\bscm\b/i.test(text)) courseSel.value = '25m SCM';
+      }
+
+      // Auto-detect time (e.g. 43.25 or 1:14.50)
+      const timeMatch = text.match(/\b(?:\d{1,2}:)?\d{2}\.\d{2}\b/);
+      if (timeMatch && timeInput && !timeInput.value.trim()) {
+        timeInput.value = timeMatch[0];
+      }
+    }
+
     function openVideoModal(swimmerId) {
       updateScannerSwimmerDropdown();
       const targetId = swimmerId || (athletesData[currentSwimmer] ? currentSwimmer : Object.keys(athletesData)[0]);
       const sel = document.getElementById('video-swimmer-select');
       if (sel && targetId) sel.value = targetId;
+
+      // Clear previous session inputs
+      if (document.getElementById('video-event-context')) document.getElementById('video-event-context').value = '';
+      if (document.getElementById('video-race-event')) document.getElementById('video-race-event').value = '';
+      if (document.getElementById('video-race-time')) document.getElementById('video-race-time').value = '';
+      if (document.getElementById('video-additional-notes')) document.getElementById('video-additional-notes').value = '';
 
       strokeTapTimestamps = [];
       measuredStrokeRateSPM = null;
@@ -2893,8 +2967,17 @@
       const container = document.getElementById('video-player-container');
       const player = document.getElementById('video-preview-player');
       const label = document.getElementById('video-filename-label');
+      const contextInput = document.getElementById('video-event-context');
 
       if (label) label.textContent = file.name;
+      const cleanTitle = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' ');
+      if (contextInput && !contextInput.value.trim()) {
+        contextInput.value = cleanTitle;
+      }
+
+      // Automatically scan filename for swimmer, stroke, distance, and race time
+      autoDetectVideoMetaFromText(cleanTitle);
+
       if (player) {
         const blobUrl = URL.createObjectURL(file);
         player.src = blobUrl;
@@ -3108,15 +3191,18 @@
       const ath = athletesData[swimmerId];
       if (!ath) return;
 
-      const contextTitle = (document.getElementById('video-event-context')?.value || 'Race Video Analysis').trim();
+      const contextInputVal = (document.getElementById('video-event-context')?.value || '').trim();
+      const rawRaceEvent = (document.getElementById('video-race-event')?.value || '').trim();
+      const raceEvent = normalizeEventName(rawRaceEvent);
+      const raceCourse = document.getElementById('video-race-course')?.value || '25m SCM';
+      const raceTimeStr = (document.getElementById('video-race-time')?.value || '').trim();
+      const additionalNotes = (document.getElementById('video-additional-notes')?.value || '').trim();
+      const contextTitle = contextInputVal || (raceEvent ? `${raceEvent} Video Analysis` : 'Race Video Analysis');
+
       const cueCatch = document.getElementById('cue-catch')?.checked;
       const cueStreamline = document.getElementById('cue-streamline')?.checked;
       const cueBreathing = document.getElementById('cue-breathing')?.checked;
       const cueKick = document.getElementById('cue-kick')?.checked;
-
-      const raceEvent = (document.getElementById('video-race-event')?.value || '').trim();
-      const raceCourse = document.getElementById('video-race-course')?.value || '25m SCM';
-      const raceTimeStr = (document.getElementById('video-race-time')?.value || '').trim();
 
       const strengths = [];
       const priorities = [];
@@ -3124,13 +3210,13 @@
       if (cueCatch) strengths.push('strong Early Vertical Forearm (EVF) catch and mid-pull water traction');
       else priorities.push('anchoring a higher elbow catch earlier in the pull phase');
 
-      if (cueStreamline) strengths.push('tight streamline alignment and crisp underwater dolphin kicks off walls');
+      if (cueStreamline) strengths.push('tight streamline alignment and crisp underwater kicks off walls');
       else priorities.push('holding a tighter bicep-to-ear streamline off starts and turns');
 
       if (cueBreathing) strengths.push('low, neutral head alignment during breath cycles');
       else priorities.push('keeping chin low on breaths to prevent hip drop');
 
-      if (cueKick) strengths.push('sustained 6-beat finish kick inside the final 15 meters');
+      if (cueKick) strengths.push('sustained leg-kick drive inside the final 15 meters');
       else priorities.push('driving continuous kick tempo through the finish pad');
 
       const telemetryBadges = [];
@@ -3138,14 +3224,19 @@
       if (extractedPoseMetrics) telemetryBadges.push(`Body Pitch Angle: ${extractedPoseMetrics.avgBodyPitchDeg}°`);
 
       let pbHighlightHTML = '';
+      let isNewPB = false;
+
       if (raceEvent && raceTimeStr) {
         const newSec = parseTimeToSeconds(raceTimeStr);
         if (newSec) {
           const stdObj = calculateStandard(raceEvent, raceTimeStr, raceCourse, ath.age);
-          const existingIdx = ath.pbs.findIndex(p => p.event.toLowerCase() === raceEvent.toLowerCase() && p.course === raceCourse);
+          const existingIdx = ath.pbs.findIndex(p =>
+            normalizeEventName(p.event).toLowerCase() === raceEvent.toLowerCase() && p.course === raceCourse
+          );
+
           if (existingIdx >= 0) {
             const oldSec = parseTimeToSeconds(ath.pbs[existingIdx].time);
-            if (!oldSec || newSec < oldSec) {
+            if (!oldSec || newSec <= oldSec) {
               const drop = oldSec ? (oldSec - newSec).toFixed(2) : '0.00';
               ath.pbs[existingIdx] = {
                 event: raceEvent,
@@ -3155,8 +3246,11 @@
                 pct: stdObj.pct,
                 note: `Video Verified PB (-${drop}s drop)`
               };
+              isNewPB = true;
               pbHighlightHTML = `<p class="text-emerald-300 font-semibold">Personal Best Upgrade: Dropped -${drop}s in ${raceEvent} (${raceCourse}) to <strong>${raceTimeStr}</strong> [${stdObj.std} Standard].</p>`;
               logActivity('PB Updated', ath.name, `Video PB in ${raceEvent} (${raceCourse}): ${raceTimeStr} (-${drop}s)`);
+            } else {
+              pbHighlightHTML = `<p class="text-slate-300">Video Race Time Logged: <strong>${raceTimeStr}</strong> in ${raceEvent} (${raceCourse}) vs standing PB of ${ath.pbs[existingIdx].time}.</p>`;
             }
           } else {
             ath.pbs.unshift({
@@ -3167,39 +3261,79 @@
               pct: stdObj.pct,
               note: `Video Verified PB`
             });
+            isNewPB = true;
             pbHighlightHTML = `<p class="text-emerald-300 font-semibold">New Verified Mark: Recorded <strong>${raceTimeStr}</strong> in ${raceEvent} (${raceCourse}) [${stdObj.std} Standard].</p>`;
             logActivity('PB Updated', ath.name, `New Video PB in ${raceEvent} (${raceCourse}): ${raceTimeStr}`);
           }
 
-          // Update quick stats if matching
-          const normEv = raceEvent.toLowerCase().replace('freestyle', 'free').replace('breaststroke', 'breast').replace('butterfly', 'fly').replace('backstroke', 'back');
+          // Record in historical progression
+          if (!ath.history) ath.history = {};
+          if (!ath.history[raceEvent]) ath.history[raceEvent] = [];
+          ath.history[raceEvent].push({
+            meet: contextTitle,
+            date: new Date().toISOString().slice(0, 10),
+            time: newSec
+          });
+
+          // Update quick stats if matching (only if faster or currently empty)
+          const shortEv = raceEvent.toLowerCase()
+            .replace('freestyle', 'free')
+            .replace('breaststroke', 'breast')
+            .replace('butterfly', 'fly')
+            .replace('backstroke', 'back');
           (ath.quickStats || []).forEach(st => {
-            if (st.label.toLowerCase().includes(normEv)) {
-              st.val = raceTimeStr;
-              st.sub = `${stdObj.std} Standard (Video PB)`;
+            if (st.label.toLowerCase().includes(shortEv)) {
+              const curStatSec = parseTimeToSeconds(st.val);
+              if (!curStatSec || newSec <= curStatSec) {
+                st.val = raceTimeStr;
+                st.sub = `${stdObj.std} Standard (Video PB!)`;
+              }
             }
           });
         }
       }
 
+      // Stroke-specific coaching commentary enhancement
+      let strokeCoachingNote = '';
+      if (raceEvent.toLowerCase().includes('breast')) {
+        strokeCoachingNote = ' Focus on snapping heels fast out-and-back and holding a streamlined forward surge after each kick before initiating the next pull.';
+      } else if (raceEvent.toLowerCase().includes('fly')) {
+        strokeCoachingNote = ' Keep chin skimming the surface on breath cycles and drive two rhythmic dolphin kicks per arm cycle.';
+      } else if (raceEvent.toLowerCase().includes('back')) {
+        strokeCoachingNote = ' Maintain steady head stillness, hip rotation, and exact stroke count from the flags into the turn wall.';
+      } else if (raceEvent.toLowerCase().includes('free')) {
+        strokeCoachingNote = ' Keep head neutral inside the final 5m flags with zero breaths into the finish touchpad.';
+      }
+
+      const customNotesHTML = additionalNotes
+        ? `<p class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-700/80 text-slate-200 text-xs"><strong class="text-cyan-400"><i class="fa-solid fa-eye mr-1"></i>Clip &amp; Lane Context:</strong> ${additionalNotes.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`
+        : '';
+
       ath.technicalSynopsis = `
-        <p><strong>Latest Video Analysis (${contextTitle}):</strong> Technical review highlights ${strengths.length ? strengths.join(', ') : 'solid competitive effort and stroke rhythm'}${telemetryBadges.length ? ` (${telemetryBadges.join(' • ')})` : ''}.</p>
+        <p><strong>Latest Video Analysis (${contextTitle}${raceEvent ? ` • ${raceEvent}` : ''}):</strong> Technical review highlights ${strengths.length ? strengths.join(', ') : 'solid competitive effort and stroke rhythm'}${telemetryBadges.length ? ` (${telemetryBadges.join(' • ')})` : ''}.</p>
+        ${customNotesHTML}
         ${pbHighlightHTML}
-        <p><strong>Key Developmental Priorities:</strong> Focus next training block on ${priorities.length ? priorities.join(' and ') : 'maintaining negative-split race pacing and zero-breath finishes'}.</p>
+        <p><strong>Key Developmental Priorities:</strong> Focus next training block on ${priorities.length ? priorities.join(' and ') : 'maintaining negative-split race pacing and crisp wall breakouts'}.${strokeCoachingNote}</p>
       `;
 
       if (!ath.videoLog) ath.videoLog = [];
+      const logSummaryParts = [...telemetryBadges];
+      if (additionalNotes) logSummaryParts.push(additionalNotes);
+
       ath.videoLog.unshift({
-        title: contextTitle,
+        title: `${contextTitle}${raceTimeStr ? ` (${raceTimeStr})` : ''}`,
         date: new Date().toISOString().slice(0, 10),
-        note: telemetryBadges.join(' • ') || 'Technical synopsis updated'
+        note: logSummaryParts.join(' • ') || 'Technical synopsis updated'
       });
 
-      logActivity('Video Analysis', ath.name, `Updated technical synopsis from "${contextTitle}"`);
+      logActivity('Video Analysis', ath.name, `Updated technical synopsis from "${contextTitle}"${additionalNotes ? ` [${additionalNotes}]` : ''}${isNewPB ? ` (New PB: ${raceTimeStr})` : ''}`);
       persistState();
       closeVideoModal();
       setSwimmerMode(swimmerId);
-      showToast(`Updated Coach's Video Synopsis for ${ath.name}!`);
+      showToast(isNewPB
+        ? `Updated ${ath.name}'s Coach Synopsis & New ${raceEvent} PB (${raceTimeStr})!`
+        : `Updated Coach's Video Synopsis for ${ath.name}!`
+      );
     }
 
     // ---------------------------------------------------------------------------
