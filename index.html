@@ -877,10 +877,39 @@
     </div>
   </div>
 
+  <!-- Non-blocking Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 pointer-events-none max-w-sm"></div>
+
   <!-- ========================================================================= -->
   <!-- JAVASCRIPT DATA & LOGIC ENGINE                                            -->
   <!-- ========================================================================= -->
   <script>
+    // Non-blocking toast message helper (replaces native alert/confirm)
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      const colors = type === 'error'
+        ? 'bg-rose-950/95 border-rose-500 text-rose-100'
+        : type === 'warning'
+        ? 'bg-amber-950/95 border-amber-500 text-amber-100'
+        : 'bg-slate-900/95 border-cyan-500 text-white';
+      const icon = type === 'error' ? 'fa-circle-exclamation text-rose-400' : 'fa-circle-check text-cyan-400';
+
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-2xl text-xs font-semibold backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 ${colors}`;
+      toast.innerHTML = `<i class="fa-solid ${icon} text-sm shrink-0"></i><span>${message}</span>`;
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3600);
+    }
+
     // Global cloud sync status and debounce timer
     let cloudSyncTimer = null;
 
@@ -1778,7 +1807,7 @@
     function exportAuditLogCSV() {
       const list = loadAuditLog();
       if (!list.length) {
-        alert('Audit log is empty.');
+        showToast('Audit log is currently empty.', 'warning');
         return;
       }
       let csv = 'Timestamp,Author,Action,Swimmer,Details\n';
@@ -1794,15 +1823,310 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+      showToast('Audit log exported as CSV.');
     }
 
     function clearAuditLog() {
-      if (confirm('Clear entire audit history? This action cannot be undone.')) {
-        localStorage.removeItem('ttsAuditLog_v1');
-        renderAuditLogTable();
-        updateAuditBadge();
-        syncToCloud();
+      localStorage.removeItem('ttsAuditLog_v1');
+      renderAuditLogTable();
+      updateAuditBadge();
+      syncToCloud();
+      showToast('Audit history cleared.', 'warning');
+    }
+
+    // ---------------------------------------------------------------------------
+    // ADD SWIMMER MODAL CONTROLS
+    // ---------------------------------------------------------------------------
+    function openAddSwimmerModal() {
+      const nameEl = document.getElementById('new-swimmer-name');
+      const dobEl = document.getElementById('new-swimmer-dob');
+      const ageEl = document.getElementById('new-swimmer-age');
+      if (nameEl) nameEl.value = '';
+      if (dobEl) dobEl.value = '';
+      if (ageEl) ageEl.value = '11';
+      document.getElementById('add-swimmer-modal')?.classList.remove('hidden');
+    }
+
+    function closeAddSwimmerModal() {
+      document.getElementById('add-swimmer-modal')?.classList.add('hidden');
+    }
+
+    // ---------------------------------------------------------------------------
+    // MANUAL PB OVERRIDE & TIME ENTRY MODAL CONTROLS
+    // ---------------------------------------------------------------------------
+    function openManualPBModal(swimmerId, pbIndex) {
+      const targetSwimmerId = swimmerId || currentSwimmer;
+      const ath = athletesData[targetSwimmerId];
+      if (!ath) return;
+
+      const swimmerSelect = document.getElementById('manual-pb-swimmer');
+      if (swimmerSelect) {
+        swimmerSelect.innerHTML = Object.values(athletesData).map(a =>
+          `<option value="${a.id}" ${a.id === targetSwimmerId ? 'selected' : ''}>${a.name}</option>`
+        ).join('');
       }
+
+      const idxInput = document.getElementById('manual-pb-index');
+      const eventInput = document.getElementById('manual-pb-event');
+      const courseSelect = document.getElementById('manual-pb-course');
+      const timeInput = document.getElementById('manual-pb-time');
+      const noteInput = document.getElementById('manual-pb-note');
+      const titleEl = document.getElementById('manual-pb-title');
+      const deleteBtn = document.getElementById('btn-delete-pb');
+
+      if (pbIndex >= 0 && ath.pbs && ath.pbs[pbIndex]) {
+        const pb = ath.pbs[pbIndex];
+        if (idxInput) idxInput.value = pbIndex;
+        if (titleEl) titleEl.textContent = 'Edit / Override Race Time';
+        if (eventInput) eventInput.value = pb.event || '';
+        if (courseSelect) courseSelect.value = pb.course || '25m SCM';
+        if (timeInput) timeInput.value = pb.time || '';
+        if (noteInput) noteInput.value = pb.note || '';
+        if (deleteBtn) deleteBtn.classList.remove('hidden');
+      } else {
+        if (idxInput) idxInput.value = -1;
+        if (titleEl) titleEl.textContent = 'Add Manual Race Time';
+        if (eventInput) eventInput.value = '';
+        if (courseSelect) courseSelect.value = '25m SCM';
+        if (timeInput) timeInput.value = '';
+        if (noteInput) noteInput.value = '';
+        if (deleteBtn) deleteBtn.classList.add('hidden');
+      }
+
+      document.getElementById('manual-pb-modal')?.classList.remove('hidden');
+    }
+
+    function closeManualPBModal() {
+      document.getElementById('manual-pb-modal')?.classList.add('hidden');
+    }
+
+    function saveManualPB() {
+      const swimmerId = document.getElementById('manual-pb-swimmer')?.value || currentSwimmer;
+      const pbIndex = parseInt(document.getElementById('manual-pb-index')?.value ?? '-1', 10);
+      const eventName = document.getElementById('manual-pb-event')?.value.trim();
+      const course = document.getElementById('manual-pb-course')?.value || '25m SCM';
+      const timeStr = document.getElementById('manual-pb-time')?.value.trim();
+      const note = document.getElementById('manual-pb-note')?.value.trim() || 'Manual entry';
+
+      if (!eventName || !timeStr) {
+        showToast('Please enter both Event Name and Official Time.', 'error');
+        return;
+      }
+
+      const ath = athletesData[swimmerId];
+      if (!ath) return;
+
+      const stdObj = calculateStandard(eventName, timeStr, course, ath.age);
+      const secVal = parseTimeToSeconds(timeStr);
+
+      if (!ath.pbs) ath.pbs = [];
+
+      if (pbIndex >= 0 && ath.pbs[pbIndex]) {
+        const oldTime = ath.pbs[pbIndex].time;
+        ath.pbs[pbIndex] = {
+          event: eventName,
+          course: course,
+          time: timeStr,
+          std: stdObj.std,
+          pct: stdObj.pct,
+          note: note
+        };
+        logActivity('PB Updated', ath.name, `Manually updated ${eventName} (${course}): ${oldTime} -> ${timeStr} [${stdObj.std}]`);
+      } else {
+        const existingIdx = ath.pbs.findIndex(p => p.event.toLowerCase() === eventName.toLowerCase() && p.course === course);
+        if (existingIdx !== -1) {
+          const oldTime = ath.pbs[existingIdx].time;
+          ath.pbs[existingIdx] = {
+            event: eventName,
+            course: course,
+            time: timeStr,
+            std: stdObj.std,
+            pct: stdObj.pct,
+            note: note
+          };
+          logActivity('PB Updated', ath.name, `Manually overrode ${eventName} (${course}): ${oldTime} -> ${timeStr} [${stdObj.std}]`);
+        } else {
+          ath.pbs.unshift({
+            event: eventName,
+            course: course,
+            time: timeStr,
+            std: stdObj.std,
+            pct: stdObj.pct,
+            note: note
+          });
+          logActivity('PB Updated', ath.name, `Manually added ${eventName} (${course}): ${timeStr} [${stdObj.std}]`);
+        }
+      }
+
+      if (secVal) {
+        if (!ath.history) ath.history = {};
+        if (!ath.history[eventName]) ath.history[eventName] = [];
+        ath.history[eventName].push({
+          meet: note || 'Manual Update',
+          date: new Date().toISOString().slice(0, 10),
+          time: secVal
+        });
+      }
+
+      // Also sync quickStats if matching primary stat labels
+      Object.values(ath.quickStats || {}).forEach(stat => {
+        if (stat.label.toLowerCase().includes(eventName.toLowerCase().replace('freestyle', 'free').replace('breaststroke', 'breast').replace('butterfly', 'fly').replace('backstroke', 'back'))) {
+          stat.val = timeStr;
+          stat.sub = `${stdObj.std} (Updated)`;
+        }
+      });
+
+      persistState();
+      closeManualPBModal();
+      setSwimmerMode(swimmerId);
+      showToast(`Saved ${eventName} (${timeStr}) for ${ath.name}!`);
+    }
+
+    function deleteManualPB() {
+      const swimmerId = document.getElementById('manual-pb-swimmer')?.value || currentSwimmer;
+      const pbIndex = parseInt(document.getElementById('manual-pb-index')?.value ?? '-1', 10);
+      const ath = athletesData[swimmerId];
+      if (!ath || pbIndex < 0 || !ath.pbs[pbIndex]) return;
+
+      const removed = ath.pbs.splice(pbIndex, 1)[0];
+      logActivity('PB Deleted', ath.name, `Removed ${removed.event} (${removed.course}): ${removed.time}`);
+      persistState();
+      closeManualPBModal();
+      setSwimmerMode(swimmerId);
+      showToast(`Removed ${removed.event} from ${ath.name}.`, 'warning');
+    }
+
+    // ---------------------------------------------------------------------------
+    // ROSTER & EDIT SWIMMER PROFILE MODAL CONTROLS
+    // ---------------------------------------------------------------------------
+    function openRosterModal() {
+      renderRosterList();
+      document.getElementById('roster-modal')?.classList.remove('hidden');
+    }
+
+    function closeRosterModal() {
+      document.getElementById('roster-modal')?.classList.add('hidden');
+    }
+
+    function renderRosterList() {
+      const container = document.getElementById('roster-list-container');
+      if (!container) return;
+
+      const swimmers = Object.values(athletesData);
+      container.innerHTML = swimmers.map(a => `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 transition">
+          <div class="flex items-center gap-3">
+            <span class="w-3.5 h-3.5 rounded-full shrink-0" style="background-color: ${a.accentColor}"></span>
+            <div>
+              <div class="font-bold text-white text-sm flex items-center gap-2">
+                <span>${a.name}</span>
+                <span class="text-[11px] font-mono text-slate-400">(${a.age}y)</span>
+              </div>
+              <div class="text-[11px] text-slate-400">${a.dobDetail || ''} • ${a.club}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 self-end sm:self-center">
+            <button onclick="closeRosterModal(); setSwimmerMode('${a.id}');" class="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 text-xs font-bold transition">
+              View
+            </button>
+            <button onclick="openEditSwimmerModal('${a.id}')" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-gold-400 border border-amber-500/30 text-xs font-bold transition" title="Edit Name, DOB, Club & Color">
+              <i class="fa-solid fa-pen mr-1"></i> Edit
+            </button>
+            ${Object.keys(athletesData).length > 1 ? `
+              <button onclick="deleteSwimmerProfile('${a.id}')" class="px-2.5 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-bold transition" title="Remove Swimmer">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openEditSwimmerModal(swimmerId) {
+      const ath = athletesData[swimmerId];
+      if (!ath) return;
+
+      document.getElementById('edit-swimmer-id').value = ath.id;
+      document.getElementById('edit-swimmer-name').value = ath.name || '';
+      document.getElementById('edit-swimmer-dob').value = ath.dob || '';
+      document.getElementById('edit-swimmer-age').value = ath.age || 11;
+      document.getElementById('edit-swimmer-club').value = ath.club || '';
+      document.getElementById('edit-swimmer-specialty').value = ath.specialty || '';
+
+      const radios = document.querySelectorAll('input[name="edit-swimmer-color"]');
+      radios.forEach(r => {
+        r.checked = (r.value.toLowerCase() === (ath.accentColor || '').toLowerCase());
+      });
+
+      document.getElementById('edit-swimmer-modal')?.classList.remove('hidden');
+    }
+
+    function closeEditSwimmerModal() {
+      document.getElementById('edit-swimmer-modal')?.classList.add('hidden');
+    }
+
+    function saveEditedSwimmer() {
+      const id = document.getElementById('edit-swimmer-id')?.value;
+      const ath = athletesData[id];
+      if (!ath) return;
+
+      const name = document.getElementById('edit-swimmer-name')?.value.trim();
+      if (!name) {
+        showToast('Swimmer name is required.', 'error');
+        return;
+      }
+
+      const dob = document.getElementById('edit-swimmer-dob')?.value;
+      const ageInput = parseInt(document.getElementById('edit-swimmer-age')?.value, 10) || ath.age;
+      const club = document.getElementById('edit-swimmer-club')?.value.trim() || ath.club;
+      const specialty = document.getElementById('edit-swimmer-specialty')?.value.trim() || ath.specialty;
+      const color = document.querySelector('input[name="edit-swimmer-color"]:checked')?.value || ath.accentColor;
+
+      const ageNarrative = calculateAgeAndNarrative(dob, ageInput);
+
+      ath.name = name;
+      ath.dob = dob;
+      ath.age = ageNarrative.age;
+      ath.dobDetail = ageNarrative.narrative;
+      ath.club = club;
+      ath.specialty = specialty;
+      ath.accentColor = color;
+      ath.division = ath.age <= 10 ? '10 & Under National Pathway' : (ath.age <= 12 ? 'M11–12 National Pathway' : 'M13–14 National Pathway');
+
+      // Recalculate standards on PBs based on updated age
+      (ath.pbs || []).forEach(pb => {
+        if (parseTimeToSeconds(pb.time)) {
+          const st = calculateStandard(pb.event, pb.time, pb.course, ath.age);
+          pb.std = st.std;
+          pb.pct = st.pct;
+        }
+      });
+
+      logActivity('Profile Edited', ath.name, `Updated profile details (Age: ${ath.age}, ${ath.dobDetail})`);
+      persistState();
+      closeEditSwimmerModal();
+      renderRosterList();
+      refreshSwimmerTabs();
+      updateScannerSwimmerDropdown();
+      if (currentSwimmer === id) renderSwimmer(id);
+      showToast(`Updated profile for ${ath.name}!`);
+    }
+
+    function deleteSwimmerProfile(swimmerId) {
+      const ath = athletesData[swimmerId];
+      if (!ath) return;
+      const removedName = ath.name;
+      delete athletesData[swimmerId];
+      logActivity('Swimmer Removed', removedName, 'Swimmer profile removed from roster');
+      persistState();
+      renderRosterList();
+      refreshSwimmerTabs();
+      updateScannerSwimmerDropdown();
+      if (currentSwimmer === swimmerId) {
+        const nextKey = Object.keys(athletesData)[0] || 'headtohead';
+        setSwimmerMode(nextKey);
+      }
+      showToast(`Removed ${removedName} from roster.`, 'warning');
     }
 
     // Comprehensive Race Definitions for Pacing Architecture Calculator
@@ -2438,7 +2762,7 @@
       const notes = document.getElementById('field-notes').value.trim();
 
       if (!eventName || !timeStr) {
-        alert('Please ensure Event Name and Final Time are populated.');
+        showToast('Please ensure Event Name and Final Time are populated.', 'error');
         return;
       }
 
@@ -2491,10 +2815,12 @@
 
       // Advance to next item in batch if more exist
       if (batchQueue.length > 1 && currentBatchIndex < batchQueue.length - 1) {
+        showToast(`Saved ${eventName} (${timeStr}). Loading next screenshot...`);
         selectBatchItem(currentBatchIndex + 1);
       } else {
         closeScanModal();
         setSwimmerMode(swimmerId);
+        showToast(`Committed ${eventName} (${timeStr}) to ${ath.name}!`);
       }
     }
 
@@ -2507,7 +2833,7 @@
       const color = document.querySelector('input[name="swimmer-color"]:checked')?.value || '#00d2ff';
 
       if (!name) {
-        alert('Please enter a swimmer name.');
+        showToast('Please enter a swimmer full name.', 'error');
         return;
       }
 
@@ -2598,7 +2924,7 @@
       logActivity('Swimmer Added', name, `New swimmer profile created (${age}y, ${club}, ${specTitle})`);
 
       setSwimmerMode(id);
-      alert(`Success! Created profile for ${name}. You can now scan race screenshots or upload swim videos.`);
+      showToast(`Created profile for ${name}! Ready to scan screenshots or add times.`);
     }
 
     // ---------------------------------------------------------------------------
@@ -2716,7 +3042,7 @@
       persistState();
       closeVideoModal();
       setSwimmerMode(swimmerId);
-      alert(`Success! Updated Coach's Video Analysis & Technical Synopsis for ${ath.name}${pbUpdateNote ? ' with a NEW Personal Best!' : '.'}`);
+      showToast(`Updated Video Analysis for ${ath.name}${pbUpdateNote ? ' with NEW Personal Best!' : '!'}`);
     }
 
     // ---------------------------------------------------------------------------
@@ -3229,37 +3555,38 @@
       if (!raw) return;
       try {
         const parsed = JSON.parse(raw);
-        if (parsed.monty && parsed.rupert) {
+        if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
           athletesData = parsed;
           persistState();
           closeDataBackupModal();
+          refreshSwimmerTabs();
+          updateScannerSwimmerDropdown();
           renderSwimmer(currentSwimmer);
-          alert('Data imported and applied successfully!');
+          showToast('Data imported and applied successfully!');
         } else {
-          alert('Invalid JSON structure. Must contain monty and rupert athlete profiles.');
+          showToast('Invalid JSON structure. Must contain swimmer profiles.', 'error');
         }
       } catch (e) {
-        alert('Invalid JSON formatting: ' + e.message);
+        showToast('Invalid JSON formatting: ' + e.message, 'error');
       }
     }
 
     function resetToDefaults() {
-      if (confirm('Are you sure you want to reset all data back to factory defaults?')) {
-        localStorage.removeItem('ttsSwimData_v8');
-        localStorage.removeItem('ttsSwimData_v7');
-        localStorage.removeItem('ttsSwimData_v6');
-        localStorage.removeItem('ttsSwimData_v5');
-        localStorage.removeItem('ttsSwimData_v4');
-        localStorage.removeItem('ttsSwimData_v3');
-        athletesData = JSON.parse(JSON.stringify(defaultAthletesData));
-        logActivity('Data Reset', 'System', 'All swimmer data reset to factory defaults.');
-        persistState();
-        closeDataBackupModal();
-        refreshSwimmerTabs();
-        updateScannerSwimmerDropdown();
-        renderSwimmer(currentSwimmer);
-        alert('Reset to default swim data.');
-      }
+      localStorage.removeItem('ttsSwimData_v10');
+      localStorage.removeItem('ttsSwimData_v8');
+      localStorage.removeItem('ttsSwimData_v7');
+      localStorage.removeItem('ttsSwimData_v6');
+      localStorage.removeItem('ttsSwimData_v5');
+      localStorage.removeItem('ttsSwimData_v4');
+      localStorage.removeItem('ttsSwimData_v3');
+      athletesData = JSON.parse(JSON.stringify(defaultAthletesData));
+      logActivity('Data Reset', 'System', 'All swimmer data reset to factory defaults.');
+      persistState();
+      closeDataBackupModal();
+      refreshSwimmerTabs();
+      updateScannerSwimmerDropdown();
+      renderSwimmer(currentSwimmer);
+      showToast('Reset all profiles to factory defaults.', 'warning');
     }
   </script>
 
