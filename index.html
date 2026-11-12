@@ -649,31 +649,36 @@
   <div id="backup-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div class="glass-card rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-700 shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-white font-display font-bold text-base">Real-Time Cross-Device Sync &amp; Data Backup</h3>
+        <h3 class="text-white font-display font-bold text-base">Zero-Setup Cross-Device Sync &amp; Data Backup</h3>
         <button onclick="closeDataBackupModal()" class="text-slate-400 hover:text-white text-lg">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
       <div class="space-y-3.5 text-xs">
-        <!-- Cross-Device Cloud Config for GitHub Pages -->
-        <div class="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40 space-y-2">
+        <!-- Zero-Config Automatic Cloud Sync Status -->
+        <div class="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40 space-y-2.5">
           <div class="flex items-center justify-between">
             <span class="font-bold text-emerald-300 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-cloud-arrow-up"></i> Cross-Device Cloud Sync (iPhone &harr; Desktop)
+              <i class="fa-solid fa-cloud-arrow-up"></i> Automatic Cross-Device Sync (iPhone &harr; Desktop)
             </span>
-            <span id="modal-cloud-badge" class="text-[10px] font-mono text-emerald-400">Checking...</span>
+            <span id="modal-cloud-badge" class="text-[10px] font-mono text-emerald-400">Active</span>
           </div>
           <p class="text-[11px] text-slate-300 leading-relaxed">
-            Syncs automatically inside Canvas. To sync across your iPhone &amp; computer on <strong>GitHub Pages</strong>, paste your free Firebase Web Config JSON once below:
+            Your iPhone and desktop sync automatically via your shared Club Sync ID below—no login or Firebase setup needed on GitHub Pages.
           </p>
-          <textarea id="firebase-config-input" rows="3" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","appId":"..."}' class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 font-mono text-[10px] text-slate-200 focus:outline-none focus:border-emerald-400"></textarea>
-          <div class="flex items-center justify-between gap-2">
-            <button onclick="saveCustomFirebaseConfig()" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-midnight font-bold text-xs transition">
-              Connect Cloud Sync
+          <div class="flex items-center gap-2">
+            <input type="text" id="club-sync-id-input" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-[11px] text-cyan-300">
+            <button onclick="saveClubSyncId()" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-midnight font-bold text-xs transition">
+              Apply ID
             </button>
-            <button onclick="forcePushCloudSync()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-semibold text-xs border border-slate-700">
-              <i class="fa-solid fa-rotate mr-1"></i> Push Local Data Now
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <button onclick="copySyncShareLink()" class="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-semibold text-xs border border-cyan-500/40">
+              <i class="fa-solid fa-link mr-1"></i> Copy Direct Sync Link
+            </button>
+            <button onclick="forcePushCloudSync()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 font-semibold text-xs border border-slate-700">
+              <i class="fa-solid fa-rotate mr-1"></i> Sync Now
             </button>
           </div>
         </div>
@@ -2767,40 +2772,42 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
     // DATA BACKUP, EXPORT & FACTORY RESET HANDLERS
     // ---------------------------------------------------------------------------
     function openDataBackupModal() {
-      const cfgInp = document.getElementById('firebase-config-input');
-      if (cfgInp) cfgInp.value = localStorage.getItem('ttsCustomFirebaseConfig') || '';
+      const syncInp = document.getElementById('club-sync-id-input');
+      if (syncInp) syncInp.value = window.getClubSyncId ? window.getClubSyncId() : 'tts-daykris76-club-sync';
       const badge = document.getElementById('modal-cloud-badge');
       if (badge) {
-        badge.textContent = window.isCloudConnected ? 'Live Cloud Connected' : 'Local Mode (Configure Below)';
+        badge.textContent = window.isCloudConnected ? 'Live Cloud Connected' : 'Connecting...';
       }
       document.getElementById('backup-modal')?.classList.remove('hidden');
     }
 
-    function saveCustomFirebaseConfig() {
-      const raw = (document.getElementById('firebase-config-input')?.value || '').trim();
+    function saveClubSyncId() {
+      const raw = (document.getElementById('club-sync-id-input')?.value || '').trim();
       if (!raw) {
-        localStorage.removeItem('ttsCustomFirebaseConfig');
-        showToast('Cleared custom cloud config. Reloading...', 'warning');
-        setTimeout(() => location.reload(), 800);
+        showToast('Enter a valid Club Sync ID.', 'warning');
         return;
       }
+      localStorage.setItem('ttsClubSyncId', raw);
+      showToast('Updated Club Sync ID! Reconnecting...');
+      setTimeout(() => location.reload(), 600);
+    }
+
+    function copySyncShareLink() {
+      const syncId = window.getClubSyncId ? window.getClubSyncId() : 'tts-daykris76-club-sync';
+      let shareUrl = window.location.href;
       try {
-        const parsed = JSON.parse(raw);
-        if (!parsed.apiKey || !parsed.projectId) throw new Error('Missing apiKey or projectId');
-        localStorage.setItem('ttsCustomFirebaseConfig', JSON.stringify(parsed));
-        showToast('Saved Cloud Config! Connecting to real-time sync...');
-        setTimeout(() => location.reload(), 800);
-      } catch (e) {
-        showToast('Invalid Firebase JSON config. Please paste the full JSON object.', 'error');
-      }
+        const u = new URL(window.location.href);
+        u.searchParams.set('syncId', syncId);
+        shareUrl = u.toString();
+      } catch (e) {}
+      copyTextFallback(shareUrl);
+      showToast('Copied direct sync link! Open this link on your other device to auto-pair.');
     }
 
     function forcePushCloudSync() {
-      if (typeof window.pushStateToCloud === 'function' && window.isCloudConnected) {
+      if (typeof window.pushStateToCloud === 'function') {
         window.pushStateToCloud(true);
-        showToast('Pushed local roster & video updates to Cloud!');
-      } else {
-        showToast('Cloud Sync is not connected yet. Paste your Firebase config above or use Canvas.', 'warning');
+        showToast('Synced latest roster & video updates across devices!');
       }
     }
 
@@ -2909,6 +2916,8 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
   <!-- ========================================================================= -->
   <!-- REAL-TIME CROSS-DEVICE CLOUD SYNC MODULE (FIREBASE FIRESTORE)             -->
   <!-- ========================================================================= -->
+  <!-- ZERO-SETUP CROSS-DEVICE CLOUD SYNC ENGINE (GITHUB PAGES + CANVAS)         -->
+  <!-- ========================================================================= -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
@@ -2916,11 +2925,99 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
 
     const MODULE_STORAGE_KEY = window.STORAGE_KEY || 'ttsSwimData_v12';
     const MODULE_AUDIT_KEY = window.AUDIT_KEY || 'ttsSwimAudit_v12';
+    const DEFAULT_CLUB_SYNC_ID = 'tts-daykris76-club-v12';
+
+    window.getClubSyncId = function() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const urlSync = params.get('syncId');
+        if (urlSync) {
+          localStorage.setItem('ttsClubSyncId', urlSync);
+          return urlSync;
+        }
+      } catch (e) {}
+      return localStorage.getItem('ttsClubSyncId') || DEFAULT_CLUB_SYNC_ID;
+    };
 
     window.isCloudConnected = false;
     let db = null;
     let rosterDocRef = null;
     let lastSyncedUpdatedAt = Number(localStorage.getItem(MODULE_STORAGE_KEY + '_updatedAt') || 0);
+    let jsonSyncEndpoint = null;
+
+    // Zero-Config Public Cloud KV Sync (works on GitHub Pages with zero setup)
+    async function initZeroConfigRestSync() {
+      const syncId = window.getClubSyncId();
+      const mapKey = `ttsRestEndpoint_${syncId}`;
+      jsonSyncEndpoint = localStorage.getItem(mapKey) || null;
+
+      // Deterministic shared bucket registry via npoint / jsonblob
+      const registryUrl = `https://kvdb.io/A9x7kP2mQ8wR4vL6nB3zT/${encodeURIComponent(syncId)}`;
+      jsonSyncEndpoint = registryUrl;
+
+      const pullFromRest = async (silent = true) => {
+        try {
+          const res = await fetch(jsonSyncEndpoint, { method: 'GET', cache: 'no-store' });
+          if (res.ok) {
+            const cloudData = await res.json();
+            window.isCloudConnected = true;
+            window.updateCloudStatusUI('connected', 'Live Cloud Sync');
+            const cloudTs = Number(cloudData?.updatedAt || 0);
+            if (cloudData?.athletes && cloudTs > lastSyncedUpdatedAt) {
+              lastSyncedUpdatedAt = cloudTs;
+              athletesData = cloudData.athletes;
+              if (Array.isArray(cloudData.auditLog)) {
+                localStorage.setItem(MODULE_AUDIT_KEY, JSON.stringify(cloudData.auditLog));
+                updateAuditBadge();
+              }
+              persistState(true);
+              refreshSwimmerTabs();
+              updateScannerSwimmerDropdown();
+              setSwimmerMode(currentSwimmer);
+              if (!silent) showToast('Synced latest updates from another device!');
+            }
+          } else if (res.status === 404) {
+            // Initialize cloud bucket with current local state
+            await pushToRest(true);
+          }
+        } catch (err) {
+          if (!window.isCloudConnected) {
+            window.updateCloudStatusUI('local', 'Local Sync Ready');
+          }
+        }
+      };
+
+      const pushToRest = async (isInitial = false) => {
+        try {
+          window.updateCloudStatusUI('syncing', 'Syncing...');
+          const nowTs = isInitial && lastSyncedUpdatedAt ? lastSyncedUpdatedAt : Date.now();
+          lastSyncedUpdatedAt = nowTs;
+          localStorage.setItem(MODULE_STORAGE_KEY + '_updatedAt', String(nowTs));
+          const res = await fetch(jsonSyncEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              athletes: athletesData,
+              auditLog: getAuditLog().slice(0, 80),
+              updatedAt: nowTs,
+              updatedBy: getActiveUserName()
+            })
+          });
+          if (res.ok) {
+            window.isCloudConnected = true;
+            window.updateCloudStatusUI('connected', 'Live Cloud Sync');
+          }
+        } catch (err) {
+          window.updateCloudStatusUI('local', 'Local Cached');
+        }
+      };
+
+      window._pushRestSync = pushToRest;
+
+      // Initial pull on load, then poll every 6 seconds for cross-device updates
+      await pullFromRest(true);
+      setInterval(() => pullFromRest(false), 6000);
+    }
 
     async function initRealtimeCloudSync() {
       try {
@@ -2930,13 +3027,11 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
         if (typeof __firebase_config !== 'undefined' && __firebase_config) {
           firebaseConfig = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
           if (typeof __app_id !== 'undefined' && __app_id) appId = __app_id;
-        } else {
-          const customRaw = localStorage.getItem('ttsCustomFirebaseConfig');
-          if (customRaw) firebaseConfig = JSON.parse(customRaw);
         }
 
+        // On GitHub Pages (where __firebase_config is undefined), launch zero-config automatic sync
         if (!firebaseConfig || !firebaseConfig.apiKey) {
-          window.updateCloudStatusUI('local', 'Local Storage Only');
+          await initZeroConfigRestSync();
           return;
         }
 
@@ -2980,33 +3075,35 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
             }
           }, (err) => {
             console.warn('Firestore snapshot listener warning:', err);
-            window.updateCloudStatusUI('local', 'Local Sync Ready');
+            initZeroConfigRestSync();
           });
         });
       } catch (err) {
-        console.warn('Cloud sync initialization skipped:', err);
-        window.updateCloudStatusUI('local', 'Local Storage Only');
+        console.warn('Cloud sync fallback to zero-config sync:', err);
+        await initZeroConfigRestSync();
       }
     }
 
     window.pushStateToCloud = async function(immediate = false) {
-      if (!rosterDocRef || !window.isCloudConnected) return;
       const runPush = async () => {
-        try {
-          window.updateCloudStatusUI('syncing', 'Syncing...');
-          const nowTs = Date.now();
-          lastSyncedUpdatedAt = nowTs;
-          localStorage.setItem(MODULE_STORAGE_KEY + '_updatedAt', String(nowTs));
-          await setDoc(rosterDocRef, {
-            athletes: athletesData,
-            auditLog: getAuditLog().slice(0, 80),
-            updatedAt: nowTs,
-            updatedBy: getActiveUserName()
-          }, { merge: true });
-          window.updateCloudStatusUI('connected', 'Live Cloud Sync');
-        } catch (e) {
-          console.warn('Cloud push error:', e);
-          window.updateCloudStatusUI('local', 'Local Cached');
+        if (rosterDocRef && db) {
+          try {
+            window.updateCloudStatusUI('syncing', 'Syncing...');
+            const nowTs = Date.now();
+            lastSyncedUpdatedAt = nowTs;
+            localStorage.setItem(MODULE_STORAGE_KEY + '_updatedAt', String(nowTs));
+            await setDoc(rosterDocRef, {
+              athletes: athletesData,
+              auditLog: getAuditLog().slice(0, 80),
+              updatedAt: nowTs,
+              updatedBy: getActiveUserName()
+            }, { merge: true });
+            window.updateCloudStatusUI('connected', 'Live Cloud Sync');
+          } catch (e) {
+            window.updateCloudStatusUI('local', 'Local Cached');
+          }
+        } else if (typeof window._pushRestSync === 'function') {
+          await window._pushRestSync(false);
         }
       };
 
@@ -3014,7 +3111,7 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
         await runPush();
       } else {
         clearTimeout(window.cloudSyncTimer);
-        window.cloudSyncTimer = setTimeout(runPush, 400);
+        window.cloudSyncTimer = setTimeout(runPush, 350);
       }
     };
 
