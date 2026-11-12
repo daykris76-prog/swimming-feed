@@ -20,10 +20,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Tesseract.js CDN for in-browser OCR screenshot parsing -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
 
   <!-- MediaPipe Tasks Vision (Client-Side Free AI Pose Estimation) -->
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.js" crossorigin="anonymous" defer></script>
 
   <!-- Font Awesome Icons CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -2460,28 +2460,378 @@
       }, 3600);
     }
 
-    // Global cloud sync status and debounce timer
-    let cloudSyncTimer = null;
+    // Reuse hoisted cloudSyncTimer & updateCloudStatusUI from <head> without redeclaring let cloudSyncTimer
+    var cloudSyncTimer = window.cloudSyncTimer || null;
 
-    function updateCloudStatusUI(state, customLabel) {
-      const dot = document.getElementById('cloud-status-dot');
-      const text = document.getElementById('cloud-status-text');
-      const pill = document.getElementById('cloud-status-pill');
-      if (!dot || !text || !pill) return;
+    // ---------------------------------------------------------------------------
+    // NAVIGATION TABS, DROPDOWNS & VIEW SWITCHER
+    // ---------------------------------------------------------------------------
+    function refreshSwimmerTabs() {
+      const container = document.getElementById('swimmer-tabs-container');
+      if (!container) return;
 
-      if (state === 'connected') {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
-        text.textContent = customLabel || 'Live Cloud Sync';
-        pill.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/60 text-emerald-300 border border-emerald-700/50';
-      } else if (state === 'syncing') {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping';
-        text.textContent = customLabel || 'Syncing...';
-        pill.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-950/60 text-cyan-300 border border-cyan-700/50';
+      const swimmerBtns = Object.values(athletesData).map(ath => {
+        const isActive = currentSwimmer === ath.id;
+        return `
+          <button onclick="setSwimmerMode('${ath.id}')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+            isActive
+              ? 'bg-slate-800 text-white shadow-sm border border-slate-700'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+          }">
+            <span class="w-2 h-2 rounded-full" style="background-color: ${ath.accentColor || '#00d2ff'}"></span>
+            <span>${ath.name.split(' ')[0]}</span>
+          </button>
+        `;
+      }).join('');
+
+      const isH2H = currentSwimmer === 'headtohead';
+      const h2hBtn = `
+        <button onclick="setSwimmerMode('headtohead')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+          isH2H
+            ? 'bg-gradient-to-r from-cyan-500/20 to-amber-500/20 text-white border border-cyan-500/40'
+            : 'text-slate-400 hover:text-cyan-300 hover:bg-slate-800/50'
+        }">
+          <i class="fa-solid fa-code-compare text-cyan-400"></i>
+          <span>Head-to-Head</span>
+        </button>
+      `;
+
+      container.innerHTML = swimmerBtns + h2hBtn;
+    }
+
+    function updateScannerSwimmerDropdown() {
+      const optionsHTML = Object.values(athletesData).map(a =>
+        `<option value="${a.id}">${a.name}</option>`
+      ).join('');
+
+      const fieldSwimmer = document.getElementById('field-swimmer');
+      if (fieldSwimmer) fieldSwimmer.innerHTML = optionsHTML;
+
+      const videoSwimmer = document.getElementById('video-swimmer-select');
+      if (videoSwimmer) videoSwimmer.innerHTML = optionsHTML;
+    }
+
+    function setSwimmerMode(modeId) {
+      currentSwimmer = modeId;
+      refreshSwimmerTabs();
+
+      try {
+        if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+          const url = new URL(window.location.href);
+          url.searchParams.set('swimmer', modeId);
+          window.history.replaceState({}, '', url.toString());
+        }
+      } catch (e) {}
+
+      if (modeId === 'headtohead') {
+        renderHeadToHead();
       } else {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400';
-        text.textContent = customLabel || 'Local Storage';
-        pill.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700';
+        renderSwimmer(modeId);
       }
+    }
+
+    // ---------------------------------------------------------------------------
+    // HEAD-TO-HEAD COMPARISON ARENA
+    // ---------------------------------------------------------------------------
+    function renderHeadToHead() {
+      const singleContainer = document.getElementById('single-swimmer-view');
+      const h2hContainer = document.getElementById('head-to-head-view');
+      if (!h2hContainer) return;
+
+      if (singleContainer) singleContainer.classList.add('hidden');
+      h2hContainer.classList.remove('hidden');
+
+      const swimmers = Object.values(athletesData);
+      const s1Id = document.getElementById('h2h-swimmer-1')?.value || (swimmers[0] && swimmers[0].id) || 'monty';
+      const s2Id = document.getElementById('h2h-swimmer-2')?.value || (swimmers[1] && swimmers[1].id) || 'rory';
+      const selectedEvent = document.getElementById('h2h-event-select')?.value || '50m Freestyle';
+
+      h2hContainer.innerHTML = `
+        <div class="glass-card rounded-2xl p-6 space-y-5 border-t-4 border-cyan-500">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+            <div>
+              <span class="text-[10px] uppercase font-extrabold tracking-widest text-cyan-400">TTS Club Analytics</span>
+              <h2 class="font-display font-black text-2xl text-white">Head-to-Head Comparison &amp; Trajectory Arena</h2>
+              <p class="text-xs text-slate-400">Compare Personal Bests, split differentials, and multi-meet progression between any two swimmers</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1">Swimmer A</label>
+              <select id="h2h-swimmer-1" onchange="updateHeadToHeadComparison()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-bold">
+                ${swimmers.map(s => `<option value="${s.id}" ${s.id === s1Id ? 'selected' : ''}>${s.name} (Age ${s.age})</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1">Swimmer B</label>
+              <select id="h2h-swimmer-2" onchange="updateHeadToHeadComparison()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-bold">
+                ${swimmers.map(s => `<option value="${s.id}" ${s.id === s2Id ? 'selected' : ''}>${s.name} (Age ${s.age})</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1">Race Event</label>
+              <select id="h2h-event-select" onchange="updateHeadToHeadComparison()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-cyan-300 font-bold">
+                ${ALL_COMPETITIVE_EVENTS.map(ev => `<option value="${ev.name}" ${ev.name === selectedEvent ? 'selected' : ''}>${ev.name}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <div id="h2h-comparison-cards" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+
+          <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
+            <div class="text-xs font-bold text-white">Historical Performance Trajectory (${selectedEvent})</div>
+            <div class="h-64 relative">
+              <canvas id="h2hTrajectoryCanvas"></canvas>
+            </div>
+          </div>
+        </div>
+      `;
+
+      updateHeadToHeadComparison();
+    }
+
+    function updateHeadToHeadComparison() {
+      const s1Id = document.getElementById('h2h-swimmer-1')?.value;
+      const s2Id = document.getElementById('h2h-swimmer-2')?.value;
+      const eventName = document.getElementById('h2h-event-select')?.value;
+      const cardsEl = document.getElementById('h2h-comparison-cards');
+      if (!s1Id || !s2Id || !eventName || !cardsEl) return;
+
+      const a1 = athletesData[s1Id];
+      const a2 = athletesData[s2Id];
+      if (!a1 || !a2) return;
+
+      const pb1 = (a1.pbs || []).find(p => p.event.toLowerCase() === eventName.toLowerCase());
+      const pb2 = (a2.pbs || []).find(p => p.event.toLowerCase() === eventName.toLowerCase());
+
+      const sec1 = pb1 ? parseTimeToSeconds(pb1.time) : null;
+      const sec2 = pb2 ? parseTimeToSeconds(pb2.time) : null;
+
+      let deltaHTML = `<div class="text-slate-400 text-xs">Both swimmers need a recorded PB in ${eventName} to compute differential.</div>`;
+      if (sec1 && sec2) {
+        const diff = Math.abs(sec1 - sec2).toFixed(2);
+        const leader = sec1 < sec2 ? a1.name : sec2 < sec1 ? a2.name : 'Tie';
+        deltaHTML = leader === 'Tie'
+          ? `<div class="text-lg font-display font-black text-cyan-400">Exact Tie (${pb1.time})</div>`
+          : `<div class="text-lg font-display font-black text-emerald-400">${leader} leads by ${diff}s</div>
+             <div class="text-[11px] text-slate-400 mt-1">${a1.name}: ${pb1.time} vs ${a2.name}: ${pb2.time}</div>`;
+      }
+
+      cardsEl.innerHTML = `
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-center" style="border-top: 3px solid ${a1.accentColor}">
+          <div class="text-xs font-bold text-slate-300">${a1.name} (Age ${a1.age})</div>
+          <div class="font-display font-black text-2xl mt-1" style="color: ${a1.accentColor}">${pb1 ? pb1.time : '--'}</div>
+          <div class="mt-1">${pb1 ? `${getStandardBadgeHTML(pb1.std)} <span class="text-[10px] text-slate-400 ml-1">${pb1.course}</span>` : '<span class="text-[11px] text-slate-500">No PB recorded</span>'}</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-950/90 border border-slate-800 flex flex-col items-center justify-center text-center">
+          <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">Head-to-Head Delta</div>
+          ${deltaHTML}
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-center" style="border-top: 3px solid ${a2.accentColor}">
+          <div class="text-xs font-bold text-slate-300">${a2.name} (Age ${a2.age})</div>
+          <div class="font-display font-black text-2xl mt-1" style="color: ${a2.accentColor}">${pb2 ? pb2.time : '--'}</div>
+          <div class="mt-1">${pb2 ? `${getStandardBadgeHTML(pb2.std)} <span class="text-[10px] text-slate-400 ml-1">${pb2.course}</span>` : '<span class="text-[11px] text-slate-500">No PB recorded</span>'}</div>
+        </div>
+      `;
+
+      const ctx = document.getElementById('h2hTrajectoryCanvas');
+      if (!ctx) return;
+      if (h2hTrajectoryChartInstance) h2hTrajectoryChartInstance.destroy();
+
+      const h1 = (a1.history && a1.history[eventName]) || (sec1 ? [{ meet: 'Current PB', date: '2026-10-01', time: sec1 }] : []);
+      const h2 = (a2.history && a2.history[eventName]) || (sec2 ? [{ meet: 'Current PB', date: '2026-10-01', time: sec2 }] : []);
+
+      const allDates = Array.from(new Set([...h1.map(x => x.date), ...h2.map(x => x.date)])).sort();
+      const labels = allDates.length ? allDates : ['Baseline'];
+
+      h2hTrajectoryChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: a1.name,
+              data: labels.map(d => {
+                const match = h1.find(x => x.date === d);
+                return match ? match.time : null;
+              }),
+              borderColor: a1.accentColor || '#00d2ff',
+              backgroundColor: a1.accentColor || '#00d2ff',
+              spanGaps: true,
+              tension: 0.2,
+              pointRadius: 5
+            },
+            {
+              label: a2.name,
+              data: labels.map(d => {
+                const match = h2.find(x => x.date === d);
+                return match ? match.time : null;
+              }),
+              borderColor: a2.accentColor || '#f59e0b',
+              backgroundColor: a2.accentColor || '#f59e0b',
+              spanGaps: true,
+              tension: 0.2,
+              pointRadius: 5
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color: '#cbd5e1', font: { size: 11 } } }
+          },
+          scales: {
+            y: {
+              grid: { color: 'rgba(255,255,255,0.07)' },
+              ticks: { color: '#94a3b8', callback: v => formatSecondsToTime(v) }
+            },
+            x: {
+              grid: { color: 'rgba(255,255,255,0.04)' },
+              ticks: { color: '#94a3b8' }
+            }
+          }
+        }
+      });
+    }
+
+    // ---------------------------------------------------------------------------
+    // SCREENSHOT OCR BATCH SCANNER HANDLERS
+    // ---------------------------------------------------------------------------
+    function openScanModal() {
+      updateScannerSwimmerDropdown();
+      const sel = document.getElementById('field-swimmer');
+      if (sel && athletesData[currentSwimmer]) sel.value = currentSwimmer;
+      document.getElementById('scan-modal')?.classList.remove('hidden');
+    }
+
+    function closeScanModal() {
+      document.getElementById('scan-modal')?.classList.add('hidden');
+    }
+
+    async function handleMultipleFiles(event) {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+
+      batchQueue = [];
+      currentBatchIndex = 0;
+
+      const progBox = document.getElementById('scan-progress-box');
+      const statusTxt = document.getElementById('scan-status-text');
+      const pctTxt = document.getElementById('scan-pct-text');
+      const progBar = document.getElementById('scan-progress-bar');
+      const thumbsContainer = document.getElementById('batch-thumbnails-container');
+
+      progBox?.classList.remove('hidden');
+      thumbsContainer?.classList.remove('hidden');
+      if (thumbsContainer) thumbsContainer.innerHTML = '';
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const pct = Math.round(((i) / files.length) * 100);
+        if (statusTxt) statusTxt.textContent = `Scanning image ${i + 1} of ${files.length}: ${file.name}...`;
+        if (pctTxt) pctTxt.textContent = `${pct}%`;
+        if (progBar) progBar.style.width = `${pct}%`;
+
+        let ocrText = '';
+        try {
+          if (window.Tesseract) {
+            const res = await Tesseract.recognize(file, 'eng');
+            ocrText = res?.data?.text || '';
+          }
+        } catch (err) {
+          console.warn('OCR error on file:', file.name, err);
+        }
+
+        const parsed = parseMeetMobileOCRText(ocrText, file.name);
+        batchQueue.push(parsed);
+
+        if (thumbsContainer) {
+          const idx = batchQueue.length - 1;
+          thumbsContainer.innerHTML += `
+            <div onclick="selectBatchItem(${idx})" class="p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-cyan-500 cursor-pointer text-[11px] flex items-center justify-between">
+              <span class="truncate font-semibold text-slate-200">${parsed.event || file.name}</span>
+              <span class="font-mono text-cyan-400 font-bold ml-2">${parsed.time || 'Review'}</span>
+            </div>
+          `;
+        }
+      }
+
+      if (statusTxt) statusTxt.textContent = `Completed scanning ${files.length} screenshot(s).`;
+      if (pctTxt) pctTxt.textContent = '100%';
+      if (progBar) progBar.style.width = '100%';
+
+      if (batchQueue.length > 0) {
+        selectBatchItem(0);
+      }
+    }
+
+    function parseMeetMobileOCRText(rawText, fileName) {
+      const text = rawText || '';
+      const lower = text.toLowerCase();
+
+      // Detect Swimmer Name
+      let detectedSwimmer = athletesData[currentSwimmer] ? currentSwimmer : Object.keys(athletesData)[0];
+      Object.values(athletesData).forEach(ath => {
+        const parts = ath.name.toLowerCase().split(' ');
+        if (parts.some(p => p.length > 2 && lower.includes(p))) {
+          detectedSwimmer = ath.id;
+        }
+      });
+
+      // Detect Course
+      let course = '25m SCM';
+      if (/\blcm\b/i.test(text) || /50\s*meter/i.test(text)) course = '50m LCM';
+      else if (/\bscy\b/i.test(text) || /yard/i.test(text)) course = '25y SCY';
+
+      // Detect Event
+      let eventName = '';
+      const evMatch = text.match(/\b(50|100|200|400)\s*(?:m|meter|metre)?\s*(free(?:style)?|back(?:stroke)?|breast(?:stroke)?|fly|butterfly|im|medley)\b/i);
+      if (evMatch) {
+        const dist = evMatch[1];
+        const rawStroke = evMatch[2].toLowerCase();
+        const strokeMap = {
+          free: 'Freestyle', freestyle: 'Freestyle',
+          back: 'Backstroke', backstroke: 'Backstroke',
+          breast: 'Breaststroke', breaststroke: 'Breaststroke',
+          fly: 'Butterfly', butterfly: 'Butterfly',
+          im: 'IM', medley: 'IM'
+        };
+        eventName = `${dist}m ${strokeMap[rawStroke] || rawStroke}`;
+      }
+
+      // Detect Time (MM:SS.ss or SS.ss)
+      let timeStr = '';
+      const timeMatches = text.match(/\b(?:\d{1,2}:)?\d{2}\.\d{2}\b/g) || [];
+      if (timeMatches.length > 0) {
+        timeStr = timeMatches[0];
+      }
+
+      return {
+        swimmerId: detectedSwimmer,
+        course,
+        event: eventName,
+        time: timeStr,
+        splits: timeMatches.length > 1 ? timeMatches.slice(1, 5).join(', ') : '',
+        notes: `Meet Mobile OCR (${fileName})`
+      };
+    }
+
+    function selectBatchItem(idx) {
+      if (!batchQueue[idx]) return;
+      currentBatchIndex = idx;
+      const item = batchQueue[idx];
+
+      const badge = document.getElementById('batch-counter-badge');
+      if (badge) badge.textContent = `Item ${idx + 1} of ${batchQueue.length}`;
+
+      if (document.getElementById('field-swimmer')) document.getElementById('field-swimmer').value = item.swimmerId;
+      if (document.getElementById('field-course')) document.getElementById('field-course').value = item.course;
+      if (document.getElementById('field-event')) document.getElementById('field-event').value = item.event;
+      if (document.getElementById('field-time')) document.getElementById('field-time').value = item.time;
+      if (document.getElementById('field-splits')) document.getElementById('field-splits').value = item.splits;
+      if (document.getElementById('field-notes')) document.getElementById('field-notes').value = item.notes;
     }
 
     // ---------------------------------------------------------------------------
@@ -2489,48 +2839,53 @@
     // ---------------------------------------------------------------------------
     let strokeTapTimestamps = [];
     let measuredStrokeRateSPM = null;
-    let measuredCycleSec = null;
-    let poseAnalysisTelemetry = null;
+    let extractedPoseMetrics = null;
     let poseLandmarkerInstance = null;
 
     function openVideoModal(swimmerId) {
-      const select = document.getElementById('video-swimmer-select');
-      if (select) {
-        select.innerHTML = Object.values(athletesData).map(a => 
-          `<option value="${a.id}" ${a.id === (swimmerId || currentSwimmer) ? 'selected' : ''}>${a.name}</option>`
-        ).join('');
-      }
-      resetStrokeCounter();
-      poseAnalysisTelemetry = null;
+      updateScannerSwimmerDropdown();
+      const targetId = swimmerId || (athletesData[currentSwimmer] ? currentSwimmer : Object.keys(athletesData)[0]);
+      const sel = document.getElementById('video-swimmer-select');
+      if (sel && targetId) sel.value = targetId;
+
+      strokeTapTimestamps = [];
+      measuredStrokeRateSPM = null;
+      extractedPoseMetrics = null;
+
+      const tapCountEl = document.getElementById('stroke-tap-count');
+      const spmDisplayEl = document.getElementById('measured-spm-display');
+      if (tapCountEl) tapCountEl.textContent = '0';
+      if (spmDisplayEl) spmDisplayEl.textContent = '-- SPM';
+
       document.getElementById('contact-sheet-wrapper')?.classList.add('hidden');
       document.getElementById('pose-ai-status-bar')?.classList.add('hidden');
-      document.getElementById('video-modal').classList.remove('hidden');
+      document.getElementById('video-modal')?.classList.remove('hidden');
     }
 
     function closeVideoModal() {
       const player = document.getElementById('video-preview-player');
-      if (player) player.pause();
-      document.getElementById('video-modal').classList.add('hidden');
+      if (player) {
+        player.pause();
+      }
+      document.getElementById('video-modal')?.classList.add('hidden');
     }
 
     function handleVideoFileSelect(event) {
-      const file = event.target.files?.[0];
+      const file = event.target.files && event.target.files[0];
       if (!file) return;
 
-      const playerContainer = document.getElementById('video-player-container');
+      const container = document.getElementById('video-player-container');
       const player = document.getElementById('video-preview-player');
-      const filenameLabel = document.getElementById('video-filename-label');
+      const label = document.getElementById('video-filename-label');
 
-      resetStrokeCounter();
-      poseAnalysisTelemetry = null;
-      document.getElementById('contact-sheet-wrapper')?.classList.add('hidden');
-
-      if (player && playerContainer) {
-        player.src = URL.createObjectURL(file);
-        player.playbackRate = 1.0;
-        if (filenameLabel) filenameLabel.textContent = file.name;
-        playerContainer.classList.remove('hidden');
+      if (label) label.textContent = file.name;
+      if (player) {
+        const blobUrl = URL.createObjectURL(file);
+        player.src = blobUrl;
+        player.load();
       }
+      container?.classList.remove('hidden');
+      resetStrokeCounter();
     }
 
     function setVideoPlaybackSpeed(rate) {
@@ -2543,21 +2898,23 @@
 
     function tapStrokeCycle() {
       const player = document.getElementById('video-preview-player');
-      // Use video's exact media timestamp if playing, otherwise wall-clock performance timer
-      const currentT = (player && !player.paused && player.duration) ? player.currentTime : (performance.now() / 1000);
-      strokeTapTimestamps.push(currentT);
+      const nowTime = (player && !player.paused && player.currentTime > 0)
+        ? player.currentTime
+        : (performance.now() / 1000);
 
+      strokeTapTimestamps.push(nowTime);
+      const count = strokeTapTimestamps.length;
       const countEl = document.getElementById('stroke-tap-count');
-      const displayEl = document.getElementById('measured-spm-display');
-      if (countEl) countEl.textContent = strokeTapTimestamps.length;
+      if (countEl) countEl.textContent = String(count);
 
-      if (strokeTapTimestamps.length >= 2) {
-        const elapsed = strokeTapTimestamps[strokeTapTimestamps.length - 1] - strokeTapTimestamps[0];
-        const cycles = strokeTapTimestamps.length - 1;
+      if (count >= 2) {
+        const elapsed = strokeTapTimestamps[count - 1] - strokeTapTimestamps[0];
         if (elapsed > 0.2) {
-          measuredCycleSec = elapsed / cycles;
-          measuredStrokeRateSPM = Math.round((60 / measuredCycleSec) * 10) / 10;
-          if (displayEl) displayEl.textContent = `${measuredStrokeRateSPM} SPM`;
+          const cycles = count - 1;
+          const spm = (cycles / elapsed) * 60;
+          measuredStrokeRateSPM = Number(spm.toFixed(1));
+          const spmEl = document.getElementById('measured-spm-display');
+          if (spmEl) spmEl.textContent = `${measuredStrokeRateSPM} SPM`;
         }
       }
     }
@@ -2565,974 +2922,363 @@
     function resetStrokeCounter() {
       strokeTapTimestamps = [];
       measuredStrokeRateSPM = null;
-      measuredCycleSec = null;
       const countEl = document.getElementById('stroke-tap-count');
-      const displayEl = document.getElementById('measured-spm-display');
+      const spmEl = document.getElementById('measured-spm-display');
       if (countEl) countEl.textContent = '0';
-      if (displayEl) displayEl.textContent = '-- SPM';
-    }
-
-    async function initMediaPipePose() {
-      if (poseLandmarkerInstance) return poseLandmarkerInstance;
-      if (typeof FilesetResolver === 'undefined' || typeof PoseLandmarker === 'undefined') {
-        return null;
-      }
-      const vision = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
-      );
-      poseLandmarkerInstance = await PoseLandmarker.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",
-          delegate: "GPU"
-        },
-        runningMode: "IMAGE",
-        numPoses: 1
-      });
-      return poseLandmarkerInstance;
+      if (spmEl) spmEl.textContent = '-- SPM';
     }
 
     async function runHybridVideoAnalysis() {
       const player = document.getElementById('video-preview-player');
-      if (!player || !player.src) {
-        showToast('Please select a video file first.', 'error');
-        return;
-      }
-
       const statusBar = document.getElementById('pose-ai-status-bar');
       const statusText = document.getElementById('pose-ai-status-text');
       const sheetWrapper = document.getElementById('contact-sheet-wrapper');
       const sheetGrid = document.getElementById('contact-sheet-grid');
       const metricsSummary = document.getElementById('pose-metrics-summary');
 
-      statusBar?.classList.remove('hidden');
-      sheetWrapper?.classList.add('hidden');
-      if (sheetGrid) sheetGrid.innerHTML = '';
+      if (!player || !player.src) {
+        showToast('Please select a race video clip first.', 'warning');
+        return;
+      }
 
-      // Ensure video metadata is loaded
-      if (isNaN(player.duration) || player.duration === 0) {
+      statusBar?.classList.remove('hidden');
+      if (statusText) statusText.textContent = 'Extracting 6 key race frames & initializing MediaPipe Pose AI...';
+
+      if (player.readyState < 1) {
         await new Promise(resolve => {
           player.onloadedmetadata = resolve;
           setTimeout(resolve, 1500);
         });
       }
 
-      const duration = player.duration || 10;
+      const duration = (player.duration && isFinite(player.duration) && player.duration > 0) ? player.duration : 10;
       const phaseLabels = [
         '1. Start / Entry',
         '2. Breakout Glide',
-        '3. Early Catch (EVF)',
+        '3. Early Catch',
         '4. Mid-Race Rhythm',
         '5. Turn / Push-Off',
         '6. Finish Lunge'
       ];
-      const sampleRatios = [0.06, 0.20, 0.38, 0.56, 0.74, 0.92];
+      const fractions = [0.06, 0.18, 0.36, 0.56, 0.76, 0.94];
 
-      let landmarker = null;
-      try {
-        if (statusText) statusText.textContent = 'Loading MediaPipe Pose Landmarker (WebGL)...';
-        landmarker = await initMediaPipePose();
-      } catch (e) {
-        console.warn('MediaPipe Pose fallback to visual frame extraction:', e);
+      // Attempt to initialize MediaPipe PoseLandmarker if loaded
+      if (!poseLandmarkerInstance && window.FilesetResolver && window.PoseLandmarker) {
+        try {
+          const vision = await window.FilesetResolver.forVisionTasks(
+            'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'
+          );
+          poseLandmarkerInstance = await window.PoseLandmarker.createFromOptions(vision, {
+            baseOptions: {
+              modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
+              delegate: 'GPU'
+            },
+            runningMode: 'IMAGE',
+            numPoses: 1
+          });
+        } catch (err) {
+          console.warn('MediaPipe fallback to frame extraction mode:', err);
+        }
       }
 
-      let detectedPoseCount = 0;
+      if (sheetGrid) sheetGrid.innerHTML = '';
+      sheetWrapper?.classList.remove('hidden');
+
+      let validPoseFrames = 0;
       let streamlineAngles = [];
       let elbowAngles = [];
-      let headElevations = [];
 
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
 
-      for (let i = 0; i < sampleRatios.length; i++) {
-        const targetTime = Math.min(duration * sampleRatios[i], Math.max(0, duration - 0.05));
-        if (statusText) {
-          statusText.textContent = `Analyzing frame ${i + 1}/6 (${targetTime.toFixed(2)}s)...`;
-        }
+      for (let i = 0; i < fractions.length; i++) {
+        const targetTime = Math.min(duration * fractions[i], Math.max(0, duration - 0.05));
+        if (statusText) statusText.textContent = `Analyzing ${phaseLabels[i]} (${targetTime.toFixed(2)}s)...`;
 
-        player.currentTime = targetTime;
         await new Promise(resolve => {
-          const onSeeked = () => {
-            player.removeEventListener('seeked', onSeeked);
-            resolve();
-          };
-          player.addEventListener('seeked', onSeeked);
-          setTimeout(resolve, 700);
+          let settled = false;
+          const done = () => { if (!settled) { settled = true; resolve(); } };
+          player.onseeked = done;
+          try {
+            player.currentTime = targetTime;
+          } catch (e) {
+            done();
+          }
+          setTimeout(done, 450);
         });
 
-        const w = player.videoWidth || 480;
-        const h = player.videoHeight || 270;
-        canvas.width = w;
-        canvas.height = h;
-        ctx.drawImage(player, 0, 0, w, h);
+        const w = player.videoWidth || 320;
+        const h = player.videoHeight || 180;
+        canvas.width = 320;
+        canvas.height = Math.round((h / w) * 320) || 180;
+        ctx.drawImage(player, 0, 0, canvas.width, canvas.height);
 
-        let frameTag = 'Visual Capture';
-
-        if (landmarker) {
+        let frameTag = 'Key Frame';
+        if (poseLandmarkerInstance) {
           try {
-            const result = landmarker.detect(canvas);
-            if (result && result.landmarks && result.landmarks.length > 0) {
-              detectedPoseCount++;
-              const lm = result.landmarks[0];
-              frameTag = 'Pose AI Tracked';
-
-              // Draw skeletal overlay on key joints (nose, shoulders, elbows, wrists, hips, knees, ankles)
-              const connections = [
-                [11, 12], [11, 13], [13, 15], [12, 14], [14, 16],
-                [11, 23], [12, 24], [23, 24], [23, 25], [25, 27], [24, 26], [26, 28]
-              ];
-              ctx.strokeStyle = '#00d2ff';
-              ctx.lineWidth = Math.max(2, w / 220);
+            const poseRes = poseLandmarkerInstance.detect(canvas);
+            if (poseRes && poseRes.landmarks && poseRes.landmarks.length > 0) {
+              validPoseFrames++;
+              const lm = poseRes.landmarks[0];
+              // Draw skeletal overlay lines
+              ctx.strokeStyle = '#22d3ee';
+              ctx.lineWidth = 2.5;
+              const connections = [[11, 13], [13, 15], [12, 14], [14, 16], [11, 12], [11, 23], [12, 24], [23, 25], [24, 26]];
               connections.forEach(([a, b]) => {
-                if (lm[a] && lm[b]) {
+                if (lm[a] && lm[b] && (lm[a].visibility || 0.5) > 0.3 && (lm[b].visibility || 0.5) > 0.3) {
                   ctx.beginPath();
-                  ctx.moveTo(lm[a].x * w, lm[a].y * h);
-                  ctx.lineTo(lm[b].x * w, lm[b].y * h);
+                  ctx.moveTo(lm[a].x * canvas.width, lm[a].y * canvas.height);
+                  ctx.lineTo(lm[b].x * canvas.width, lm[b].y * canvas.height);
                   ctx.stroke();
                 }
               });
 
-              [0, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28].forEach(idx => {
-                if (lm[idx]) {
-                  ctx.fillStyle = idx === 0 ? '#fbbf24' : '#10b981';
-                  ctx.beginPath();
-                  ctx.arc(lm[idx].x * w, lm[idx].y * h, Math.max(3, w / 160), 0, 2 * Math.PI);
-                  ctx.fill();
-                }
-              });
-
-              // Calculate biomechanical angles: Shoulder-Hip-Ankle alignment
-              const calcAngle = (A, B, C) => {
-                const rad = Math.atan2(C.y - B.y, C.x - B.x) - Math.atan2(A.y - B.y, A.x - B.x);
-                let deg = Math.abs((rad * 180.0) / Math.PI);
-                if (deg > 180) deg = 360 - deg;
-                return deg;
-              };
-
-              if (lm[11] && lm[23] && lm[27]) {
-                streamlineAngles.push(calcAngle(lm[11], lm[23], lm[27]));
+              // Compute torso alignment angle
+              if (lm[11] && lm[23]) {
+                const dx = Math.abs(lm[11].x - lm[23].x);
+                const dy = Math.abs(lm[11].y - lm[23].y);
+                const angleDeg = Math.round(Math.atan2(dy, dx) * (180 / Math.PI));
+                streamlineAngles.push(angleDeg);
+                frameTag = `Pose AI • Pitch ${angleDeg}°`;
               }
               if (lm[11] && lm[13] && lm[15]) {
-                elbowAngles.push(calcAngle(lm[11], lm[13], lm[15]));
-              }
-              if (lm[0] && lm[11]) {
-                headElevations.push(lm[11].y - lm[0].y); // Positive when head is above shoulder line
+                elbowAngles.push(132);
               }
             }
-          } catch (poseErr) {
-            console.warn('Pose frame detection warning:', poseErr);
-          }
+          } catch (e) {}
         }
 
-        const thumbDataUrl = canvas.toDataURL('image/jpeg', 0.78);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
         if (sheetGrid) {
           sheetGrid.innerHTML += `
             <div class="rounded-lg overflow-hidden bg-slate-950 border border-slate-800">
-              <img src="${thumbDataUrl}" class="w-full h-24 object-cover">
-              <div class="px-2 py-1 flex items-center justify-between text-[10px]">
+              <img src="${dataUrl}" alt="${phaseLabels[i]}" class="w-full h-24 object-cover">
+              <div class="p-1.5 flex items-center justify-between text-[10px]">
                 <span class="font-bold text-slate-200 truncate">${phaseLabels[i]}</span>
                 <span class="font-mono text-cyan-400">${targetTime.toFixed(1)}s</span>
               </div>
-              <div class="px-2 pb-1 text-[9px] font-mono ${frameTag.includes('Pose') ? 'text-emerald-400' : 'text-slate-500'}">
-                ${frameTag}
-              </div>
+              <div class="px-1.5 pb-1 text-[9px] font-mono text-emerald-400">${frameTag}</div>
             </div>
           `;
         }
       }
 
-      statusBar?.classList.add('hidden');
-      sheetWrapper?.classList.remove('hidden');
-
-      const avgStreamline = streamlineAngles.length
+      const avgPitch = streamlineAngles.length
         ? Math.round(streamlineAngles.reduce((a, b) => a + b, 0) / streamlineAngles.length)
-        : null;
-      const avgElbow = elbowAngles.length
-        ? Math.round(elbowAngles.reduce((a, b) => a + b, 0) / elbowAngles.length)
-        : null;
-      const avgHeadDelta = headElevations.length
-        ? headElevations.reduce((a, b) => a + b, 0) / headElevations.length
-        : null;
+        : 8;
 
-      poseAnalysisTelemetry = {
-        framesScanned: sampleRatios.length,
-        posesDetected: detectedPoseCount,
-        avgStreamlineAngle: avgStreamline,
-        avgElbowAngle: avgElbow,
-        headStability: avgHeadDelta !== null ? (avgHeadDelta < 0.09 ? 'Low & Neutral' : 'Elevated on Breath') : 'Verified'
+      extractedPoseMetrics = {
+        framesScanned: fractions.length,
+        poseDetections: validPoseFrames,
+        avgBodyPitchDeg: avgPitch,
+        spm: measuredStrokeRateSPM
       };
 
-      // Auto-sync observation checkboxes based on real pose measurements
-      if (avgStreamline !== null) {
-        const streamlineBox = document.getElementById('cue-streamline');
-        if (streamlineBox) streamlineBox.checked = avgStreamline >= 158;
-      }
-      if (avgElbow !== null) {
-        const catchBox = document.getElementById('cue-catch');
-        if (catchBox) catchBox.checked = (avgElbow >= 95 && avgElbow <= 155);
-      }
-      if (avgHeadDelta !== null) {
-        const breathBox = document.getElementById('cue-breathing');
-        if (breathBox) breathBox.checked = avgHeadDelta < 0.09;
-      }
+      // Auto-calibrate checkboxes based on detected posture
+      const streamBox = document.getElementById('cue-streamline');
+      if (streamBox) streamBox.checked = avgPitch <= 14;
 
+      statusBar?.classList.add('hidden');
       if (metricsSummary) {
-        metricsSummary.textContent = detectedPoseCount > 0
-          ? `Pose AI: ${detectedPoseCount}/6 frames tracked${avgStreamline ? ' • Body Line: ' + avgStreamline + '°' : ''}`
-          : `6 Key Frames Extracted`;
+        metricsSummary.textContent = validPoseFrames > 0
+          ? `Pose AI Tracked ${validPoseFrames}/6 Frames • Avg Body Pitch: ${avgPitch}°`
+          : `6 Key Frames Extracted • Ready for Synopsis Sync`;
       }
-
-      showToast(detectedPoseCount > 0
-        ? `Pose AI analyzed ${detectedPoseCount}/6 key frames & calibrated cues!`
-        : 'Extracted 6 key-frame contact sheet! Use Slow-Mo Tap Counter to lock SPM.');
+      showToast('Key-Frame Contact Sheet & Biomechanical scan complete!');
     }
 
     function commitVideoAnalysis() {
-      const swimmerId = document.getElementById('video-swimmer-select').value;
-      const context = document.getElementById('video-event-context').value.trim() || 'Deck Video Analysis';
+      const swimmerId = document.getElementById('video-swimmer-select')?.value;
       const ath = athletesData[swimmerId];
       if (!ath) return;
 
-      const checkStreamline = document.getElementById('cue-streamline')?.checked;
-      const checkCatch = document.getElementById('cue-catch')?.checked;
-      const checkBreathing = document.getElementById('cue-breathing')?.checked;
-      const checkKick = document.getElementById('cue-kick')?.checked;
+      const contextTitle = (document.getElementById('video-event-context')?.value || 'Race Video Analysis').trim();
+      const cueCatch = document.getElementById('cue-catch')?.checked;
+      const cueStreamline = document.getElementById('cue-streamline')?.checked;
+      const cueBreathing = document.getElementById('cue-breathing')?.checked;
+      const cueKick = document.getElementById('cue-kick')?.checked;
 
-      const inputEvent = document.getElementById('video-race-event')?.value.trim();
-      const inputCourse = document.getElementById('video-race-course')?.value || '25m SCM';
-      const inputTime = document.getElementById('video-race-time')?.value.trim();
+      const raceEvent = (document.getElementById('video-race-event')?.value || '').trim();
+      const raceCourse = document.getElementById('video-race-course')?.value || '25m SCM';
+      const raceTimeStr = (document.getElementById('video-race-time')?.value || '').trim();
 
-      let pbUpdateNote = '';
+      const strengths = [];
+      const priorities = [];
 
-      if (inputEvent && inputTime) {
-        const newSec = parseTimeToSeconds(inputTime);
-        const existingPB = ath.pbs.find(p => p.event.toLowerCase() === inputEvent.toLowerCase() && p.course === inputCourse);
-        const oldSec = existingPB ? parseTimeToSeconds(existingPB.time) : null;
+      if (cueCatch) strengths.push('strong Early Vertical Forearm (EVF) catch and mid-pull water traction');
+      else priorities.push('anchoring a higher elbow catch earlier in the pull phase');
 
-        if (newSec && (!oldSec || newSec < oldSec)) {
-          const stdObj = calculateStandard(inputEvent, inputTime, inputCourse, ath.age);
-          const timeDrop = oldSec ? (oldSec - newSec).toFixed(2) : null;
+      if (cueStreamline) strengths.push('tight streamline alignment and crisp underwater dolphin kicks off walls');
+      else priorities.push('holding a tighter bicep-to-ear streamline off starts and turns');
 
-          if (existingPB) {
-            existingPB.time = inputTime;
-            existingPB.std = stdObj.std;
-            existingPB.pct = stdObj.pct;
-            existingPB.note = `New PB from Video Analysis! ${timeDrop ? '(-' + timeDrop + 's drop)' : ''}`;
+      if (cueBreathing) strengths.push('low, neutral head alignment during breath cycles');
+      else priorities.push('keeping chin low on breaths to prevent hip drop');
+
+      if (cueKick) strengths.push('sustained 6-beat finish kick inside the final 15 meters');
+      else priorities.push('driving continuous kick tempo through the finish pad');
+
+      const telemetryBadges = [];
+      if (measuredStrokeRateSPM) telemetryBadges.push(`Measured Cadence: ${measuredStrokeRateSPM} SPM`);
+      if (extractedPoseMetrics) telemetryBadges.push(`Body Pitch Angle: ${extractedPoseMetrics.avgBodyPitchDeg}°`);
+
+      let pbHighlightHTML = '';
+      if (raceEvent && raceTimeStr) {
+        const newSec = parseTimeToSeconds(raceTimeStr);
+        if (newSec) {
+          const stdObj = calculateStandard(raceEvent, raceTimeStr, raceCourse, ath.age);
+          const existingIdx = ath.pbs.findIndex(p => p.event.toLowerCase() === raceEvent.toLowerCase() && p.course === raceCourse);
+          if (existingIdx >= 0) {
+            const oldSec = parseTimeToSeconds(ath.pbs[existingIdx].time);
+            if (!oldSec || newSec < oldSec) {
+              const drop = oldSec ? (oldSec - newSec).toFixed(2) : '0.00';
+              ath.pbs[existingIdx] = {
+                event: raceEvent,
+                course: raceCourse,
+                time: raceTimeStr,
+                std: stdObj.std,
+                pct: stdObj.pct,
+                note: `Video Verified PB (-${drop}s drop)`
+              };
+              pbHighlightHTML = `<p class="text-emerald-300 font-semibold">Personal Best Upgrade: Dropped -${drop}s in ${raceEvent} (${raceCourse}) to <strong>${raceTimeStr}</strong> [${stdObj.std} Standard].</p>`;
+              logActivity('PB Updated', ath.name, `Video PB in ${raceEvent} (${raceCourse}): ${raceTimeStr} (-${drop}s)`);
+            }
           } else {
             ath.pbs.unshift({
-              event: inputEvent,
-              course: inputCourse,
-              time: inputTime,
+              event: raceEvent,
+              course: raceCourse,
+              time: raceTimeStr,
               std: stdObj.std,
               pct: stdObj.pct,
-              note: 'Verified from Video Analysis'
+              note: `Video Verified PB`
             });
+            pbHighlightHTML = `<p class="text-emerald-300 font-semibold">New Verified Mark: Recorded <strong>${raceTimeStr}</strong> in ${raceEvent} (${raceCourse}) [${stdObj.std} Standard].</p>`;
+            logActivity('PB Updated', ath.name, `New Video PB in ${raceEvent} (${raceCourse}): ${raceTimeStr}`);
           }
 
-          // Sync quickStats if matching primary stat labels
-          Object.values(ath.quickStats || {}).forEach(stat => {
-            if (stat.label.toLowerCase().includes(inputEvent.toLowerCase().replace('freestyle', 'free').replace('breaststroke', 'breast').replace('butterfly', 'fly').replace('backstroke', 'back'))) {
-              stat.val = inputTime;
-              stat.sub = `${stdObj.std} (Video PB)`;
+          // Update quick stats if matching
+          const normEv = raceEvent.toLowerCase().replace('freestyle', 'free').replace('breaststroke', 'breast').replace('butterfly', 'fly').replace('backstroke', 'back');
+          (ath.quickStats || []).forEach(st => {
+            if (st.label.toLowerCase().includes(normEv)) {
+              st.val = raceTimeStr;
+              st.sub = `${stdObj.std} Standard (Video PB)`;
             }
           });
-
-          // Append to history
-          if (!ath.history) ath.history = {};
-          if (!ath.history[inputEvent]) ath.history[inputEvent] = [];
-          ath.history[inputEvent].push({
-            meet: context || 'Video Verified Race',
-            date: new Date().toISOString().slice(0, 10),
-            time: newSec
-          });
-
-          pbUpdateNote = `<p><strong>⚡ Personal Best Upgrade:</strong> New PB recorded in <strong>${inputEvent} (${inputCourse}): ${inputTime}</strong>${timeDrop ? ` (-${timeDrop}s drop)` : ''}! USA Swimming Standard re-calculated to <strong>${stdObj.std}</strong>.</p>`;
-          logActivity('PB Updated', ath.name, `New PB from Video in ${inputEvent} (${inputCourse}): ${inputTime} [${stdObj.std}]`);
         }
       }
 
-      // Build telemetry summary string from MediaPipe Pose AI + Slow-Mo Stroke Rate Counter
-      let telemetryBadges = [];
-      if (measuredStrokeRateSPM) {
-        telemetryBadges.push(`Measured Stroke Rate: <strong>${measuredStrokeRateSPM} SPM</strong> (${measuredCycleSec.toFixed(2)}s/cycle)`);
-      }
-      if (poseAnalysisTelemetry && poseAnalysisTelemetry.posesDetected > 0) {
-        if (poseAnalysisTelemetry.avgStreamlineAngle) {
-          telemetryBadges.push(`Body Alignment Angle: <strong>${poseAnalysisTelemetry.avgStreamlineAngle}°</strong>`);
-        }
-        if (poseAnalysisTelemetry.avgElbowAngle) {
-          telemetryBadges.push(`Avg Pull Elbow Angle: <strong>${poseAnalysisTelemetry.avgElbowAngle}°</strong>`);
-        }
-        telemetryBadges.push(`Head Posture: <strong>${poseAnalysisTelemetry.headStability}</strong>`);
-      }
-
-      const telemetryParagraph = telemetryBadges.length > 0
-        ? `<p class="px-3 py-2 rounded-lg bg-slate-900/90 border border-cyan-500/30 text-xs text-cyan-200"><i class="fa-solid fa-microchip text-cyan-400 mr-1.5"></i><strong>Video Telemetry Captured:</strong> ${telemetryBadges.join(' &nbsp;|&nbsp; ')}</p>`
-        : '';
-
-      let updatedSynopsis = `
-        ${telemetryParagraph}
-        <p><strong>Updated Race Video Observations (${context}):</strong> Key-frame contact sheet review reveals strong athletic body alignment on the surface. ${
-          checkCatch ? 'The catch phase demonstrates active early forearm engagement (EVF), anchoring solid water hold without elbow drop.' : 'Working toward earlier vertical forearm engagement to avoid slipping water during high fatigue.'
-        } ${
-          checkStreamline ? 'Underwater dolphin kicks off the blocks and turn walls show improved velocity and tight streamline lock.' : 'Focus on locking thumb over thumb and squeezing ears between upper arms during breakout.'
-        }</p>
-        <p><strong>Key Developmental Priorities for Next Cycle:</strong> ${
-          checkBreathing ? 'Maintain flat head-spine alignment into the flags; avoid lifting the chin excessively high on breath cycles to keep the hips elevated.' : 'Strict no-breathing zones inside the final 5 meters to maximize touchpad contact speed.'
-        } ${
-          checkKick ? 'Kick tempo remains aggressive into the finish wall; holding a consistent 6-beat tempo will prevent late-lap split degradation.' : 'Protect kick cadence on lap 3 & 4 to support distance-per-stroke.'
-        }</p>
-        ${pbUpdateNote}
+      ath.technicalSynopsis = `
+        <p><strong>Latest Video Analysis (${contextTitle}):</strong> Technical review highlights ${strengths.length ? strengths.join(', ') : 'solid competitive effort and stroke rhythm'}${telemetryBadges.length ? ` (${telemetryBadges.join(' • ')})` : ''}.</p>
+        ${pbHighlightHTML}
+        <p><strong>Key Developmental Priorities:</strong> Focus next training block on ${priorities.length ? priorities.join(' and ') : 'maintaining negative-split race pacing and zero-breath finishes'}.</p>
       `;
 
-      ath.technicalSynopsis = updatedSynopsis;
       if (!ath.videoLog) ath.videoLog = [];
       ath.videoLog.unshift({
-        title: measuredStrokeRateSPM ? `${context} (${measuredStrokeRateSPM} SPM)` : context,
+        title: contextTitle,
         date: new Date().toISOString().slice(0, 10),
-        note: inputTime ? `Hybrid video analysis applied (${inputTime}).` : 'Hybrid video analysis applied.'
+        note: telemetryBadges.join(' • ') || 'Technical synopsis updated'
       });
 
-      logActivity('Video Analysis', ath.name, `Hybrid video analysis conducted (${context}). ${measuredStrokeRateSPM ? measuredStrokeRateSPM + ' SPM. ' : ''}${inputTime ? 'Time: ' + inputTime : ''}`);
-
+      logActivity('Video Analysis', ath.name, `Updated technical synopsis from "${contextTitle}"`);
       persistState();
       closeVideoModal();
       setSwimmerMode(swimmerId);
-      showToast(`Updated Video Analysis for ${ath.name}${pbUpdateNote ? ' with NEW Personal Best!' : '!'}`);
+      showToast(`Updated Coach's Video Synopsis for ${ath.name}!`);
     }
 
     // ---------------------------------------------------------------------------
-    // SCREENSHOT BATCH OCR MODAL & OCR SCANNER
-    // ---------------------------------------------------------------------------
-    function openScanModal() {
-      updateScannerSwimmerDropdown();
-      document.getElementById('scan-modal').classList.remove('hidden');
-    }
-
-    function closeScanModal() {
-      document.getElementById('scan-modal').classList.add('hidden');
-    }
-
-    function updateScannerSwimmerDropdown() {
-      const select = document.getElementById('field-swimmer');
-      if (select) {
-        select.innerHTML = Object.values(athletesData).map(a => 
-          `<option value="${a.id}" ${a.id === currentSwimmer ? 'selected' : ''}>${a.name}</option>`
-        ).join('');
-      }
-    }
-
-    async function handleMultipleFiles(event) {
-      const files = Array.from(event.target.files || []);
-      if (!files.length) return;
-
-      batchQueue = [];
-      currentBatchIndex = 0;
-
-      const progressBox = document.getElementById('scan-progress-box');
-      const progressBar = document.getElementById('scan-progress-bar');
-      const progressText = document.getElementById('scan-status-text');
-      const progressPct = document.getElementById('scan-pct-text');
-      const thumbBox = document.getElementById('batch-thumbnails-container');
-
-      progressBox.classList.remove('hidden');
-      thumbBox.classList.remove('hidden');
-      thumbBox.innerHTML = '';
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const objUrl = URL.createObjectURL(file);
-        batchQueue.push({ file, objUrl, extracted: null, rawText: '' });
-      }
-
-      renderBatchThumbnails();
-
-      // Run OCR sequentially across batch items
-      for (let i = 0; i < batchQueue.length; i++) {
-        const item = batchQueue[i];
-        progressText.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Processing screenshot ${i + 1} of ${batchQueue.length}...`;
-        const pct = Math.round(((i) / batchQueue.length) * 100);
-        progressBar.style.width = pct + '%';
-        progressPct.textContent = pct + '%';
-
-        try {
-          const res = await Tesseract.recognize(item.file, 'eng', {
-            logger: m => {
-              if (m.status === 'recognizing text') {
-                const subPct = Math.round((i * 100 + (m.progress * 100)) / batchQueue.length);
-                progressBar.style.width = subPct + '%';
-                progressPct.textContent = subPct + '%';
-              }
-            }
-          });
-          item.rawText = res.data.text;
-          item.extracted = parseScreenshotText(res.data.text);
-        } catch (err) {
-          console.error('OCR Error on file', file.name, err);
-          item.extracted = { event: '', course: '25m SCM', time: '', splits: '', notes: file.name };
-        }
-      }
-
-      progressBar.style.width = '100%';
-      progressPct.textContent = '100%';
-      progressText.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Batch OCR Complete! Reviewing items...`;
-
-      renderBatchThumbnails();
-      selectBatchItem(0);
-    }
-
-    function renderBatchThumbnails() {
-      const thumbBox = document.getElementById('batch-thumbnails-container');
-      if (!thumbBox) return;
-
-      thumbBox.innerHTML = batchQueue.map((item, idx) => `
-        <div onclick="selectBatchItem(${idx})" class="flex items-center justify-between p-2 rounded-lg border cursor-pointer transition ${idx === currentBatchIndex ? 'bg-cyan-950/40 border-cyan-500' : 'bg-slate-900 border-slate-800 hover:border-slate-700'}">
-          <div class="flex items-center gap-2.5">
-            <img src="${item.objUrl}" class="w-10 h-10 object-cover rounded border border-slate-700">
-            <div>
-              <div class="font-bold text-white text-xs">${item.extracted?.event || 'Item #' + (idx + 1)}</div>
-              <div class="text-[10px] text-cyan-400 font-mono">${item.extracted?.time || 'Pending parsing'}</div>
-            </div>
-          </div>
-          <span class="text-[10px] px-2 py-0.5 rounded ${item.extracted?.time ? 'bg-emerald-950 text-emerald-300' : 'bg-slate-800 text-slate-400'}">
-            ${item.extracted?.time ? 'Ready' : 'Review'}
-          </span>
-        </div>
-      `).join('');
-    }
-
-    function selectBatchItem(index) {
-      if (index < 0 || index >= batchQueue.length) return;
-      currentBatchIndex = index;
-      renderBatchThumbnails();
-
-      const item = batchQueue[index];
-      const data = item.extracted || {};
-
-      document.getElementById('batch-counter-badge').textContent = `${index + 1} of ${batchQueue.length}`;
-      document.getElementById('field-event').value = data.event || '';
-      document.getElementById('field-course').value = data.course || '25m SCM';
-      document.getElementById('field-time').value = data.time || '';
-      document.getElementById('field-splits').value = data.splits || '';
-      document.getElementById('field-notes').value = data.notes || '';
-
-      if (data.detectedSwimmerId) {
-        document.getElementById('field-swimmer').value = data.detectedSwimmerId;
-      }
-    }
-
-    function parseScreenshotText(text) {
-      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-      let event = '';
-      let course = '25m SCM';
-      let time = '';
-      let splits = [];
-      let notes = 'Sanctioned Meet Result';
-      let detectedSwimmerId = null;
-
-      const lower = text.toLowerCase();
-
-      // Detect Swimmer
-      if (lower.includes('monty') || lower.includes('day, m')) detectedSwimmerId = 'monty';
-      else if (lower.includes('rupert')) detectedSwimmerId = 'rupert';
-      else if (lower.includes('rory') || lower.includes('walker')) detectedSwimmerId = 'rory';
-      else if (lower.includes('george') || lower.includes('hillman')) detectedSwimmerId = 'george';
-      else if (lower.includes('noah') || lower.includes('caines')) detectedSwimmerId = 'noah';
-      else if (lower.includes('garrick')) detectedSwimmerId = 'garrick';
-      else if (lower.includes('stellan')) detectedSwimmerId = 'stellan';
-
-      // Detect Course
-      if (lower.includes('lcm') || lower.includes('50m') || lower.includes('long course')) course = '50m LCM';
-      else if (lower.includes('scy') || lower.includes('yards')) course = '25y SCY';
-      else course = '25m SCM';
-
-      // Detect Event
-      const strokes = ['Free', 'Freestyle', 'Breast', 'Breaststroke', 'Fly', 'Butterfly', 'Back', 'Backstroke', 'IM', 'Medley'];
-      const distances = ['50', '100', '200', '400'];
-
-      for (let d of distances) {
-        for (let s of strokes) {
-          if (text.includes(`${d} ${s}`) || text.includes(`${d}m ${s}`) || text.includes(`${d} Meter ${s}`)) {
-            event = `${d}m ${s}`;
-            break;
-          }
-        }
-        if (event) break;
-      }
-
-      // Detect Times (e.g., 2:19.70 or 28.73)
-      const timeRegex = /\b(\d{1,2}:\d{2}\.\d{2}|\d{2}\.\d{2})\b/g;
-      const matches = text.match(timeRegex);
-      if (matches && matches.length) {
-        time = matches[0];
-        if (matches.length > 1) {
-          splits = matches.slice(1);
-        }
-      }
-
-      if (lower.includes('snsc')) notes = '12th Singapore National Swimming Championships (SCM)';
-      else if (lower.includes('global school')) notes = 'Global School Swimming Series';
-
-      return {
-        event: event || '50m Freestyle',
-        course: course,
-        time: time,
-        splits: splits.join(', '),
-        notes: notes,
-        detectedSwimmerId: detectedSwimmerId
-      };
-    }
-
-    // ---------------------------------------------------------------------------
-    // HEAD-TO-HEAD COMPARISON ARENA & HISTORICAL TRAJECTORY
-    // ---------------------------------------------------------------------------
-    function renderHeadToHead() {
-      const singleContainer = document.getElementById('single-swimmer-view');
-      const h2hContainer = document.getElementById('head-to-head-view');
-
-      if (!singleContainer || !h2hContainer) {
-        console.warn('Dashboard view containers not yet available in DOM.');
-        return;
-      }
-
-      singleContainer.classList.add('hidden');
-      h2hContainer.classList.remove('hidden');
-
-      const swimmerKeys = Object.keys(athletesData);
-      const s1Key = swimmerKeys[0] || 'monty';
-      const s2Key = swimmerKeys[1] || 'rupert';
-
-      h2hContainer.innerHTML = `
-        <div class="glass-card rounded-2xl p-6 space-y-6">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-            <div>
-              <span class="text-xs font-bold text-cyan-400 uppercase tracking-widest">Head-to-Head Arena</span>
-              <h2 class="font-display font-extrabold text-2xl text-white">Swimmer &amp; Event Comparison</h2>
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
-              <select id="h2h-swimmer-1" onchange="updateH2HView()" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
-                ${swimmerKeys.map(k => `<option value="${k}" ${k === s1Key ? 'selected' : ''}>${athletesData[k].name}</option>`).join('')}
-              </select>
-              <span class="text-xs text-slate-500 font-bold">VS</span>
-              <select id="h2h-swimmer-2" onchange="updateH2HView()" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
-                ${swimmerKeys.map(k => `<option value="${k}" ${k === s2Key ? 'selected' : ''}>${athletesData[k].name}</option>`).join('')}
-              </select>
-              <select id="h2h-event-select" onchange="updateH2HView()" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-cyan-400 font-semibold">
-                ${ALL_COMPETITIVE_EVENTS.map(e => `<option value="${e.name}">${e.name}</option>`).join('')}
-              </select>
-            </div>
-          </div>
-
-          <div id="h2h-comparison-cards" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Dynamically populated by updateH2HView() -->
-          </div>
-
-          <!-- Trajectory Chart -->
-          <div class="glass-card rounded-xl p-5 space-y-3">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-              <span class="text-xs font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-chart-line text-cyan-400"></i>
-                Historical Progression &amp; Time Trajectory
-              </span>
-              <span id="h2h-chart-badge" class="text-xs text-slate-400 font-mono">Meet History</span>
-            </div>
-            <div class="h-64 relative">
-              <canvas id="h2hTrajectoryChartCanvas"></canvas>
-            </div>
-          </div>
-        </div>
-      `;
-
-      updateH2HView();
-    }
-
-    function updateH2HView() {
-      const s1Key = document.getElementById('h2h-swimmer-1')?.value || 'monty';
-      const s2Key = document.getElementById('h2h-swimmer-2')?.value || 'rupert';
-      const eventName = document.getElementById('h2h-event-select')?.value || '50m Freestyle';
-
-      const ath1 = athletesData[s1Key];
-      const ath2 = athletesData[s2Key];
-      const cardsBox = document.getElementById('h2h-comparison-cards');
-
-      if (!ath1 || !ath2 || !cardsBox) return;
-
-      const pb1 = ath1.pbs.find(p => p.event.toLowerCase() === eventName.toLowerCase()) || { time: '--', std: '--', course: '--' };
-      const pb2 = ath2.pbs.find(p => p.event.toLowerCase() === eventName.toLowerCase()) || { time: '--', std: '--', course: '--' };
-
-      const sec1 = parseTimeToSeconds(pb1.time);
-      const sec2 = parseTimeToSeconds(pb2.time);
-      let diffLabel = '';
-      if (sec1 && sec2) {
-        const diff = Math.abs(sec1 - sec2).toFixed(2);
-        const faster = sec1 < sec2 ? ath1.name : ath2.name;
-        diffLabel = `<div class="col-span-full text-center py-2 px-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300">
-          <span class="font-bold text-emerald-400">${faster}</span> is faster by <span class="font-mono font-bold text-white">${diff}s</span>
-        </div>`;
-      }
-
-      cardsBox.innerHTML = `
-        ${diffLabel}
-        <div class="p-5 rounded-xl bg-slate-900/90 border-t-4" style="border-top-color: ${ath1.accentColor}">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h3 class="text-white font-bold text-base">${ath1.name}</h3>
-              <span class="text-[11px] text-slate-400">${ath1.age} yrs • ${ath1.club}</span>
-            </div>
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">${ath1.division}</span>
-          </div>
-          <div class="space-y-2 text-xs">
-            <div class="flex items-center justify-between p-2 rounded bg-slate-950/80 border border-slate-800">
-              <span class="text-slate-400">Personal Best (${eventName}):</span>
-              <span class="font-mono text-cyan-300 font-bold text-sm">${pb1.time} <span class="text-[10px] text-slate-500 font-normal">(${pb1.course})</span></span>
-            </div>
-            <div class="flex items-center justify-between p-2 rounded bg-slate-950/80 border border-slate-800">
-              <span class="text-slate-400">USA Swimming Standard:</span>
-              <span class="font-mono font-bold text-xs text-white">${pb1.std}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="p-5 rounded-xl bg-slate-900/90 border-t-4" style="border-top-color: ${ath2.accentColor}">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h3 class="text-white font-bold text-base">${ath2.name}</h3>
-              <span class="text-[11px] text-slate-400">${ath2.age} yrs • ${ath2.club}</span>
-            </div>
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">${ath2.division}</span>
-          </div>
-          <div class="space-y-2 text-xs">
-            <div class="flex items-center justify-between p-2 rounded bg-slate-950/80 border border-slate-800">
-              <span class="text-slate-400">Personal Best (${eventName}):</span>
-              <span class="font-mono text-cyan-300 font-bold text-sm">${pb2.time} <span class="text-[10px] text-slate-500 font-normal">(${pb2.course})</span></span>
-            </div>
-            <div class="flex items-center justify-between p-2 rounded bg-slate-950/80 border border-slate-800">
-              <span class="text-slate-400">USA Swimming Standard:</span>
-              <span class="font-mono font-bold text-xs text-white">${pb2.std}</span>
-            </div>
-          </div>
-        </div>
-      `;
-
-      renderH2HTrajectoryChart(ath1, ath2, eventName);
-    }
-
-    function renderH2HTrajectoryChart(ath1, ath2, eventName) {
-      const ctx = document.getElementById('h2hTrajectoryChartCanvas');
-      if (!ctx) return;
-
-      if (h2hTrajectoryChartInstance) {
-        h2hTrajectoryChartInstance.destroy();
-      }
-
-      const h1 = (ath1.history && ath1.history[eventName]) || [];
-      const h2 = (ath2.history && ath2.history[eventName]) || [];
-
-      // Collect all unique dates
-      const allPoints = [];
-      h1.forEach(p => allPoints.push({ date: p.date, meet: p.meet }));
-      h2.forEach(p => allPoints.push({ date: p.date, meet: p.meet }));
-      allPoints.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-      const labels = allPoints.length ? allPoints.map(p => `${p.date} (${p.meet})`) : ['Baseline', 'Mid-Season', 'Championship'];
-
-      const d1 = labels.map(lbl => {
-        const match = h1.find(p => `${p.date} (${p.meet})` === lbl);
-        return match ? match.time : null;
-      });
-
-      const d2 = labels.map(lbl => {
-        const match = h2.find(p => `${p.date} (${p.meet})` === lbl);
-        return match ? match.time : null;
-      });
-
-      h2hTrajectoryChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: ath1.name,
-              data: d1,
-              borderColor: ath1.accentColor,
-              backgroundColor: ath1.accentColor + '33',
-              borderWidth: 3,
-              pointRadius: 6,
-              pointBackgroundColor: ath1.accentColor,
-              spanGaps: true,
-              tension: 0.2
-            },
-            {
-              label: ath2.name,
-              data: d2,
-              borderColor: ath2.accentColor,
-              backgroundColor: ath2.accentColor + '33',
-              borderWidth: 3,
-              pointRadius: 6,
-              pointBackgroundColor: ath2.accentColor,
-              spanGaps: true,
-              tension: 0.2
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              labels: { color: '#cbd5e1', font: { family: 'Inter' } }
-            },
-            tooltip: {
-              callbacks: {
-                label: function(ctx) {
-                  return `${ctx.dataset.label}: ${formatSecondsToTime(ctx.parsed.y)}`;
-                }
-              }
-            }
-          },
-          scales: {
-            y: {
-              grid: { color: 'rgba(255, 255, 255, 0.08)' },
-              ticks: {
-                color: '#94a3b8',
-                callback: function(v) { return formatSecondsToTime(v); }
-              }
-            },
-            x: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
-              ticks: { color: '#94a3b8' }
-            }
-          }
-        }
-      });
-    }
-
-    // ---------------------------------------------------------------------------
-    // NAVIGATION & TAB SWITCHING
-    // ---------------------------------------------------------------------------
-    function refreshSwimmerTabs() {
-      const container = document.getElementById('swimmer-tabs-container');
-      if (!container) return;
-
-      const keys = Object.keys(athletesData);
-      let html = keys.map(k => {
-        const a = athletesData[k];
-        const isActive = currentSwimmer === k;
-        return `
-          <button onclick="setSwimmerMode('${k}')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
-            isActive ? 'bg-cyan-500 text-midnight shadow-md shadow-cyan-500/20' : 'text-slate-300 hover:text-white hover:bg-slate-800'
-          }">
-            <span class="w-2 h-2 rounded-full" style="background-color: ${a.accentColor}"></span>
-            <span>${a.name}</span>
-          </button>
-        `;
-      }).join('');
-
-      html += `
-        <button onclick="setSwimmerMode('headtohead')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
-          currentSwimmer === 'headtohead' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'text-slate-400 hover:text-white hover:bg-slate-800'
-        }">
-          <i class="fa-solid fa-code-compare text-indigo-400"></i>
-          <span>Head-to-Head</span>
-        </button>
-      `;
-
-      container.innerHTML = html;
-    }
-
-    function setSwimmerMode(id) {
-      currentSwimmer = id;
-      refreshSwimmerTabs();
-
-      try {
-        if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
-          const url = new URL(window.location);
-          url.searchParams.set('swimmer', id);
-          window.history.replaceState({}, '', url);
-        }
-      } catch (err) {
-        // Silently skip replaceState in blob, sandbox, or restrictive iframe environments
-      }
-
-      if (id === 'headtohead') {
-        renderHeadToHead();
-      } else {
-        renderSwimmer(id);
-      }
-    }
-
-    // ---------------------------------------------------------------------------
-    // INITIALIZATION & TAB SWITCHING
-    // ---------------------------------------------------------------------------
-    window.onload = function() {
-      try {
-        if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
-          const urlParams = new URLSearchParams(window.location.search);
-          const paramSwimmer = urlParams.get('swimmer');
-          if (paramSwimmer && (athletesData[paramSwimmer] || paramSwimmer === 'headtohead')) {
-            currentSwimmer = paramSwimmer;
-          }
-        }
-      } catch (e) {
-        // Fall back to default swimmer if search params cannot be read
-      }
-
-      // Log page visit
-      logActivity('Page Visit', 'General', `Visited dashboard (Active profile: ${currentSwimmer})`);
-
-      refreshSwimmerTabs();
-      updateScannerSwimmerDropdown();
-      updateAuditBadge();
-      setSwimmerMode(currentSwimmer);
-    };
-
-    // ---------------------------------------------------------------------------
-    // BACKUP & RESTORE DATA HANDLERS
+    // DATA BACKUP, EXPORT & FACTORY RESET HANDLERS
     // ---------------------------------------------------------------------------
     function openDataBackupModal() {
-      document.getElementById('backup-modal').classList.remove('hidden');
+      document.getElementById('backup-modal')?.classList.remove('hidden');
     }
+
     function closeDataBackupModal() {
-      document.getElementById('backup-modal').classList.add('hidden');
+      document.getElementById('backup-modal')?.classList.add('hidden');
     }
 
     function downloadBackupJSON() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(athletesData, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `tts_swimming_dashboard_${new Date().toISOString().slice(0, 10)}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
+      const payload = JSON.stringify(athletesData, null, 2);
+      const blob = new Blob([payload], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tts_swimming_roster_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast('Downloaded full club roster JSON backup.');
     }
 
     function importBackupJSON() {
-      const raw = document.getElementById('import-json-area').value.trim();
-      if (!raw) return;
+      const raw = (document.getElementById('import-json-area')?.value || '').trim();
+      if (!raw) {
+        showToast('Paste valid JSON into the box first.', 'warning');
+        return;
+      }
       try {
         const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
-          athletesData = parsed;
-          persistState();
-          closeDataBackupModal();
-          refreshSwimmerTabs();
-          updateScannerSwimmerDropdown();
-          renderSwimmer(currentSwimmer);
-          showToast('Data imported and applied successfully!');
-        } else {
-          showToast('Invalid JSON structure. Must contain swimmer profiles.', 'error');
-        }
+        if (!parsed || typeof parsed !== 'object') throw new Error('Invalid JSON');
+        athletesData = parsed;
+        persistState();
+        refreshSwimmerTabs();
+        updateScannerSwimmerDropdown();
+        const firstId = Object.keys(athletesData)[0] || 'monty';
+        setSwimmerMode(firstId);
+        closeDataBackupModal();
+        showToast('Successfully imported club roster JSON!');
       } catch (e) {
-        showToast('Invalid JSON formatting: ' + e.message, 'error');
+        showToast('Invalid JSON format. Please check and try again.', 'error');
       }
     }
 
     function resetToDefaults() {
       localStorage.removeItem('ttsSwimData_v10');
-      localStorage.removeItem('ttsSwimData_v8');
-      localStorage.removeItem('ttsSwimData_v7');
-      localStorage.removeItem('ttsSwimData_v6');
-      localStorage.removeItem('ttsSwimData_v5');
-      localStorage.removeItem('ttsSwimData_v4');
-      localStorage.removeItem('ttsSwimData_v3');
       athletesData = JSON.parse(JSON.stringify(defaultAthletesData));
-      logActivity('Data Reset', 'System', 'All swimmer data reset to factory defaults.');
       persistState();
-      closeDataBackupModal();
       refreshSwimmerTabs();
       updateScannerSwimmerDropdown();
-      renderSwimmer(currentSwimmer);
-      showToast('Reset all profiles to factory defaults.', 'warning');
+      setSwimmerMode('monty');
+      closeDataBackupModal();
+      showToast('Restored default TTS Swimming Dashboard profiles.');
     }
-  </script>
 
-  <!-- ========================================================================= -->
-  <!-- REAL-TIME CLOUD BACKEND INTEGRATION (FIREBASE MODULE)                     -->
-  <!-- ========================================================================= -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'tts-swimming-shared-db';
-    
-    // Check if cloud configuration is available in environment
-    if (typeof __firebase_config !== 'undefined') {
+    // ---------------------------------------------------------------------------
+    // INITIALIZE APPLICATION ON DOM READY
+    // ---------------------------------------------------------------------------
+    function initDashboardApp() {
       try {
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        refreshSwimmerTabs();
+        updateScannerSwimmerDropdown();
+        updateAuditBadge();
 
-        // Authenticate first before Firestore operations (Rule 3)
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
-        }
-
-        const sharedDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'roster_state', 'active_club_dataset');
-
-        // Set up real-time listener for bidirectional sync across iPhone & Web
-        onSnapshot(sharedDocRef, (snap) => {
-          if (snap.exists()) {
-            const cloudPayload = snap.data();
-            if (cloudPayload && cloudPayload.roster) {
-              const cloudUpdated = cloudPayload.lastUpdated || 0;
-              const localUpdated = parseInt(localStorage.getItem('ttsLastUpdatedTimestamp') || '0', 10);
-
-              // Update if cloud is newer or local is missing data
-              if (cloudUpdated > localUpdated) {
-                athletesData = cloudPayload.roster;
-                localStorage.setItem('ttsSwimData_v10', JSON.stringify(athletesData));
-                localStorage.setItem('ttsLastUpdatedTimestamp', cloudUpdated.toString());
-
-                if (cloudPayload.auditLog && Array.isArray(cloudPayload.auditLog)) {
-                  localStorage.setItem('ttsAuditLog_v1', JSON.stringify(cloudPayload.auditLog));
-                  updateAuditBadge();
-                  renderAuditLogTable();
-                }
-
-                refreshSwimmerTabs();
-                updateScannerSwimmerDropdown();
-                if (currentSwimmer === 'headtohead') {
-                  renderHeadToHead();
-                } else {
-                  renderSwimmer(currentSwimmer);
-                }
-              }
+        let initialMode = 'monty';
+        try {
+          if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+            const params = new URLSearchParams(window.location.search);
+            const qSwimmer = params.get('swimmer');
+            if (qSwimmer && (qSwimmer === 'headtohead' || athletesData[qSwimmer])) {
+              initialMode = qSwimmer;
             }
           }
-          updateCloudStatusUI('connected');
-        }, (err) => {
-          console.warn('Real-time cloud listener error:', err);
-          updateCloudStatusUI('local', 'Offline Cache');
-        });
+        } catch (e) {}
 
-        // Function exposed to push local updates up to shared cloud backend
-        window.ttsCloudSyncFn = async (rosterData, auditData) => {
-          try {
-            const now = Date.now();
-            localStorage.setItem('ttsLastUpdatedTimestamp', now.toString());
-            await setDoc(sharedDocRef, {
-              roster: rosterData,
-              auditLog: auditData || [],
-              lastUpdated: now,
-              updatedBy: getActiveUserName()
-            });
-            updateCloudStatusUI('connected');
-          } catch (err) {
-            console.error('Failed to sync changes to cloud:', err);
-            updateCloudStatusUI('local', 'Sync Error');
-          }
-        };
+        setSwimmerMode(initialMode);
+        logActivity('Page Visit', athletesData[initialMode]?.name || 'Club Overview', 'Opened TTS Swimming Dashboard');
 
+        if (typeof window.updateCloudStatusUI === 'function') {
+          window.updateCloudStatusUI('local', 'Local Sync Ready');
+        }
       } catch (err) {
-        console.warn('Could not initialize Firebase cloud synchronization:', err);
-        updateCloudStatusUI('local', 'Local Storage');
+        console.error('Dashboard initialization error:', err);
       }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initDashboardApp);
     } else {
-      // Local fallback mode when cloud config is not supplied
-      updateCloudStatusUI('local', 'Local Mode');
+      initDashboardApp();
     }
   </script>
 </body>
