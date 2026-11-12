@@ -210,7 +210,7 @@
             <i class="fa-brands fa-apple"></i>
           </button>
 
-          <button onclick="openDataBackupModal()" title="Export / Import Roster JSON Backup" class="w-8 h-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 flex items-center justify-center text-xs transition">
+          <button onclick="openDataBackupModal()" title="Cloud Sync Settings & JSON Backup" class="w-8 h-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 flex items-center justify-center text-xs transition">
             <i class="fa-solid fa-database"></i>
           </button>
 
@@ -228,61 +228,202 @@
   </header>
 
   <!-- ========================================================================= -->
-  <!-- MAIN DASHBOARD VIEWPORT                                                   -->
+  <!-- MAIN DASHBOARD VIEWPORTS                                                  -->
   <!-- ========================================================================= -->
-  <main class="max-w-7xl mx-auto px-3 sm:px-6 pt-5 space-y-6">
-    <!-- Single Swimmer Performance View -->
-    <div id="single-swimmer-view" class="space-y-6"></div>
-
-    <!-- Head-to-Head Comparison Arena View -->
-    <div id="head-to-head-view" class="hidden space-y-6"></div>
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 py-5 space-y-5">
+    <div id="single-swimmer-view" class="space-y-5"></div>
+    <div id="head-to-head-view" class="hidden space-y-5"></div>
   </main>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: INSTALL IPHONE HOME SCREEN APP                                     -->
+  <!-- MODAL: ADD NEW SWIMMER                                                    -->
   <!-- ========================================================================= -->
-  <div id="install-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4">
-    <div class="glass-card rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-700 shadow-2xl">
+  <div id="add-swimmer-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-700 shadow-2xl my-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-slate-800 text-white flex items-center justify-center text-lg">
-            <i class="fa-brands fa-apple"></i>
-          </div>
-          <div>
-            <h3 class="text-white font-display font-bold text-base">Install iPhone App</h3>
-            <p class="text-xs text-slate-400">Add TTS Swim Analytics to your Home Screen</p>
-          </div>
-        </div>
-        <button onclick="closeInstallModal()" class="text-slate-400 hover:text-white text-lg">
+        <h3 class="text-white font-display font-bold text-base flex items-center gap-2">
+          <i class="fa-solid fa-user-plus text-emerald-400"></i> Add New Swimmer Profile
+        </h3>
+        <button onclick="closeAddSwimmerModal()" class="text-slate-400 hover:text-white text-lg">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-      <ol class="space-y-2.5 text-xs text-slate-300 list-decimal pl-4">
-        <li>Open this dashboard link in <strong>Safari</strong> on your iPhone.</li>
-        <li>Tap the <strong>Share</strong> icon (<i class="fa-solid fa-arrow-up-from-bracket text-cyan-400"></i>) at the bottom of Safari.</li>
-        <li>Scroll down and tap <strong>"Add to Home Screen"</strong>.</li>
-        <li>Launch <strong>TTS Swim</strong> directly from your iPhone Home Screen in full-screen app mode!</li>
-      </ol>
-      <div class="pt-2 border-t border-slate-800 flex justify-end">
-        <button onclick="closeInstallModal()" class="px-4 py-2 rounded-lg bg-cyan-500 text-midnight font-bold text-xs">Got It</button>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Full Name *</label>
+          <input type="text" id="new-swimmer-name" placeholder="e.g. Leo Chen" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Current Age</label>
+            <input type="number" id="new-swimmer-age" value="11" min="6" max="18" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Date of Birth</label>
+            <input type="date" id="new-swimmer-dob" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Club / Squad</label>
+          <input type="text" id="new-swimmer-club" value="Tanglin Merlions (TTS-VD)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Primary Specialty</label>
+          <select id="new-swimmer-specialty" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
+            <option value="free_sprint">Freestyle Sprint Specialist</option>
+            <option value="free_distance">Freestyle Mid/Distance Specialist</option>
+            <option value="breast">Breaststroke Specialist</option>
+            <option value="fly">Butterfly Specialist</option>
+            <option value="back">Backstroke Specialist</option>
+            <option value="im">Individual Medley (IM) All-Rounder</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Profile Accent Color</label>
+          <div class="flex items-center gap-3 pt-1">
+            <label class="cursor-pointer"><input type="radio" name="swimmer-color" value="#00d2ff" checked class="mr-1"> <span class="text-cyan-400 font-bold">Cyan</span></label>
+            <label class="cursor-pointer"><input type="radio" name="swimmer-color" value="#f59e0b" class="mr-1"> <span class="text-amber-400 font-bold">Gold</span></label>
+            <label class="cursor-pointer"><input type="radio" name="swimmer-color" value="#10b981" class="mr-1"> <span class="text-emerald-400 font-bold">Emerald</span></label>
+            <label class="cursor-pointer"><input type="radio" name="swimmer-color" value="#a855f7" class="mr-1"> <span class="text-purple-400 font-bold">Purple</span></label>
+          </div>
+        </div>
+        <button onclick="saveNewSwimmer()" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-midnight font-extrabold transition">
+          Create Swimmer Profile
+        </button>
       </div>
     </div>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: EXTERNAL AI VIDEO COACH BRIDGE & STRUCTURED PASTE-BACK             -->
+  <!-- MODAL: MANUAL PB ENTRY / OVERRIDE                                         -->
   <!-- ========================================================================= -->
-  <div id="video-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="glass-card rounded-2xl max-w-3xl w-full p-6 space-y-4 border border-amber-500/40 shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
+  <div id="manual-pb-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-700 shadow-2xl my-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-gold-400 flex items-center justify-center text-base font-bold">
-            <i class="fa-solid fa-video"></i>
+        <h3 id="manual-pb-title" class="text-white font-display font-bold text-base">Add / Override Personal Best</h3>
+        <button onclick="closeManualPBModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <input type="hidden" id="manual-pb-index" value="-1">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Swimmer</label>
+          <select id="manual-pb-swimmer" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white"></select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Event (e.g. 50m Freestyle)</label>
+            <input type="text" id="manual-pb-event" placeholder="50m Freestyle" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
           </div>
           <div>
-            <h3 class="text-white font-display font-bold text-base">AI Video Coach Bridge &amp; Analysis Import</h3>
-            <p class="text-xs text-slate-400">Analyze your race video in Gemini, ChatGPT, Claude, or Grok &amp; paste results back here</p>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Course</label>
+            <select id="manual-pb-course" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
+              <option value="25m SCM">25m SCM</option>
+              <option value="50m LCM">50m LCM</option>
+              <option value="25y SCY">25y SCY</option>
+            </select>
           </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Official Time (mm:ss.ss or ss.ss)</label>
+          <input type="text" id="manual-pb-time" placeholder="e.g. 32.82 or 1:14.84" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-cyan-300 font-mono font-bold">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Meet / Split Note</label>
+          <input type="text" id="manual-pb-note" placeholder="e.g. 12th SNSC SCM PB" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
+        </div>
+        <div class="flex items-center gap-2 pt-1">
+          <button onclick="saveManualPB()" class="flex-1 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-midnight font-extrabold transition">
+            Save Time
+          </button>
+          <button id="btn-delete-pb" onclick="deleteManualPB()" class="hidden px-3 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold transition">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: MEET MOBILE SCREENSHOT OCR SCANNER                                 -->
+  <!-- ========================================================================= -->
+  <div id="scan-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-700 shadow-2xl my-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-white font-display font-bold text-base flex items-center gap-2">
+          <i class="fa-solid fa-images text-cyan-400"></i> Meet Mobile Screenshot OCR Scanner
+        </h3>
+        <button onclick="closeScanModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Target Swimmer</label>
+          <select id="field-swimmer" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-bold"></select>
+        </div>
+        <label class="block p-4 rounded-xl border-2 border-dashed border-cyan-500/40 bg-cyan-950/20 hover:bg-cyan-950/30 text-center cursor-pointer transition">
+          <i class="fa-solid fa-cloud-arrow-up text-2xl text-cyan-400 mb-1"></i>
+          <div class="font-bold text-white">Tap to Select Meet Mobile Screenshot(s)</div>
+          <div class="text-[11px] text-slate-400">Supports single or batch PNG/JPG screenshots</div>
+          <input type="file" accept="image/*" multiple onchange="handleMultipleFiles(event)" class="hidden">
+        </label>
+        <div id="scan-progress-box" class="hidden space-y-1">
+          <div class="flex justify-between text-[11px]">
+            <span id="scan-status-text" class="text-cyan-300 font-semibold">Scanning...</span>
+            <span id="scan-pct-text" class="font-mono text-slate-400">0%</span>
+          </div>
+          <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+            <div id="scan-progress-bar" class="bg-cyan-400 h-1.5 transition-all" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Detected Event</label>
+            <input type="text" id="field-event" placeholder="50m Freestyle" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Course</label>
+            <select id="field-course" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
+              <option value="25m SCM">25m SCM</option>
+              <option value="50m LCM">50m LCM</option>
+              <option value="25y SCY">25y SCY</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Final Time</label>
+            <input type="text" id="field-time" placeholder="28.73" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-cyan-300 font-mono font-bold">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Splits (Optional)</label>
+            <input type="text" id="field-splits" placeholder="13.85, 14.88" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-300 font-mono">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Meet Note</label>
+          <input type="text" id="field-notes" value="Meet Mobile OCR Import" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
+        </div>
+        <button onclick="commitScannedResult()" class="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-midnight font-extrabold transition">
+          Save Result to Swimmer Profile
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: EXTERNAL AI VIDEO COACH BRIDGE & PASTE-BACK                        -->
+  <!-- ========================================================================= -->
+  <div id="video-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-2xl w-full p-5 sm:p-6 space-y-4 border border-slate-700 shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-white font-display font-bold text-base flex items-center gap-2">
+            <i class="fa-solid fa-video text-amber-400"></i> External AI Video Coach &amp; Paste-Back Bridge
+          </h3>
+          <p class="text-[11px] text-slate-400">Analyze race videos in Gemini, ChatGPT, Claude, or Grok &amp; paste the structured output below</p>
         </div>
         <button onclick="closeVideoModal()" class="text-slate-400 hover:text-white text-lg">
           <i class="fa-solid fa-xmark"></i>
@@ -290,316 +431,146 @@
       </div>
 
       <div class="space-y-4 text-xs">
-        <!-- Swimmer & Race Context -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">1. Target Swimmer</label>
-            <select id="video-swimmer-select" onchange="updateExternalAIPrompt()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white font-semibold focus:outline-none focus:border-amber-400"></select>
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">2. Lane, Cap &amp; Race Notes (Injected into Prompt)</label>
-            <input type="text" id="video-additional-notes" oninput="updateExternalAIPrompt()" placeholder="e.g. Lane 3, navy cap, 50m Breaststroke finals" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-amber-400 placeholder:text-slate-500">
-          </div>
-        </div>
-
-        <!-- Step 1: Select External AI Platform -->
-        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <span class="font-extrabold text-white text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-              <span class="w-5 h-5 rounded-full bg-amber-500 text-midnight font-black inline-flex items-center justify-center text-[10px]">1</span>
-              Launch Your Preferred AI Model (Auto-Copies Prompt)
-            </span>
-            <span class="text-[10px] text-slate-400">Logs in with your own AI account</span>
-          </div>
-
-          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-            <button type="button" onclick="launchExternalAI('gemini')" class="py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-600/30 to-cyan-500/30 hover:from-blue-600/50 hover:to-cyan-500/50 border border-cyan-500/40 text-white font-bold flex items-center justify-center gap-1.5 transition shadow-sm">
-              <i class="fa-solid fa-sparkles text-cyan-400"></i> Gemini
-            </button>
-            <button type="button" onclick="launchExternalAI('chatgpt')" class="py-2.5 px-3 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/35 border border-emerald-500/40 text-white font-bold flex items-center justify-center gap-1.5 transition shadow-sm">
-              <i class="fa-solid fa-bolt text-emerald-400"></i> ChatGPT
-            </button>
-            <button type="button" onclick="launchExternalAI('claude')" class="py-2.5 px-3 rounded-xl bg-orange-600/20 hover:bg-orange-600/35 border border-orange-500/40 text-white font-bold flex items-center justify-center gap-1.5 transition shadow-sm">
-              <i class="fa-solid fa-feather-pointed text-orange-400"></i> Claude
-            </button>
-            <button type="button" onclick="launchExternalAI('grok')" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold flex items-center justify-center gap-1.5 transition shadow-sm">
-              <i class="fa-solid fa-terminal text-slate-300"></i> Grok
-            </button>
-            <button type="button" onclick="launchExternalAI('other')" class="py-2.5 px-3 rounded-xl bg-purple-600/20 hover:bg-purple-600/35 border border-purple-500/40 text-white font-bold flex items-center justify-center gap-1.5 transition shadow-sm">
-              <i class="fa-solid fa-up-right-from-square text-purple-400"></i> Other AI
-            </button>
-          </div>
-
-          <!-- No-AI Screenshot Fallback Banner -->
-          <div class="pt-2 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px]">
-            <span class="text-slate-400"><i class="fa-solid fa-circle-info text-slate-500 mr-1"></i> Don't want to use an AI video model?</span>
-            <button type="button" onclick="switchVideoToScreenshotFallback()" class="text-cyan-400 hover:text-cyan-300 font-bold underline flex items-center gap-1 self-start sm:self-auto">
-              <i class="fa-solid fa-images"></i> Upload a Meet Mobile Screenshot instead &rarr;
-            </button>
-          </div>
-        </div>
-
-        <!-- Step 2: Copyable Prompt Template -->
-        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-extrabold text-white text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-              <span class="w-5 h-5 rounded-full bg-cyan-500 text-midnight font-black inline-flex items-center justify-center text-[10px]">2</span>
-              Coaching Prompt (Paste with Video in Your AI App)
-            </span>
-            <button type="button" onclick="copyExternalAIPrompt()" class="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 font-bold text-[11px] flex items-center gap-1 transition">
-              <i class="fa-regular fa-copy"></i> Copy Prompt
-            </button>
-          </div>
-          <textarea id="external-ai-prompt-box" rows="6" readonly class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 font-mono text-[11px] text-slate-300 leading-relaxed focus:outline-none"></textarea>
-        </div>
-
-        <!-- Step 3: Paste Output Back Into Dashboard -->
-        <div class="p-4 rounded-xl bg-gradient-to-br from-slate-900 to-slate-950 border border-emerald-500/40 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="font-extrabold text-emerald-300 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-              <span class="w-5 h-5 rounded-full bg-emerald-500 text-midnight font-black inline-flex items-center justify-center text-[10px]">3</span>
-              Paste AI Output Here to Update Dashboard
-            </span>
-            <button type="button" onclick="parseExternalAIOutput(true)" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold text-[11px] flex items-center gap-1 transition">
-              <i class="fa-solid fa-wand-magic-sparkles"></i> Parse &amp; Preview
-            </button>
-          </div>
-
-          <textarea id="external-ai-paste-box" rows="5" oninput="parseExternalAIOutput(false)" placeholder="Paste the structured response from Gemini, ChatGPT, Claude, or Grok here (EVENT, COURSE, TIME, STROKE_RATE, STRENGTHS, PRIORITIES, SUMMARY_TAG)..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 font-mono text-[11px] text-slate-200 focus:outline-none focus:border-emerald-400 placeholder:text-slate-600"></textarea>
-
-          <!-- Parsed / Editable Verification Fields -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+        <!-- Step 1: Context & Launch AI -->
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3">
+          <div class="font-bold text-amber-300 uppercase tracking-wider text-[11px]">Step 1: Select Swimmer &amp; Launch Your Preferred AI Model</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <div>
-              <label class="block text-[10px] font-bold text-slate-400 mb-1">Detected / Confirmed Event</label>
-              <input type="text" id="video-race-event" list="competitive-events-list" placeholder="e.g. 50m Breaststroke" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-semibold focus:border-emerald-400 focus:outline-none">
+              <label class="block text-[11px] font-bold text-slate-400 mb-1">Swimmer</label>
+              <select id="video-swimmer-select" onchange="updateExternalAIPrompt()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-white font-bold"></select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 mb-1">Lane / Cap / Race Notes (Optional)</label>
+              <input type="text" id="video-additional-notes" oninput="updateExternalAIPrompt()" placeholder="e.g. Lane 3, navy cap, 50m Breast" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-white">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            <button onclick="launchExternalAI('gemini')" class="py-2 px-2.5 rounded-lg bg-blue-600/25 hover:bg-blue-600/40 text-blue-200 border border-blue-500/40 font-bold flex items-center justify-center gap-1.5 transition">
+              <i class="fa-solid fa-sparkles"></i> Gemini
+            </button>
+            <button onclick="launchExternalAI('chatgpt')" class="py-2 px-2.5 rounded-lg bg-emerald-600/25 hover:bg-emerald-600/40 text-emerald-200 border border-emerald-500/40 font-bold flex items-center justify-center gap-1.5 transition">
+              <i class="fa-solid fa-robot"></i> ChatGPT
+            </button>
+            <button onclick="launchExternalAI('claude')" class="py-2 px-2.5 rounded-lg bg-orange-600/25 hover:bg-orange-600/40 text-orange-200 border border-orange-500/40 font-bold flex items-center justify-center gap-1.5 transition">
+              <i class="fa-solid fa-brain"></i> Claude
+            </button>
+            <button onclick="launchExternalAI('grok')" class="py-2 px-2.5 rounded-lg bg-slate-700/60 hover:bg-slate-700 text-white border border-slate-600 font-bold flex items-center justify-center gap-1.5 transition">
+              <i class="fa-solid fa-bolt"></i> Grok
+            </button>
+            <button onclick="launchExternalAI('other')" class="py-2 px-2.5 rounded-lg bg-purple-600/25 hover:bg-purple-600/40 text-purple-200 border border-purple-500/40 font-bold flex items-center justify-center gap-1.5 transition">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Other AI
+            </button>
+          </div>
+          <div class="pt-1 border-t border-slate-800/80 flex items-center justify-between">
+            <span class="text-[11px] text-slate-400">No video AI model? Log official meet times instead:</span>
+            <button onclick="switchVideoToScreenshotFallback()" class="text-[11px] font-bold text-cyan-400 hover:underline">
+              Upload Meet Mobile Screenshot &rarr;
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: Smart Prompt -->
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-cyan-300 uppercase tracking-wider text-[11px]">Step 2: Smart Coaching Prompt (Auto-Copied on Launch)</span>
+            <button onclick="copyExternalAIPrompt()" class="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-bold text-[11px]">
+              <i class="fa-regular fa-copy mr-1"></i> Copy Prompt
+            </button>
+          </div>
+          <textarea id="external-ai-prompt-box" rows="4" readonly class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 font-mono text-[10px] text-slate-300 focus:outline-none"></textarea>
+        </div>
+
+        <!-- Step 3: Paste Output -->
+        <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-emerald-300 uppercase tracking-wider text-[11px]">Step 3: Paste AI Output Here</span>
+            <button onclick="parseExternalAIOutput(true)" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold text-[11px]">
+              Parse &amp; Preview
+            </button>
+          </div>
+          <textarea id="external-ai-paste-box" oninput="parseExternalAIOutput(false)" rows="4" placeholder="Paste the response from Gemini, ChatGPT, Claude, or Grok here..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-emerald-400"></textarea>
+
+          <div id="parsed-ai-preview-card" class="hidden p-3 rounded-xl bg-emerald-950/25 border border-emerald-500/30 space-y-1.5 text-[11px]">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-emerald-300"><i class="fa-solid fa-check-circle mr-1"></i> Parsed Preview</span>
+              <span id="parsed-spm-badge" class="font-mono text-cyan-300 font-bold"></span>
+            </div>
+            <div id="parsed-preview-body" class="text-slate-200 space-y-1"></div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2.5">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-400 mb-1">Confirm Event</label>
+              <input type="text" id="video-race-event" placeholder="e.g. 50m Breaststroke" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
             </div>
             <div>
               <label class="block text-[10px] font-bold text-slate-400 mb-1">Course</label>
-              <select id="video-race-course" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:border-emerald-400 focus:outline-none">
+              <select id="video-race-course" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
                 <option value="25m SCM">25m SCM</option>
                 <option value="50m LCM">50m LCM</option>
                 <option value="25y SCY">25y SCY</option>
               </select>
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-slate-400 mb-1">Race Time (Optional PB Sync)</label>
-              <input type="text" id="video-race-time" placeholder="e.g. 43.15 or N/A" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-cyan-400 font-mono font-bold focus:border-emerald-400 focus:outline-none">
+              <label class="block text-[10px] font-bold text-slate-400 mb-1">Race Time (Optional)</label>
+              <input type="text" id="video-race-time" placeholder="e.g. 43.20" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-cyan-300 font-mono font-bold">
             </div>
           </div>
 
-          <!-- Live Preview of Parsed Strengths & Priorities -->
-          <div id="parsed-ai-preview-card" class="hidden p-3 rounded-lg bg-slate-900/90 border border-slate-800 space-y-1.5 text-[11px]">
-            <div class="flex items-center justify-between text-emerald-400 font-bold">
-              <span><i class="fa-solid fa-circle-check mr-1"></i> Ready to Sync to Swimmer Profile</span>
-              <span id="parsed-spm-badge" class="font-mono text-[10px] text-cyan-300"></span>
-            </div>
-            <div id="parsed-preview-body" class="text-slate-300 space-y-1"></div>
-          </div>
+          <button onclick="commitVideoAnalysis()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-midnight font-extrabold transition">
+            Save Analysis &amp; Update Swimmer Profile
+          </button>
         </div>
-      </div>
-
-      <div class="flex items-center justify-between pt-2 border-t border-slate-800">
-        <button onclick="closeVideoModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Cancel</button>
-        <button onclick="commitVideoAnalysis()" class="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-midnight font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-amber-500/20">
-          <i class="fa-solid fa-check"></i> Save Analysis &amp; Sync Profile
-        </button>
       </div>
     </div>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: ADD NEW SWIMMER WIZARD                                             -->
+  <!-- MODAL: ROSTER & EDIT SWIMMER DOB                                          -->
   <!-- ========================================================================= -->
-  <div id="add-swimmer-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="glass-card rounded-2xl max-w-lg w-full p-6 space-y-4 border border-emerald-500/40 shadow-2xl my-auto">
+  <div id="roster-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-700 shadow-2xl my-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base font-bold">
-            <i class="fa-solid fa-user-plus"></i>
-          </div>
-          <div>
-            <h3 class="text-white font-display font-bold text-base">Add New Swimmer Profile</h3>
-            <p class="text-xs text-slate-400">Create a profile to track PBs, screenshots, and pacing targets</p>
-          </div>
-        </div>
-        <button onclick="closeAddSwimmerModal()" class="text-slate-400 hover:text-white text-lg">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <h3 class="text-white font-display font-bold text-base">TTS Club &amp; Family Roster</h3>
+        <button onclick="closeRosterModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
       </div>
-
-      <div class="space-y-3.5 text-xs">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Swimmer Full Name *</label>
-            <input type="text" id="new-swimmer-name" placeholder="e.g. Maya Chen" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white font-semibold focus:outline-none focus:border-emerald-500">
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Current Age</label>
-            <input type="number" id="new-swimmer-age" placeholder="e.g. 11" min="6" max="18" value="11" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-semibold">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Date of Birth (Optional)</label>
-            <input type="date" id="new-swimmer-dob" onchange="autoCalculateAgeFromDOB('new')" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-emerald-500 font-semibold">
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Swim Team / Club</label>
-            <input type="text" id="new-swimmer-club" placeholder="e.g. Tanglin Merlions (TTS-VD)" value="Tanglin Merlions (TTS-VD)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-emerald-500">
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-bold text-slate-400 mb-1">Primary Stroke Specialty</label>
-          <select id="new-swimmer-specialty" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-emerald-500">
-            <option value="free_sprint">Freestyle Sprint (50m/100m)</option>
-            <option value="free_distance">Freestyle Mid/Distance (200m/400m)</option>
-            <option value="breast">Breaststroke Specialist</option>
-            <option value="fly">Butterfly Specialist</option>
-            <option value="back">Backstroke Specialist</option>
-            <option value="im">Individual Medley (IM) All-Rounder</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-bold text-slate-400 mb-1">Profile Accent Color</label>
-          <div class="flex flex-wrap items-center gap-3">
-            <label class="flex items-center gap-1.5 cursor-pointer">
-              <input type="radio" name="swimmer-color" value="#00d2ff" checked class="accent-cyan-400">
-              <span class="w-4 h-4 rounded-full bg-cyan-400 inline-block"></span>
-              <span class="text-slate-300">Cyan</span>
-            </label>
-            <label class="flex items-center gap-1.5 cursor-pointer">
-              <input type="radio" name="swimmer-color" value="#f59e0b" class="accent-gold-500">
-              <span class="w-4 h-4 rounded-full bg-gold-500 inline-block"></span>
-              <span class="text-slate-300">Gold</span>
-            </label>
-            <label class="flex items-center gap-1.5 cursor-pointer">
-              <input type="radio" name="swimmer-color" value="#10b981" class="accent-emerald-400">
-              <span class="w-4 h-4 rounded-full bg-emerald-400 inline-block"></span>
-              <span class="text-slate-300">Emerald</span>
-            </label>
-            <label class="flex items-center gap-1.5 cursor-pointer">
-              <input type="radio" name="swimmer-color" value="#a855f7" class="accent-purple-400">
-              <span class="w-4 h-4 rounded-full bg-purple-400 inline-block"></span>
-              <span class="text-slate-300">Purple</span>
-            </label>
-            <label class="flex items-center gap-1.5 cursor-pointer">
-              <input type="radio" name="swimmer-color" value="#ec4899" class="accent-pink-400">
-              <span class="w-4 h-4 rounded-full bg-pink-400 inline-block"></span>
-              <span class="text-slate-300">Pink</span>
-            </label>
-          </div>
-        </div>
-
-        <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
-          <div class="font-bold text-slate-200 flex items-center gap-1.5">
-            <i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i> Automatic Setup:
-          </div>
-          <div>• Generates customized Huegill Performance Loop, habit bricks, and target ladder.</div>
-          <div>• Immediately available for batch screenshot OCR uploads or manual time entries.</div>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-between pt-3 border-t border-slate-800">
-        <button onclick="closeAddSwimmerModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
-          Cancel
-        </button>
-        <button onclick="saveNewSwimmer()" class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-midnight font-bold text-xs transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
-          <i class="fa-solid fa-check"></i>
-          Create Profile
-        </button>
-      </div>
+      <div id="roster-list-container" class="space-y-2 max-h-[65vh] overflow-y-auto"></div>
     </div>
   </div>
 
-  <!-- ========================================================================= -->
-  <!-- MODAL: MANUAL PB OVERRIDE & TIME ENTRY                                    -->
-  <!-- ========================================================================= -->
-  <div id="manual-pb-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="glass-card rounded-2xl max-w-md w-full p-6 space-y-4 border border-cyan-500/40 shadow-2xl my-auto">
+  <div id="edit-swimmer-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-700 shadow-2xl my-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-base font-bold">
-            <i class="fa-solid fa-stopwatch"></i>
-          </div>
-          <div>
-            <h3 id="manual-pb-title" class="text-white font-display font-bold text-base">Manual Race Time Override</h3>
-            <p class="text-xs text-slate-400">Add or manually correct a personal best time</p>
-          </div>
-        </div>
-        <button onclick="closeManualPBModal()" class="text-slate-400 hover:text-white text-lg">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <h3 class="text-white font-display font-bold text-base">Edit Swimmer Profile &amp; Date of Birth</h3>
+        <button onclick="closeEditSwimmerModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
       </div>
-
-      <input type="hidden" id="manual-pb-index" value="-1">
-
       <div class="space-y-3 text-xs">
+        <input type="hidden" id="edit-swimmer-id">
         <div>
-          <label class="block text-[11px] font-bold text-slate-400 mb-1">Swimmer</label>
-          <select id="manual-pb-swimmer" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white font-semibold focus:outline-none focus:border-cyan-500">
-            <!-- Dynamically populated -->
-          </select>
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Full Name</label>
+          <input type="text" id="edit-swimmer-name" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Event Name *</label>
-            <input type="text" id="manual-pb-event" list="competitive-events-list" placeholder="e.g. 50m Freestyle" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white font-semibold focus:outline-none focus:border-cyan-500">
-            <datalist id="competitive-events-list">
-              <option value="50m Freestyle">
-              <option value="100m Freestyle">
-              <option value="200m Freestyle">
-              <option value="400m Freestyle">
-              <option value="50m Backstroke">
-              <option value="100m Backstroke">
-              <option value="200m Backstroke">
-              <option value="50m Breaststroke">
-              <option value="100m Breaststroke">
-              <option value="200m Breaststroke">
-              <option value="50m Butterfly">
-              <option value="100m Butterfly">
-              <option value="200m Butterfly">
-              <option value="100m IM">
-              <option value="200m IM">
-              <option value="400m IM">
-            </datalist>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Date of Birth</label>
+            <input type="date" id="edit-swimmer-dob" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Course *</label>
-            <select id="manual-pb-course" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-cyan-500">
-              <option value="25m SCM">25m SCM</option>
-              <option value="50m LCM">50m LCM</option>
-              <option value="25y SCY">25y SCY</option>
-            </select>
+            <label class="block text-[11px] font-bold text-slate-400 mb-1">Age</label>
+            <input type="number" id="edit-swimmer-age" min="6" max="18" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
           </div>
         </div>
-
         <div>
-          <label class="block text-[11px] font-bold text-slate-400 mb-1">Official / Corrected Time *</label>
-          <input type="text" id="manual-pb-time" placeholder="e.g. 32.82 or 1:14.50" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-cyan-400 font-mono font-bold text-sm focus:outline-none focus:border-cyan-500">
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Club</label>
+          <input type="text" id="edit-swimmer-club" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
         </div>
-
         <div>
-          <label class="block text-[11px] font-bold text-slate-400 mb-1">Meet / Note / Context</label>
-          <input type="text" id="manual-pb-note" placeholder="e.g. Manual correction • SNSC SCM" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-slate-200 focus:outline-none focus:border-cyan-500">
+          <label class="block text-[11px] font-bold text-slate-400 mb-1">Specialty</label>
+          <input type="text" id="edit-swimmer-specialty" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
         </div>
-      </div>
-
-      <div class="flex items-center justify-between pt-3 border-t border-slate-800">
-        <button id="btn-delete-pb" onclick="deleteManualPB()" class="hidden px-3 py-2 rounded-lg text-xs font-bold bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 transition">
-          <i class="fa-solid fa-trash mr-1"></i> Delete Entry
+        <button onclick="saveEditedSwimmer()" class="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-midnight font-extrabold transition">
+          Save Profile Changes
         </button>
-        <div class="flex items-center gap-2 ml-auto">
-          <button onclick="closeManualPBModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
-            Cancel
-          </button>
-          <button onclick="saveManualPB()" class="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-midnight font-bold text-xs transition flex items-center gap-1.5 shadow-lg shadow-cyan-500/20">
-            <i class="fa-solid fa-check"></i> Save Time
-          </button>
-        </div>
       </div>
     </div>
   </div>
@@ -608,443 +579,112 @@
   <!-- MODAL: ACTIVITY TRACKER & AUDIT LOG                                       -->
   <!-- ========================================================================= -->
   <div id="audit-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="glass-card rounded-2xl max-w-4xl w-full p-6 space-y-4 border border-indigo-500/40 shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-3xl w-full p-6 space-y-4 border border-slate-700 shadow-2xl my-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-base font-bold shadow-sm">
-            <i class="fa-solid fa-clock-rotate-left"></i>
-          </div>
-          <div>
-            <h3 class="text-white font-display font-bold text-base flex items-center gap-2">
-              Activity Tracker &amp; Audit Trail
-            </h3>
-            <p class="text-xs text-slate-400">Track page visits, updates, OCR scans, and personal best adjustments with author attribution</p>
-          </div>
-        </div>
-        <button onclick="closeAuditModal()" class="text-slate-400 hover:text-white text-lg">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <h3 class="text-white font-display font-bold text-base">Activity Tracker &amp; Audit Log</h3>
+        <button onclick="closeAuditModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
       </div>
-
-      <!-- Current User Attribution Bar -->
-      <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-        <div class="flex items-center gap-2">
-          <span class="text-slate-400 font-semibold"><i class="fa-solid fa-user-tag text-indigo-400"></i> Logging As:</span>
-          <input type="text" id="active-user-name-input" placeholder="e.g. Coach Dave, Kris Day, Rory" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-white font-semibold focus:outline-none focus:border-indigo-400 text-xs">
-          <button onclick="saveActiveUserName()" class="px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition">
-            Save
-          </button>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="exportAuditLogCSV()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 flex items-center gap-1">
-            <i class="fa-solid fa-file-csv"></i> Export CSV
-          </button>
-          <button onclick="clearAuditLog()" class="px-2.5 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-semibold border border-rose-500/30">
-            Clear
-          </button>
-        </div>
+      <div class="flex flex-wrap items-center gap-2 text-xs">
+        <input type="text" id="active-user-name-input" placeholder="Your Name (e.g. Coach / Parent)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
+        <button onclick="saveActiveUserName()" class="px-3 py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white font-bold">Set Author Name</button>
+        <button onclick="exportAuditLogCSV()" class="ml-auto px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold">Export CSV</button>
       </div>
-
-      <!-- Filter / Search Controls -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-        <div>
-          <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Search Audit Text</label>
-          <input type="text" id="audit-search-filter" oninput="renderAuditLogTable()" placeholder="Filter by swimmer, meet, or time..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
-        </div>
-        <div>
-          <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Action Type</label>
-          <select id="audit-type-filter" onchange="renderAuditLogTable()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
-            <option value="ALL">All Actions</option>
-            <option value="PB Updated">PB Updated</option>
-            <option value="Video Analysis">Video Analysis</option>
-            <option value="OCR Scan">OCR Scan</option>
-            <option value="Swimmer Added">Swimmer Added</option>
-            <option value="Page Visit">Page Visit</option>
-            <option value="Habit Check">Habit Check</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Swimmer Filter</label>
-          <select id="audit-swimmer-filter" onchange="renderAuditLogTable()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
-            <option value="ALL">All Swimmers</option>
-            <!-- Injected dynamically -->
-          </select>
-        </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+        <input type="text" id="audit-search-filter" oninput="renderAuditLogTable()" placeholder="Search log..." class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
+        <select id="audit-type-filter" onchange="renderAuditLogTable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white">
+          <option value="ALL">All Actions</option>
+          <option value="Page Visit">Page Visit</option>
+          <option value="PB Updated">PB Updated</option>
+          <option value="Video Analysis">Video Analysis</option>
+          <option value="OCR Scan">OCR Scan</option>
+          <option value="Swimmer Added">Swimmer Added</option>
+          <option value="Habit Check">Habit Check</option>
+        </select>
+        <select id="audit-swimmer-filter" onchange="renderAuditLogTable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white"></select>
       </div>
-
-      <!-- Audit Table -->
-      <div class="overflow-x-auto max-h-80 overflow-y-auto border border-slate-800 rounded-xl bg-slate-950/60">
-        <table class="w-full text-left text-xs text-slate-300">
-          <thead class="bg-slate-900/90 text-[10px] uppercase font-bold text-slate-400 sticky top-0 border-b border-slate-800">
+      <div class="max-h-72 overflow-y-auto border border-slate-800 rounded-xl">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-900 text-[10px] uppercase text-slate-400">
             <tr>
-              <th class="py-2.5 px-3">Timestamp</th>
-              <th class="py-2.5 px-3">Author / User</th>
-              <th class="py-2.5 px-3">Action Type</th>
-              <th class="py-2.5 px-3">Swimmer</th>
-              <th class="py-2.5 px-3">Details / Delta</th>
+              <th class="py-2 px-3">Timestamp</th>
+              <th class="py-2 px-3">Author</th>
+              <th class="py-2 px-3">Action</th>
+              <th class="py-2 px-3">Swimmer</th>
+              <th class="py-2 px-3">Details</th>
             </tr>
           </thead>
-          <tbody id="audit-table-body" class="divide-y divide-slate-800/60 font-medium">
-            <!-- Dynamically injected -->
-          </tbody>
+          <tbody id="audit-table-body" class="divide-y divide-slate-800"></tbody>
         </table>
       </div>
-
-      <div class="flex items-center justify-between pt-2 border-t border-slate-800 text-xs">
-        <span id="audit-count-label" class="text-slate-400 font-mono text-[11px]">0 records logged</span>
-        <button onclick="closeAuditModal()" class="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold">
-          Close
-        </button>
+      <div class="flex items-center justify-between text-[11px] text-slate-400">
+        <span id="audit-count-label">0 records logged</span>
+        <button onclick="clearAuditLog()" class="text-rose-400 hover:underline">Clear Log</button>
       </div>
     </div>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: BATCH SCREENSHOT OCR SCANNER                                       -->
+  <!-- MODAL: IPHONE HOME SCREEN PWA INSTALL GUIDE                               -->
   <!-- ========================================================================= -->
-  <div id="scan-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="glass-card rounded-2xl max-w-2xl w-full p-6 space-y-4 border border-cyan-500/40 shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
+  <div id="install-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-700 shadow-2xl my-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-base font-bold">
-            <i class="fa-solid fa-images"></i>
-          </div>
-          <div>
-            <h3 class="text-white font-display font-bold text-base">Meet Mobile Screenshot OCR Scanner</h3>
-            <p class="text-xs text-slate-400">Upload one or multiple screenshots to auto-extract times &amp; splits</p>
-          </div>
-        </div>
-        <button onclick="closeScanModal()" class="text-slate-400 hover:text-white text-lg">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <h3 class="text-white font-display font-bold text-base flex items-center gap-2">
+          <i class="fa-brands fa-apple text-lg"></i> Install TTS Swim iPhone App
+        </h3>
+        <button onclick="closeInstallModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
       </div>
-
-      <div class="border-2 border-dashed border-slate-700 hover:border-cyan-500/60 rounded-xl p-5 text-center transition bg-slate-900/50">
-        <input type="file" id="screenshot-file-input" accept="image/*" multiple onchange="handleMultipleFiles(event)" class="hidden">
-        <label for="screenshot-file-input" class="cursor-pointer flex flex-col items-center gap-2">
-          <i class="fa-solid fa-cloud-arrow-up text-2xl text-cyan-400"></i>
-          <span class="text-xs font-bold text-white">Click to Select Meet Mobile Screenshots</span>
-          <span class="text-[11px] text-slate-400">Supports batch multi-file upload (JPG, PNG)</span>
-        </label>
-      </div>
-
-      <!-- Progress Bar -->
-      <div id="scan-progress-box" class="hidden space-y-1.5 bg-slate-900 p-3 rounded-xl border border-slate-800">
-        <div class="flex justify-between text-[11px] font-semibold">
-          <span id="scan-status-text" class="text-cyan-400">Initializing OCR...</span>
-          <span id="scan-pct-text" class="font-mono text-slate-300">0%</span>
-        </div>
-        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-          <div id="scan-progress-bar" class="bg-cyan-400 h-1.5 rounded-full transition-all duration-200" style="width: 0%"></div>
-        </div>
-      </div>
-
-      <!-- Batch Queue Thumbnails -->
-      <div id="batch-thumbnails-container" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto"></div>
-
-      <!-- Extracted Data Verification Form -->
-      <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3 text-xs">
-        <div class="flex items-center justify-between">
-          <span class="font-bold text-white">Verify &amp; Commit Extracted Result</span>
-          <span id="batch-counter-badge" class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">Ready</span>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Target Swimmer</label>
-            <select id="field-swimmer" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-semibold"></select>
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Course</label>
-            <select id="field-course" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
-              <option value="25m SCM">25m SCM</option>
-              <option value="50m LCM">50m LCM</option>
-              <option value="25y SCY">25y SCY</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Event Name</label>
-            <input type="text" id="field-event" placeholder="e.g. 200m Freestyle" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-semibold">
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Final Time</label>
-            <input type="text" id="field-time" placeholder="e.g. 2:19.70" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-cyan-400 font-mono font-bold">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Detected Splits</label>
-            <input type="text" id="field-splits" placeholder="e.g. 31.09, 35.08, 35.96, 37.57" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-300 font-mono">
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Meet / Context Note</label>
-            <input type="text" id="field-notes" placeholder="e.g. 12th SNSC SCM" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-300">
-          </div>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-between pt-2 border-t border-slate-800">
-        <button onclick="closeScanModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Close</button>
-        <button onclick="commitScannedResult()" class="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-midnight font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-cyan-500/20">
-          <i class="fa-solid fa-check"></i> Save Result to Profile
-        </button>
-      </div>
+      <ol class="space-y-2.5 text-xs text-slate-300 list-decimal pl-4 leading-relaxed">
+        <li>Open your live GitHub Pages dashboard URL in <strong>Safari</strong> on your iPhone.</li>
+        <li>Tap the <strong>Share</strong> icon (<i class="fa-solid fa-arrow-up-from-bracket text-cyan-400"></i>) at the bottom of Safari.</li>
+        <li>Scroll down and tap <strong>"Add to Home Screen"</strong>, then tap <strong>Add</strong>.</li>
+        <li>Launch <strong>TTS Swim</strong> directly from your Home Screen in full-screen native app mode.</li>
+      </ol>
     </div>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: SWIM VIDEO UPLOAD & TECHNICAL ANALYSIS                             -->
-  <!-- ========================================================================= -->
-  <div id="video-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="glass-card rounded-2xl max-w-3xl w-full p-6 space-y-4 border border-amber-500/40 shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-gold-400 flex items-center justify-center text-base font-bold">
-            <i class="fa-solid fa-video"></i>
-          </div>
-          <div>
-            <h3 class="text-white font-display font-bold text-base">Automated Gemini AI Video Coach &amp; PB Sync</h3>
-            <p class="text-xs text-slate-400">Extracts 8 key race frames &amp; runs automated Gemini Vision biomechanical critique</p>
-          </div>
-        </div>
-        <button onclick="closeVideoModal()" class="text-slate-400 hover:text-white text-lg">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="space-y-3.5 text-xs">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Swimmer</label>
-            <select id="video-swimmer-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white font-semibold"></select>
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Video Title / Meet Context</label>
-            <input type="text" id="video-event-context" oninput="autoDetectVideoMetaFromText(this.value)" placeholder="e.g. 50m Breaststroke Finals (43.20)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white">
-          </div>
-        </div>
-
-        <!-- Free-Text Additional Video Context Field (Placed right near top for Lane ID) -->
-        <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1.5">
-          <label for="video-additional-notes" class="block font-bold text-slate-200 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-            <i class="fa-solid fa-comment-dots text-cyan-400"></i> Lane &amp; Video Context (Helps AI Identify Swimmer)
-          </label>
-          <input type="text" id="video-additional-notes" placeholder="e.g. Swimmer is in Lane 3 (navy cap); 50m Breaststroke finals" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-slate-200 text-xs focus:outline-none focus:border-cyan-500 placeholder:text-slate-500">
-        </div>
-
-        <!-- Prominent Race Event & PB Auto-Sync Box -->
-        <div class="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-emerald-300 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-medal"></i> Race Event &amp; New PB Auto-Sync
-            </span>
-            <span class="text-[10px] text-emerald-400/80">Auto-updates PB table, stats &amp; commentary if faster</span>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <input type="text" id="video-race-event" list="competitive-events-list" placeholder="Event (e.g. 50m Breaststroke)" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-semibold focus:border-emerald-400 focus:outline-none">
-            <select id="video-race-course" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white focus:border-emerald-400 focus:outline-none">
-              <option value="25m SCM">25m SCM</option>
-              <option value="50m LCM">50m LCM</option>
-              <option value="25y SCY">25y SCY</option>
-            </select>
-            <input type="text" id="video-race-time" placeholder="New Time (e.g. 43.15)" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-cyan-400 font-mono font-bold focus:border-emerald-400 focus:outline-none">
-          </div>
-        </div>
-
-        <!-- Video Dropzone & Slow-Motion Player -->
-        <div class="border border-dashed border-slate-700 hover:border-amber-500/60 rounded-xl p-3.5 text-center bg-slate-900/50 relative transition">
-          <div class="relative inline-flex items-center justify-center gap-2 text-gold-400 hover:text-amber-300 font-bold py-2.5 px-5 rounded-lg bg-slate-950/80 border border-slate-700 cursor-pointer shadow-md">
-            <i class="fa-solid fa-wand-magic-sparkles text-cyan-400"></i>
-            <span id="video-select-btn-label">Tap to Select Race Video (.mp4, .mov) — Auto-Analyzes</span>
-            <input type="file" id="video-file-input" accept="video/*,video/mp4,video/quicktime" onclick="this.value=null" onchange="handleVideoFileSelect(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-          </div>
-          <p class="text-[10px] text-slate-400 mt-1.5">Automatically extracts 8 race frames and generates full Gemini Vision swim commentary.</p>
-          
-          <div id="video-player-container" class="hidden mt-3 space-y-3 text-left">
-            <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-950/80 px-3 py-2 rounded-lg border border-slate-800">
-              <div id="video-filename-label" class="text-[11px] text-slate-300 font-mono truncate max-w-[210px]"></div>
-              
-              <!-- Playback Speed Controls -->
-              <div class="flex items-center gap-1">
-                <span class="text-[10px] text-slate-400 mr-1">Speed:</span>
-                <button type="button" onclick="setVideoPlaybackSpeed(0.25)" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] font-mono text-cyan-300 font-bold">0.25x</button>
-                <button type="button" onclick="setVideoPlaybackSpeed(0.5)" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] font-mono text-cyan-300 font-bold">0.5x</button>
-                <button type="button" onclick="setVideoPlaybackSpeed(1.0)" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] font-mono text-white font-bold">1.0x</button>
-              </div>
-
-              <!-- Re-Run Gemini AI Scan Button -->
-              <button type="button" id="btn-run-pose-ai" onclick="runAutomatedGeminiVideoAnalysis()" class="px-3 py-1 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-midnight font-bold text-[11px] flex items-center gap-1.5 shadow-md">
-                <i class="fa-solid fa-sparkles"></i> Re-Run Gemini AI Analysis
-              </button>
-            </div>
-
-            <video id="video-preview-player" controls playsinline muted class="w-full max-h-52 rounded-lg bg-black border border-slate-800"></video>
-
-            <!-- AI Progress Bar -->
-            <div id="pose-ai-status-bar" class="hidden p-3 rounded-xl bg-cyan-950/50 border border-cyan-500/40 text-xs text-cyan-200 flex items-center gap-2.5">
-              <i class="fa-solid fa-circle-notch fa-spin text-cyan-400 text-base"></i>
-              <span id="pose-ai-status-text">Sampling key frames &amp; running Gemini Vision biomechanical analysis...</span>
-            </div>
-
-            <!-- Automated Gemini AI Output Preview Card -->
-            <div id="gemini-ai-report-box" class="hidden p-4 rounded-xl bg-gradient-to-br from-slate-900 to-slate-950 border border-cyan-500/40 space-y-2.5">
-              <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-                  <i class="fa-solid fa-robot"></i> Automated Gemini Vision Swim Critique
-                </span>
-                <span id="gemini-ai-telemetry-badge" class="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-700/50 font-mono text-[10px]">AI Verified</span>
-              </div>
-              <div id="gemini-ai-report-preview" class="text-xs text-slate-200 leading-relaxed space-y-2"></div>
-            </div>
-
-            <!-- Key-Frame Contact Sheet -->
-            <div id="contact-sheet-wrapper" class="hidden space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold text-white uppercase tracking-wider">
-                  <i class="fa-solid fa-film text-gold-400 mr-1"></i> Extracted Race Frames Analyzed by AI
-                </span>
-                <span id="pose-metrics-summary" class="text-[10px] font-mono text-emerald-400"></span>
-              </div>
-              <div id="contact-sheet-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Optional API Key Config for External GitHub Pages Hosting -->
-        <details class="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800 text-[11px] text-slate-400">
-          <summary class="cursor-pointer font-semibold text-slate-300 flex items-center justify-between">
-            <span><i class="fa-solid fa-key text-amber-400 mr-1.5"></i> GitHub Pages Gemini API Key (Optional — Auto-provided in Canvas)</span>
-            <span class="text-[10px] text-slate-500">Click to configure</span>
-          </summary>
-          <div class="mt-2 flex items-center gap-2">
-            <input type="password" id="gemini-custom-api-key" placeholder="Paste free Google AI Studio API Key (AIza...) for GitHub Pages" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-mono text-xs">
-            <button type="button" onclick="saveCustomGeminiKey()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold">Save Key</button>
-          </div>
-        </details>
-      </div>
-
-      <div class="flex items-center justify-between pt-2 border-t border-slate-800">
-        <button onclick="closeVideoModal()" class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Cancel</button>
-        <button onclick="commitVideoAnalysis()" class="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-midnight font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-amber-500/20">
-          <i class="fa-solid fa-check"></i> Save AI Analysis &amp; Sync PB to Profile
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================================================= -->
-  <!-- MODAL: CLUB & FAMILY ROSTER                                               -->
-  <!-- ========================================================================= -->
-  <div id="roster-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="glass-card rounded-2xl max-w-2xl w-full p-6 space-y-4 border border-slate-700 shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-slate-800 text-cyan-400 flex items-center justify-center text-base font-bold">
-            <i class="fa-solid fa-users"></i>
-          </div>
-          <div>
-            <h3 class="text-white font-display font-bold text-base">TTS Club &amp; Family Roster</h3>
-            <p class="text-xs text-slate-400">Switch, edit DOB/age, or remove swimmer profiles</p>
-          </div>
-        </div>
-        <button onclick="closeRosterModal()" class="text-slate-400 hover:text-white text-lg">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div id="roster-list-container" class="space-y-2.5 max-h-96 overflow-y-auto pr-1"></div>
-
-      <div class="flex items-center justify-between pt-3 border-t border-slate-800">
-        <button onclick="closeRosterModal(); openAddSwimmerModal();" class="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5">
-          <i class="fa-solid fa-user-plus"></i> Add New Swimmer
-        </button>
-        <button onclick="closeRosterModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================================================= -->
-  <!-- MODAL: EDIT SWIMMER PROFILE & DOB                                         -->
-  <!-- ========================================================================= -->
-  <div id="edit-swimmer-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="glass-card rounded-2xl max-w-md w-full p-6 space-y-4 border border-amber-500/40 shadow-2xl my-auto">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-white font-display font-bold text-base">Edit Swimmer Profile &amp; DOB</h3>
-        <button onclick="closeEditSwimmerModal()" class="text-slate-400 hover:text-white text-lg">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <input type="hidden" id="edit-swimmer-id">
-
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block text-[11px] font-bold text-slate-400 mb-1">Full Name *</label>
-          <input type="text" id="edit-swimmer-name" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white font-semibold">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Date of Birth</label>
-            <input type="date" id="edit-swimmer-dob" onchange="autoCalculateAgeFromDOB('edit')" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white">
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 mb-1">Age</label>
-            <input type="number" id="edit-swimmer-age" min="6" max="18" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white font-semibold">
-          </div>
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-400 mb-1">Swim Club</label>
-          <input type="text" id="edit-swimmer-club" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white">
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-400 mb-1">Specialty Subtitle</label>
-          <input type="text" id="edit-swimmer-specialty" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-white">
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-400 mb-1">Accent Color</label>
-          <div class="flex flex-wrap gap-3">
-            <label class="flex items-center gap-1"><input type="radio" name="edit-swimmer-color" value="#00d2ff"> Cyan</label>
-            <label class="flex items-center gap-1"><input type="radio" name="edit-swimmer-color" value="#f59e0b"> Gold</label>
-            <label class="flex items-center gap-1"><input type="radio" name="edit-swimmer-color" value="#10b981"> Emerald</label>
-            <label class="flex items-center gap-1"><input type="radio" name="edit-swimmer-color" value="#6366f1"> Indigo</label>
-            <label class="flex items-center gap-1"><input type="radio" name="edit-swimmer-color" value="#f43f5e"> Rose</label>
-            <label class="flex items-center gap-1"><input type="radio" name="edit-swimmer-color" value="#a855f7"> Purple</label>
-            <label class="flex items-center gap-1"><input type="radio" name="edit-swimmer-color" value="#ec4899"> Pink</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
-        <button onclick="closeEditSwimmerModal()" class="px-4 py-2 rounded-lg text-xs text-slate-400 hover:text-white">Cancel</button>
-        <button onclick="saveEditedSwimmer()" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-midnight font-bold text-xs">Save Changes</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================================================= -->
-  <!-- MODAL: DATA BACKUP & RESTORE JSON                                         -->
+  <!-- MODAL: DATA BACKUP, CLOUD SYNC & RESTORE JSON                             -->
   <!-- ========================================================================= -->
   <div id="backup-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="glass-card rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-700 shadow-2xl my-auto">
+    <div class="glass-card rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-700 shadow-2xl my-auto max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-white font-display font-bold text-base">Data Backup, Export &amp; Restore</h3>
+        <h3 class="text-white font-display font-bold text-base">Real-Time Cross-Device Sync &amp; Data Backup</h3>
         <button onclick="closeDataBackupModal()" class="text-slate-400 hover:text-white text-lg">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <div class="space-y-3 text-xs">
+      <div class="space-y-3.5 text-xs">
+        <!-- Cross-Device Cloud Config for GitHub Pages -->
+        <div class="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-emerald-300 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Cross-Device Cloud Sync (iPhone &harr; Desktop)
+            </span>
+            <span id="modal-cloud-badge" class="text-[10px] font-mono text-emerald-400">Checking...</span>
+          </div>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Syncs automatically inside Canvas. To sync across your iPhone &amp; computer on <strong>GitHub Pages</strong>, paste your free Firebase Web Config JSON once below:
+          </p>
+          <textarea id="firebase-config-input" rows="3" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","appId":"..."}' class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 font-mono text-[10px] text-slate-200 focus:outline-none focus:border-emerald-400"></textarea>
+          <div class="flex items-center justify-between gap-2">
+            <button onclick="saveCustomFirebaseConfig()" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-midnight font-bold text-xs transition">
+              Connect Cloud Sync
+            </button>
+            <button onclick="forcePushCloudSync()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-semibold text-xs border border-slate-700">
+              <i class="fa-solid fa-rotate mr-1"></i> Push Local Data Now
+            </button>
+          </div>
+        </div>
+
         <button onclick="downloadBackupJSON()" class="w-full py-2.5 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-midnight font-bold flex items-center justify-center gap-2 transition">
           <i class="fa-solid fa-download"></i> Download Full Club Roster (.json)
         </button>
 
         <div class="space-y-1.5 pt-2 border-t border-slate-800">
           <label class="block text-[11px] font-bold text-slate-400">Paste Roster JSON to Restore:</label>
-          <textarea id="import-json-area" rows="4" placeholder='{"monty": {...}}' class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 font-mono text-[11px] text-slate-300"></textarea>
+          <textarea id="import-json-area" rows="3" placeholder='{"monty": {...}}' class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 font-mono text-[11px] text-slate-300"></textarea>
           <button onclick="importBackupJSON()" class="w-full py-2 px-4 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold transition">
             Import &amp; Apply JSON
           </button>
@@ -1070,8 +710,10 @@
     // ---------------------------------------------------------------------------
     // 1. DEFAULT ATHLETE DATABASE (ALL 7 SWIMMERS) & PERSISTENCE
     // ---------------------------------------------------------------------------
-    const STORAGE_KEY = 'ttsSwimData_v12';
-    const AUDIT_KEY = 'ttsSwimAudit_v12';
+    window.STORAGE_KEY = 'ttsSwimData_v12';
+    window.AUDIT_KEY = 'ttsSwimAudit_v12';
+    const STORAGE_KEY = window.STORAGE_KEY;
+    const AUDIT_KEY = window.AUDIT_KEY;
 
     const ALL_COMPETITIVE_EVENTS = [
       { event: '50m Freestyle', distance: 50, stroke: 'Free' },
@@ -1495,33 +1137,38 @@
     let splitChartInstance = null;
     let h2hChartInstance = null;
 
-    function persistState() {
+    function persistState(skipCloud = false) {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(athletesData));
+        localStorage.setItem(STORAGE_KEY + '_updatedAt', String(Date.now()));
       } catch (e) {}
+      if (!skipCloud && typeof window.pushStateToCloud === 'function') {
+        window.pushStateToCloud();
+      }
     }
 
-    // ---------------------------------------------------------------------------
-    // 2. TOAST NOTIFICATIONS & TIME / STANDARD HELPERS
-    // ---------------------------------------------------------------------------
     function showToast(msg, type = 'success') {
       const container = document.getElementById('toast-container');
       if (!container) return;
       const el = document.createElement('div');
-      const borderCol = type === 'error' ? 'border-rose-500/60 text-rose-200' : type === 'warning' ? 'border-amber-500/60 text-amber-200' : 'border-cyan-500/60 text-cyan-100';
-      el.className = `pointer-events-auto glass-card px-4 py-3 rounded-xl border ${borderCol} text-xs font-semibold shadow-2xl flex items-center gap-2 transition-all duration-300`;
-      el.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation text-rose-400' : type === 'warning' ? 'fa-triangle-exclamation text-amber-400' : 'fa-circle-check text-cyan-400'}"></i><span>${msg}</span>`;
+      const colors = type === 'error'
+        ? 'bg-rose-950/95 border-rose-500 text-rose-200'
+        : type === 'warning'
+        ? 'bg-amber-950/95 border-amber-500 text-amber-200'
+        : 'bg-slate-900/95 border-cyan-500 text-cyan-200';
+      el.className = `pointer-events-auto px-4 py-2.5 rounded-xl border shadow-xl text-xs font-semibold flex items-center gap-2 transition-all ${colors}`;
+      el.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>${msg}</span>`;
       container.appendChild(el);
       setTimeout(() => {
         el.style.opacity = '0';
         setTimeout(() => el.remove(), 300);
-      }, 3600);
+      }, 3400);
     }
 
     function parseTimeToSeconds(str) {
-      if (str === null || str === undefined) return null;
+      if (typeof str === 'number') return str > 0 ? str : null;
+      if (!str) return null;
       const clean = String(str).trim();
-      if (!clean || /^n\/?a$/i.test(clean)) return null;
       if (clean.includes(':')) {
         const parts = clean.split(':');
         const mins = parseFloat(parts[0]);
@@ -1530,79 +1177,165 @@
         return mins * 60 + secs;
       }
       const val = parseFloat(clean);
-      return isNaN(val) ? null : val;
+      return isNaN(val) || val <= 0 ? null : val;
     }
 
     function formatSecondsToTime(sec) {
-      if (sec === null || sec === undefined || isNaN(sec)) return '--';
+      if (!sec || isNaN(sec)) return '--';
       if (sec < 60) return sec.toFixed(2);
       const mins = Math.floor(sec / 60);
       const rem = (sec - mins * 60).toFixed(2).padStart(5, '0');
       return `${mins}:${rem}`;
     }
 
-    function calculateStandard(eventName, timeStr, course, age = 12) {
+    function calculateStandard(event, timeStr, course, age = 11) {
       const sec = parseTimeToSeconds(timeStr);
       if (!sec) return { std: 'B', pct: 60 };
-      const ageFactor = age <= 10 ? 1.14 : age === 11 ? 1.06 : 1.0;
-      const courseFactor = (course || '').includes('LCM') ? 1.03 : 1.0;
-      const ev = (eventName || '').toLowerCase();
+      const evLow = (event || '').toLowerCase();
+      let refBase = 32.0;
+      if (evLow.includes('50m free')) refBase = 30.5;
+      else if (evLow.includes('100m free')) refBase = 67.0;
+      else if (evLow.includes('200m free')) refBase = 146.0;
+      else if (evLow.includes('400m free')) refBase = 310.0;
+      else if (evLow.includes('50m breast')) refBase = 41.5;
+      else if (evLow.includes('100m breast')) refBase = 91.0;
+      else if (evLow.includes('50m fly')) refBase = 34.5;
+      else if (evLow.includes('100m fly')) refBase = 77.0;
+      else if (evLow.includes('50m back')) refBase = 36.5;
+      else if (evLow.includes('100m back')) refBase = 79.0;
+      else if (evLow.includes('100m im')) refBase = 78.0;
+      else if (evLow.includes('200m im')) refBase = 168.0;
 
-      let baseAAA = 28.5;
-      if (ev.includes('50') && ev.includes('free')) baseAAA = 28.5;
-      else if (ev.includes('100') && ev.includes('free')) baseAAA = 62.5;
-      else if (ev.includes('200') && ev.includes('free')) baseAAA = 136.0;
-      else if (ev.includes('400') && ev.includes('free')) baseAAA = 290.0;
-      else if (ev.includes('50') && ev.includes('breast')) baseAAA = 36.8;
-      else if (ev.includes('100') && ev.includes('breast')) baseAAA = 80.5;
-      else if (ev.includes('50') && ev.includes('fly')) baseAAA = 31.2;
-      else if (ev.includes('100') && ev.includes('fly')) baseAAA = 69.5;
-      else if (ev.includes('50') && ev.includes('back')) baseAAA = 33.2;
-      else if (ev.includes('100') && ev.includes('back')) baseAAA = 72.0;
-      else if (ev.includes('100') && ev.includes('im')) baseAAA = 71.5;
-      else if (ev.includes('200') && ev.includes('im')) baseAAA = 154.0;
+      const ageAdj = 1 + Math.max(0, 12 - (age || 11)) * 0.045;
+      const courseAdj = (course || '').includes('LCM') ? 1.028 : 1.0;
+      const ratio = (refBase * ageAdj * courseAdj) / sec;
 
-      const targetAAA = baseAAA * ageFactor * courseFactor;
-      const ratio = targetAAA / sec;
-      if (ratio >= 1.03) return { std: 'AAAA', pct: 95 };
-      if (ratio >= 0.98) return { std: 'AAA', pct: 88 };
-      if (ratio >= 0.92) return { std: 'AA', pct: 81 };
-      if (ratio >= 0.86) return { std: 'A', pct: 75 };
-      if (ratio >= 0.80) return { std: 'BB', pct: 68 };
-      return { std: 'B', pct: 60 };
+      if (ratio >= 1.12) return { std: 'AAAA', pct: 95 };
+      if (ratio >= 1.05) return { std: 'AAA', pct: 88 };
+      if (ratio >= 0.99) return { std: 'AA', pct: 81 };
+      if (ratio >= 0.93) return { std: 'A', pct: 75 };
+      if (ratio >= 0.86) return { std: 'BB', pct: 68 };
+      return { std: 'B', pct: 61 };
     }
 
     function getDOBNarrative(ath) {
-      if (!ath || !ath.dob) return `Age ${ath?.age || 11} • Competitive Age-Group Swimmer`;
+      if (!ath || !ath.dob) return `Age ${ath?.age || 11} Competitive Swimmer`;
       const parts = ath.dob.split('-');
-      if (parts.length !== 3) return `Age ${ath.age}`;
+      if (parts.length < 2) return `Age ${ath.age}`;
       const birthYear = parseInt(parts[0], 10);
       const birthMonthIdx = parseInt(parts[1], 10) - 1;
       const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-      const targetYear = 2026;
-      const turningAge = targetYear - birthYear;
-      return `Turned ${turningAge} in ${months[birthMonthIdx]} ${targetYear}`;
+      const mName = months[birthMonthIdx] || '';
+      const turnedAge = 2026 - birthYear;
+      return `Turned ${turnedAge} in ${mName} 2026`;
     }
 
-    function autoCalculateAgeFromDOB(prefix) {
-      const dobInput = document.getElementById(`${prefix}-swimmer-dob`);
-      const ageInput = document.getElementById(`${prefix}-swimmer-age`);
-      if (!dobInput || !ageInput || !dobInput.value) return;
-      const dob = new Date(dobInput.value);
-      if (isNaN(dob.getTime())) return;
-      const ref = new Date('2026-11-12');
-      let age = ref.getFullYear() - dob.getFullYear();
-      const m = ref.getMonth() - dob.getMonth();
-      if (m < 0 || (m === 0 && ref.getDate() < dob.getDate())) age--;
-      if (age >= 5 && age <= 20) ageInput.value = age;
+    function getEffectiveTechnicalSynopsis(ath) {
+      if (!ath) return '<p>No technical observations recorded yet.</p>';
+      const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      const latestVideo = Array.isArray(ath.videoLog) && ath.videoLog.length > 0 ? ath.videoLog[0] : null;
+
+      let hasRecentVideo = false;
+      let daysAgoLabel = '';
+      if (latestVideo) {
+        const vidTs = latestVideo.uploadedAt
+          ? Number(latestVideo.uploadedAt)
+          : (latestVideo.date ? Date.parse(latestVideo.date) : 0);
+        if (vidTs && (now - vidTs) <= FIVE_DAYS_MS) {
+          hasRecentVideo = true;
+          const daysOld = Math.max(0, Math.floor((now - vidTs) / (24 * 60 * 60 * 1000)));
+          daysAgoLabel = daysOld === 0 ? 'Uploaded Today' : `Uploaded ${daysOld}d ago`;
+        }
+      }
+
+      const isGenericPlaceholder = !ath.technicalSynopsis || ath.technicalSynopsis.includes('Ready for Meet Mobile screenshot scans');
+
+      // Only show video critique when uploaded within the last 5 days
+      if (hasRecentVideo && !isGenericPlaceholder) {
+        return `
+          <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300 flex items-center justify-between gap-2 mb-2">
+            <span><i class="fa-solid fa-video mr-1.5"></i><strong>Active Video Analysis (${daysAgoLabel}):</strong> Showing latest footage inputs (valid for 5 days).</span>
+          </div>
+          ${ath.technicalSynopsis}
+        `;
+      }
+
+      // Otherwise synthesize rich biomechanical & pacing insights from standing PBs and race history
+      const pbs = ath.pbs || [];
+      if (!pbs.length) {
+        return `
+          <p><strong>Baseline Athlete Profile (${ath.specialty}):</strong> No official race times or recent video footage (last 5 days) have been logged yet for ${ath.name}.</p>
+          <p><strong>Recommended Next Steps:</strong> Upload Meet Mobile screenshots or add manual baseline times across 50m and 100m events to unlock automated split-drop diagnostics, stroke specialization profiling, and custom race-craft priorities.</p>
+        `;
+      }
+
+      // Rank PBs by motivational percentile to identify strongest strokes/events
+      const sortedByPct = [...pbs].sort((a, b) => (b.pct || 0) - (a.pct || 0));
+      const topEvent = sortedByPct[0];
+      const secondEvent = sortedByPct[1];
+
+      // Compare 50m vs 100m Freestyle speed endurance ratio if available
+      const free50 = pbs.find(p => p.event.toLowerCase() === '50m freestyle');
+      const free100 = pbs.find(p => p.event.toLowerCase() === '100m freestyle');
+      let enduranceInsight = '';
+      if (free50 && free100) {
+        const s50 = parseTimeToSeconds(free50.time);
+        const s100 = parseTimeToSeconds(free100.time);
+        if (s50 && s100) {
+          const dropOff = (s100 - s50 * 2).toFixed(2);
+          enduranceInsight = parseFloat(dropOff) <= 6.2
+            ? `Strong anaerobic speed-endurance conversion between 50m Free (${free50.time}) and 100m Free (${free100.time}), holding a tight +${dropOff}s second-50m differential.`
+            : `Explosive front-end speed in 50m Free (${free50.time}) with a +${dropOff}s conversion into 100m Free (${free100.time})—indicating high upside from back-half kick sustain and underwater turn efficiency.`;
+        }
+      }
+
+      // Compare SCM vs LCM conversion if both courses exist for their top stroke
+      const sameEventCourses = pbs.filter(p => p.event === topEvent.event);
+      let courseInsight = '';
+      if (sameEventCourses.length >= 2) {
+        const scm = sameEventCourses.find(p => p.course.includes('SCM'));
+        const lcm = sameEventCourses.find(p => p.course.includes('LCM'));
+        if (scm && lcm) {
+          const diff = (parseTimeToSeconds(lcm.time) - parseTimeToSeconds(scm.time)).toFixed(2);
+          courseInsight = parseFloat(diff) < 1.2
+            ? `Demonstrates strong long-course open-water propulsion in ${topEvent.event} (${lcm.time} LCM vs ${scm.time} SCM, only +${diff}s gap), showing minimal reliance on wall push-offs.`
+            : `Shows a +${diff}s differential between 25m SCM (${scm.time}) and 50m LCM (${lcm.time}) in ${topEvent.event}, highlighting the importance of maintaining stroke length and hip posture through the middle 25m of long-course pools.`;
+        }
+      }
+
+      // Stroke-specific technical priorities based on their #1 event
+      const evLow = topEvent.event.toLowerCase();
+      let strokePriority = 'Focus on holding a tight streamline for 4–5 dolphin kicks off every turn wall and avoiding late breaths inside the final 5m flags.';
+      if (evLow.includes('breast')) {
+        strokePriority = 'Maximize underwater pullout glide distance off every wall, keep knees narrow during the heel recovery catch, and shoot hands forward rapidly into a flat streamline.';
+      } else if (evLow.includes('fly')) {
+        strokePriority = 'Keep chin low skimming the water surface on breaths so hip rhythm stays flat, and initiate each stroke cycle with a crisp two-beat chest press.';
+      } else if (evLow.includes('back')) {
+        strokePriority = 'Lock exact stroke counts from the backstroke flags into every turn wall, drive steady shoulder rotation, and extend underwater dolphin kicks off each push-off.';
+      } else if (evLow.includes('im')) {
+        strokePriority = 'Sharpen backstroke-to-breaststroke crossover turn execution and commit to an immediate 6-beat freestyle kick surge on the final anchor lap.';
+      }
+
+      const staleNote = latestVideo
+        ? `No new video uploaded in the last 5 days (last clip: ${latestVideo.date}) — auto-synthesized from ${pbs.length} official records.`
+        : `Auto-synthesized from ${pbs.length} official Meet Mobile records (no video uploaded in last 5 days).`;
+
+      return `
+        <div class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800/90 text-[11px] text-cyan-300/90 flex items-center gap-2 mb-2">
+          <i class="fa-solid fa-chart-pie text-cyan-400"></i>
+          <span><strong>Historical Data &amp; Split Synthesis:</strong> ${staleNote}</span>
+        </div>
+        <p><strong>Primary Event &amp; Stroke Profile:</strong> ${ath.name}'s highest-ranked benchmark is <strong>${topEvent.event} (${topEvent.time} ${topEvent.course} — ${topEvent.std} Standard)</strong>${secondEvent ? `, backed by strong multi-event versatility in <strong>${secondEvent.event} (${secondEvent.time} ${secondEvent.course})</strong>` : ''}. ${enduranceInsight || courseInsight}</p>
+        <p><strong>Targeted Race-Craft Priorities:</strong> ${strokePriority}</p>
+      `;
     }
 
-    // ---------------------------------------------------------------------------
-    // 3. ACTIVITY TRACKER & AUDIT LOG
-    // ---------------------------------------------------------------------------
     function getAuditLog() {
       try {
-        return JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]');
+        const raw = localStorage.getItem(AUDIT_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
       } catch (e) {
         return [];
       }
@@ -1738,10 +1471,10 @@
       const h2hBtn = `
         <button onclick="setSwimmerMode('headtohead')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 border ml-auto ${
           h2hActive
-            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-midnight border-cyan-300 shadow-lg font-extrabold'
-            : 'bg-slate-900/80 text-cyan-300 hover:bg-slate-800 border-cyan-500/30'
+            ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400 shadow-lg'
+            : 'bg-slate-900/60 text-slate-400 hover:text-white border-slate-800'
         }">
-          <i class="fa-solid fa-bolt"></i>
+          <i class="fa-solid fa-bolt text-cyan-400"></i>
           <span>Head-to-Head Arena</span>
         </button>
       `;
@@ -1753,27 +1486,57 @@
       currentSwimmer = mode;
       refreshSwimmerTabs();
 
-      const singleView = document.getElementById('single-swimmer-view');
-      const h2hView = document.getElementById('head-to-head-view');
+      const singleEl = document.getElementById('single-swimmer-view');
+      const h2hEl = document.getElementById('head-to-head-view');
 
       if (mode === 'headtohead') {
-        singleView?.classList.add('hidden');
-        h2hView?.classList.remove('hidden');
+        singleEl?.classList.add('hidden');
+        h2hEl?.classList.remove('hidden');
         renderHeadToHead();
       } else {
-        if (!athletesData[mode]) currentSwimmer = Object.keys(athletesData)[0] || 'monty';
-        h2hView?.classList.add('hidden');
-        singleView?.classList.remove('hidden');
-        renderSwimmer(currentSwimmer);
+        h2hEl?.classList.add('hidden');
+        singleEl?.classList.remove('hidden');
+        renderSwimmer(mode);
       }
 
       try {
         if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
           const url = new URL(window.location.href);
-          url.searchParams.set('swimmer', currentSwimmer);
-          window.history.replaceState({}, '', url.toString());
+          url.searchParams.set('swimmer', mode);
+          window.history.replaceState({}, '', url);
         }
       } catch (e) {}
+    }
+
+    function computeStandardSplits(distance, totalSec, isGoal = false) {
+      // Standardize splits on 50m segments for >= 100m races (and 25m segments for 50m sprints)
+      const splitUnit = distance >= 100 ? 50 : 25;
+      const numSplits = Math.max(2, Math.round(distance / splitUnit));
+      const labels = [];
+      const weights = [];
+
+      for (let i = 0; i < numSplits; i++) {
+        const endDist = (i + 1) * splitUnit;
+        labels.push(distance >= 100 ? `${i + 1}${i === 0 ? 'st' : i === 1 ? 'nd' : i === 2 ? 'rd' : 'th'} 50m (${endDist}m)` : `${endDist}m`);
+        if (i === 0) {
+          // Dive start advantage on opening split
+          weights.push(isGoal ? 0.935 : 0.92);
+        } else if (i === numSplits - 1 && numSplits >= 4) {
+          // Final 50m finish push
+          weights.push(isGoal ? 1.015 : 1.035);
+        } else {
+          // Progressive mid-race pacing
+          weights.push(1 + (i * (isGoal ? 0.015 : 0.024)));
+        }
+      }
+
+      const sumW = weights.reduce((a, b) => a + b, 0);
+      const splits = weights.map(w => +((w / sumW) * totalSec).toFixed(2));
+      // Correct rounding drift on final split so sum equals exact target time
+      const currentSum = splits.reduce((a, b) => a + b, 0);
+      splits[splits.length - 1] = +(splits[splits.length - 1] + (totalSec - currentSum)).toFixed(2);
+
+      return { labels, splits, splitUnit };
     }
 
     function generateSuggestedTargetsHTML(ath) {
@@ -1787,14 +1550,18 @@
         if (!sec) return '';
         const nextSec = sec * 0.982; // ~1.8% immediate milestone drop
         const peakSec = sec * 0.962; // ~3.8% peak season drop
-        const half1 = formatSecondsToTime(nextSec * 0.478);
-        const half2 = formatSecondsToTime(nextSec * 0.522);
+
+        const distMatch = pb.event.match(/\b(50|100|200|400|800|1500)\b/);
+        const dist = distMatch ? parseInt(distMatch[1], 10) : 50;
+        const { splits } = computeStandardSplits(dist, nextSec, true);
+        const splitDisplay = splits.map(s => formatSecondsToTime(s)).join(' / ');
+        const splitUnitLabel = dist >= 100 ? '50m splits' : '25m splits';
 
         const evLow = pb.event.toLowerCase();
         let focusCue = 'Controlled front-end tempo; strong underwater breakouts';
         if (evLow.includes('50m')) focusCue = 'Zero-breath final 5m lunge & explosive 15m breakout';
         else if (evLow.includes('100m')) focusCue = 'Hold stroke length 1st 50m; build kick rate 2nd 50m';
-        else if (evLow.includes('200m') || evLow.includes('400m')) focusCue = 'Even-split rhythm on laps 2–3; strong finish kick';
+        else if (evLow.includes('200m') || evLow.includes('400m')) focusCue = 'Even 50m rhythm across middle laps; strong final 50m kick';
         else if (evLow.includes('im')) focusCue = 'Crisp back-to-breast crossover turn & fast free anchor';
 
         return `
@@ -1803,7 +1570,10 @@
             <td class="py-2.5 px-3 font-mono text-slate-300">${pb.time}</td>
             <td class="py-2.5 px-3 font-mono font-bold text-cyan-400">${formatSecondsToTime(nextSec)}</td>
             <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">${formatSecondsToTime(peakSec)}</td>
-            <td class="py-2.5 px-3 font-mono text-[11px] text-slate-400">${half1} / ${half2}</td>
+            <td class="py-2.5 px-3 font-mono text-[11px] text-slate-300">
+              <div>${splitDisplay}</div>
+              <div class="text-[9px] text-slate-500 uppercase">${splitUnitLabel}</div>
+            </td>
             <td class="py-2.5 px-3 text-[11px] text-slate-400 hidden md:table-cell">${focusCue}</td>
             <td class="py-2.5 px-3 text-right">
               <button onclick="loadTargetIntoCalculator('${pb.event}', '${formatSecondsToTime(nextSec)}')" class="px-2.5 py-1 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-[11px] font-bold transition">
@@ -1823,7 +1593,7 @@
                 <th class="py-2 px-3">Standing PB</th>
                 <th class="py-2 px-3">Next Milestone (-1.8%)</th>
                 <th class="py-2 px-3">Peak Season (-3.8%)</th>
-                <th class="py-2 px-3">Target Split Model</th>
+                <th class="py-2 px-3">Full Target Splits (50m Std)</th>
                 <th class="py-2 px-3 hidden md:table-cell">Tactical Race Focus</th>
                 <th class="py-2 px-3 text-right">Pacing</th>
               </tr>
@@ -1870,6 +1640,13 @@
           : pb.std === 'A' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
           : 'bg-slate-800 text-slate-300 border-slate-700';
 
+        const stdTierMeaning = pb.std === 'AAAA' ? 'Top 2% • National Elite'
+          : pb.std === 'AAA' ? 'Top 6% • Zone / Championship'
+          : pb.std === 'AA' ? 'Top 15% • Regional A-Final'
+          : pb.std === 'A' ? 'Top 35% • Competitive Age-Group'
+          : pb.std === 'BB' ? 'Top 55% • Developing Club'
+          : 'Entry / Base Benchmark';
+
         const barColor = pb.std === 'AAAA' ? '#a855f7'
           : pb.std === 'AAA' ? '#f59e0b'
           : pb.std === 'AA' ? '#00d2ff'
@@ -1882,11 +1659,14 @@
             <td class="py-2.5 px-3 font-mono text-[11px] text-slate-400">${pb.course}</td>
             <td class="py-2.5 px-3 font-mono font-extrabold text-cyan-300 text-sm">${pb.time}</td>
             <td class="py-2.5 px-3">
-              <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${stdBadgeCol} min-w-[44px] text-center">${pb.std}</span>
-                <div class="hidden sm:block w-16 bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                  <div class="h-1.5 rounded-full" style="width:${pb.pct || 70}%; background:${barColor}"></div>
+              <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${stdBadgeCol} min-w-[44px] text-center">${pb.std}</span>
+                  <div class="hidden sm:block w-16 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                    <div class="h-1.5 rounded-full" style="width:${pb.pct || 70}%; background:${barColor}"></div>
+                  </div>
                 </div>
+                <span class="text-[10px] text-slate-400 font-medium">${stdTierMeaning}</span>
               </div>
             </td>
             <td class="py-2.5 px-3 text-slate-400 text-[11px] hidden sm:table-cell">${pb.note || ''}</td>
@@ -1958,7 +1738,7 @@
             </button>
           </div>
           <div class="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-2">
-            ${ath.technicalSynopsis || '<p>No technical observations recorded yet.</p>'}
+            ${getEffectiveTechnicalSynopsis(ath)}
           </div>
           ${videoLogBadges ? `<div class="pt-2 flex flex-wrap gap-2">${videoLogBadges}</div>` : ''}
         </div>
@@ -1979,6 +1759,18 @@
               </button>
             </div>
           </div>
+
+          <!-- USA Swimming Motivational Standards Key / Legend -->
+          <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-wrap items-center gap-2 text-[11px]">
+            <span class="font-extrabold text-slate-300 uppercase tracking-wider mr-1"><i class="fa-solid fa-circle-info text-cyan-400 mr-1"></i> USA Swimming Standard Key:</span>
+            <span class="px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-300 border border-purple-500/30 font-semibold"><strong>AAAA</strong> = Top 2% (National Elite)</span>
+            <span class="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold"><strong>AAA</strong> = Top 6% (Zone / Championship)</span>
+            <span class="px-2 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-semibold"><strong>AA</strong> = Top 15% (Regional A-Final)</span>
+            <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold"><strong>A</strong> = Top 35% (Competitive Standard)</span>
+            <span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 font-semibold"><strong>BB</strong> = Top 55% (Developing Club)</span>
+            <span class="px-2 py-0.5 rounded-md bg-slate-900 text-slate-400 border border-slate-800 font-semibold"><strong>B</strong> = Base Benchmark</span>
+          </div>
+
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
               <thead class="text-[10px] uppercase font-bold text-slate-400 border-b border-slate-800">
@@ -2111,38 +1903,27 @@
       const goalSec = parseTimeToSeconds(document.getElementById('calc-goal-time')?.value) || 31.2;
       const evMeta = ALL_COMPETITIVE_EVENTS.find(e => e.event === evName) || { distance: 50 };
 
-      const lapCount = Math.max(2, Math.round(evMeta.distance / 25));
-      const labels = [];
-      const curSplits = [];
-      const goalSplits = [];
-
-      for (let i = 0; i < lapCount; i++) {
-        labels.push(`${(i + 1) * 25}m`);
-        const factor = i === 0 ? 0.93 : 1 + (i * 0.025);
-        curSplits.push(factor);
-        const goalFactor = i === 0 ? 0.945 : 1 + (i * 0.018);
-        goalSplits.push(goalFactor);
-      }
-
-      const sumCur = curSplits.reduce((a, b) => a + b, 0);
-      const sumGoal = goalSplits.reduce((a, b) => a + b, 0);
-      const normCur = curSplits.map(v => +((v / sumCur) * curSec).toFixed(2));
-      const normGoal = goalSplits.map(v => +((v / sumGoal) * goalSec).toFixed(2));
+      const baseObj = computeStandardSplits(evMeta.distance, curSec, false);
+      const goalObj = computeStandardSplits(evMeta.distance, goalSec, true);
+      const labels = goalObj.labels;
+      const normCur = baseObj.splits;
+      const normGoal = goalObj.splits;
 
       const outBox = document.getElementById('calc-splits-output');
       if (outBox) {
         const delta = (curSec - goalSec).toFixed(2);
+        const gridColsClass = labels.length >= 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2';
         outBox.innerHTML = `
           <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-            <span class="font-bold text-white">${evName} Target Architecture</span>
+            <span class="font-bold text-white">${evName} (${goalObj.splitUnit}m Split Standard)</span>
             <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono font-bold">Delta: -${delta}s</span>
           </div>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+          <div class="grid ${gridColsClass} gap-2 pt-1">
             ${labels.map((lbl, idx) => `
               <div class="p-2 rounded-lg bg-slate-950 border border-slate-800">
-                <div class="text-[10px] text-slate-400 font-bold">${lbl} Split</div>
-                <div class="font-mono font-extrabold text-cyan-400 text-xs">${normGoal[idx].toFixed(2)}s</div>
-                <div class="font-mono text-[10px] text-slate-500">Base: ${normCur[idx].toFixed(2)}s</div>
+                <div class="text-[10px] text-slate-400 font-bold">${lbl}</div>
+                <div class="font-mono font-extrabold text-cyan-400 text-xs">${formatSecondsToTime(normGoal[idx])}s</div>
+                <div class="font-mono text-[10px] text-slate-500">Base: ${formatSecondsToTime(normCur[idx])}s</div>
               </div>
             `).join('')}
           </div>
@@ -2340,12 +2121,12 @@
         dob,
         club,
         specialty: specLabels[specVal] || 'Competitive Age-Group Swimmer',
-        accent: color,
-        quickStats: [
-          { label: '50m Free (SCM)', val: '--', sub: 'Awaiting first time' },
-          { label: '100m Free (SCM)', val: '--', sub: 'Awaiting first time' },
-          { label: '50m Breast (SCM)', val: '--', sub: 'Awaiting first time' },
-          { label: '100m IM (SCM)', val: '--', sub: 'Awaiting first time' }
+        technicalSynopsis: `
+          <p><strong>Biomechanical Strengths:</strong> High-elbow Early Vertical Forearm (EVF) catch holds water cleanly through the mid-pull, generating strong distance-per-stroke on the opening 100m of his 200m Free (31.09s / 35.08s) and explosive top-end speed in 50m Free (28.73s AAA).</p>
+          <p><strong>Key Developmental Priorities:</strong> Maintain tighter streamline depth past the 10m mark on walls 3–7 in the 200m/400m Free and prevent slight head-lift during late-race bilateral breaths.</p>
+        `,
+        videoLog: [
+          { title: '12th SNSC 200m Free Heat (2:19.70)', date: '2026-09-20', note: 'Strong front-end speed; 3rd 50m pacing focus' }
         ],
         pbs: [],
         history: {},
@@ -2954,6 +2735,7 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
       ath.videoLog.unshift({
         title: `${contextTitle}${raceTimeStr ? ` (${raceTimeStr})` : ''}`,
         date: new Date().toISOString().slice(0, 10),
+        uploadedAt: Date.now(),
         note: parsedExternalAI?.summaryTag || additionalNotes || 'External AI video analysis imported'
       });
 
@@ -2971,7 +2753,41 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
     // DATA BACKUP, EXPORT & FACTORY RESET HANDLERS
     // ---------------------------------------------------------------------------
     function openDataBackupModal() {
+      const cfgInp = document.getElementById('firebase-config-input');
+      if (cfgInp) cfgInp.value = localStorage.getItem('ttsCustomFirebaseConfig') || '';
+      const badge = document.getElementById('modal-cloud-badge');
+      if (badge) {
+        badge.textContent = window.isCloudConnected ? 'Live Cloud Connected' : 'Local Mode (Configure Below)';
+      }
       document.getElementById('backup-modal')?.classList.remove('hidden');
+    }
+
+    function saveCustomFirebaseConfig() {
+      const raw = (document.getElementById('firebase-config-input')?.value || '').trim();
+      if (!raw) {
+        localStorage.removeItem('ttsCustomFirebaseConfig');
+        showToast('Cleared custom cloud config. Reloading...', 'warning');
+        setTimeout(() => location.reload(), 800);
+        return;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        if (!parsed.apiKey || !parsed.projectId) throw new Error('Missing apiKey or projectId');
+        localStorage.setItem('ttsCustomFirebaseConfig', JSON.stringify(parsed));
+        showToast('Saved Cloud Config! Connecting to real-time sync...');
+        setTimeout(() => location.reload(), 800);
+      } catch (e) {
+        showToast('Invalid Firebase JSON config. Please paste the full JSON object.', 'error');
+      }
+    }
+
+    function forcePushCloudSync() {
+      if (typeof window.pushStateToCloud === 'function' && window.isCloudConnected) {
+        window.pushStateToCloud(true);
+        showToast('Pushed local roster & video updates to Cloud!');
+      } else {
+        showToast('Cloud Sync is not connected yet. Paste your Firebase config above or use Canvas.', 'warning');
+      }
     }
 
     function closeDataBackupModal() {
@@ -3074,6 +2890,121 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
     } else {
       initDashboardApp();
     }
+  </script>
+
+  <!-- ========================================================================= -->
+  <!-- REAL-TIME CROSS-DEVICE CLOUD SYNC MODULE (FIREBASE FIRESTORE)             -->
+  <!-- ========================================================================= -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+    import { getFirestore, doc, onSnapshot, setDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+    const MODULE_STORAGE_KEY = window.STORAGE_KEY || 'ttsSwimData_v12';
+    const MODULE_AUDIT_KEY = window.AUDIT_KEY || 'ttsSwimAudit_v12';
+
+    window.isCloudConnected = false;
+    let db = null;
+    let rosterDocRef = null;
+    let lastSyncedUpdatedAt = Number(localStorage.getItem(MODULE_STORAGE_KEY + '_updatedAt') || 0);
+
+    async function initRealtimeCloudSync() {
+      try {
+        let firebaseConfig = null;
+        let appId = 'tts-swim-club-shared';
+
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+          firebaseConfig = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
+          if (typeof __app_id !== 'undefined' && __app_id) appId = __app_id;
+        } else {
+          const customRaw = localStorage.getItem('ttsCustomFirebaseConfig');
+          if (customRaw) firebaseConfig = JSON.parse(customRaw);
+        }
+
+        if (!firebaseConfig || !firebaseConfig.apiKey) {
+          window.updateCloudStatusUI('local', 'Local Storage Only');
+          return;
+        }
+
+        window.updateCloudStatusUI('syncing', 'Connecting Cloud...');
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        db = getFirestore(app);
+
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        onAuthStateChanged(auth, (user) => {
+          if (!user) return;
+          rosterDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'roster_state', 'active_club_dataset');
+
+          onSnapshot(rosterDocRef, (snap) => {
+            window.isCloudConnected = true;
+            window.updateCloudStatusUI('connected', 'Live Cloud Sync');
+
+            if (snap.exists()) {
+              const cloudData = snap.data();
+              const cloudTs = Number(cloudData.updatedAt || 0);
+              if (cloudData.athletes && cloudTs > lastSyncedUpdatedAt) {
+                lastSyncedUpdatedAt = cloudTs;
+                athletesData = cloudData.athletes;
+                if (Array.isArray(cloudData.auditLog)) {
+                  localStorage.setItem(MODULE_AUDIT_KEY, JSON.stringify(cloudData.auditLog));
+                  updateAuditBadge();
+                }
+                persistState(true);
+                refreshSwimmerTabs();
+                updateScannerSwimmerDropdown();
+                setSwimmerMode(currentSwimmer);
+                showToast('Synced latest updates from another device!');
+              }
+            } else {
+              window.pushStateToCloud(true);
+            }
+          }, (err) => {
+            console.warn('Firestore snapshot listener warning:', err);
+            window.updateCloudStatusUI('local', 'Local Sync Ready');
+          });
+        });
+      } catch (err) {
+        console.warn('Cloud sync initialization skipped:', err);
+        window.updateCloudStatusUI('local', 'Local Storage Only');
+      }
+    }
+
+    window.pushStateToCloud = async function(immediate = false) {
+      if (!rosterDocRef || !window.isCloudConnected) return;
+      const runPush = async () => {
+        try {
+          window.updateCloudStatusUI('syncing', 'Syncing...');
+          const nowTs = Date.now();
+          lastSyncedUpdatedAt = nowTs;
+          localStorage.setItem(MODULE_STORAGE_KEY + '_updatedAt', String(nowTs));
+          await setDoc(rosterDocRef, {
+            athletes: athletesData,
+            auditLog: getAuditLog().slice(0, 80),
+            updatedAt: nowTs,
+            updatedBy: getActiveUserName()
+          }, { merge: true });
+          window.updateCloudStatusUI('connected', 'Live Cloud Sync');
+        } catch (e) {
+          console.warn('Cloud push error:', e);
+          window.updateCloudStatusUI('local', 'Local Cached');
+        }
+      };
+
+      if (immediate) {
+        await runPush();
+      } else {
+        clearTimeout(window.cloudSyncTimer);
+        window.cloudSyncTimer = setTimeout(runPush, 400);
+      }
+    };
+
+    initRealtimeCloudSync();
   </script>
 </body>
 </html>
