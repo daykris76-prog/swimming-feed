@@ -679,7 +679,7 @@
               <i class="fa-solid fa-link mr-1"></i> Copy Direct Sync Link
             </button>
             <button onclick="forcePushCloudSync()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 font-semibold text-xs border border-slate-700">
-              <i class="fa-solid fa-rotate mr-1"></i> Sync Now
+              <i class="fa-solid fa-rotate mr-1"></i> Force Push Now
             </button>
           </div>
         </div>
@@ -2141,12 +2141,12 @@
         dob,
         club,
         specialty: specLabels[specVal] || 'Competitive Age-Group Swimmer',
-        technicalSynopsis: `
-          <p><strong>Biomechanical Strengths:</strong> High-elbow Early Vertical Forearm (EVF) catch holds water cleanly through the mid-pull, generating strong distance-per-stroke on the opening 100m of his 200m Free (31.09s / 35.08s) and explosive top-end speed in 50m Free (28.73s AAA).</p>
-          <p><strong>Key Developmental Priorities:</strong> Maintain tighter streamline depth past the 10m mark on walls 3–7 in the 200m/400m Free and prevent slight head-lift during late-race bilateral breaths.</p>
-        `,
-        videoLog: [
-          { title: '12th SNSC 200m Free Heat (2:19.70)', date: '2026-09-20', note: 'Strong front-end speed; 3rd 50m pacing focus' }
+        accent: color,
+        quickStats: [
+          { label: '50m Free', val: '--', sub: 'Baseline Pending' },
+          { label: '100m Free', val: '--', sub: 'Baseline Pending' },
+          { label: 'Primary Stroke', val: '--', sub: 'Baseline Pending' },
+          { label: '100m IM', val: '--', sub: 'Baseline Pending' }
         ],
         pbs: [],
         history: {},
@@ -2923,6 +2923,8 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
   <!-- ========================================================================= -->
   <!-- ZERO-SETUP CROSS-DEVICE CLOUD SYNC ENGINE (GITHUB PAGES + CANVAS)         -->
   <!-- ========================================================================= -->
+  <!-- REAL-TIME CROSS-DEVICE CLOUD SYNC MODULE (FIREBASE + ZERO-CONFIG REST)    -->
+  <!-- ========================================================================= -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
@@ -2930,8 +2932,8 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
 
     const MODULE_STORAGE_KEY = window.STORAGE_KEY || 'ttsSwimData_v12';
     const MODULE_AUDIT_KEY = window.AUDIT_KEY || 'ttsSwimAudit_v12';
-    // Shared pre-provisioned CORS-enabled JSONBlob ID for daykris76 TTS Swim Club
-    const DEFAULT_BLOB_ID = '019a7c8e-4b21-7d90-a3f1-88c4e9120b77';
+    const DEFAULT_CLUB_SYNC_KEY = 'tts-swim-daykris76-club-v12';
+    const KV_APP_TOKEN = 'ttsswimdaykris76';
 
     window.getClubSyncId = function() {
       try {
@@ -2942,7 +2944,13 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
           return urlSync;
         }
       } catch (e) {}
-      return localStorage.getItem('ttsClubSyncId') || DEFAULT_BLOB_ID;
+      const saved = localStorage.getItem('ttsClubSyncId');
+      // Migrate away from old placeholder blob ID automatically
+      if (!saved || saved === '019a7c8e-4b21-7d90-a3f1-88c4e9120b77') {
+        localStorage.setItem('ttsClubSyncId', DEFAULT_CLUB_SYNC_KEY);
+        return DEFAULT_CLUB_SYNC_KEY;
+      }
+      return saved;
     };
 
     window.isCloudConnected = false;
@@ -2951,83 +2959,46 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
     let rosterDocRef = null;
     let lastSyncedUpdatedAt = Number(localStorage.getItem(MODULE_STORAGE_KEY + '_updatedAt') || 0);
 
-    function buildJsonBlobUrl(idOrUrl) {
-      if (!idOrUrl) return '';
-      if (idOrUrl.startsWith('http://') || idOrUrl.startsWith('https://')) return idOrUrl;
-      return `https://jsonblob.com/api/jsonBlob/${encodeURIComponent(idOrUrl)}`;
-    }
-
-    // Zero-Config CORS-Enabled JSONBlob Cloud Sync (works natively on GitHub Pages)
+    // Zero-Config Deterministic Key-Value Cloud Sync (works natively on GitHub Pages across iPhone & Desktop)
     async function initZeroConfigRestSync() {
-      let syncId = window.getClubSyncId();
-      let endpoint = buildJsonBlobUrl(syncId);
-      window.cloudSyncEndpointUrl = endpoint;
-
-      const createNewCloudBlob = async () => {
-        const nowTs = lastSyncedUpdatedAt || Date.now();
-        lastSyncedUpdatedAt = nowTs;
-        localStorage.setItem(MODULE_STORAGE_KEY + '_updatedAt', String(nowTs));
-        const res = await fetch('https://jsonblob.com/api/jsonBlob', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            athletes: athletesData,
-            auditLog: getAuditLog().slice(0, 80),
-            updatedAt: nowTs,
-            updatedBy: getActiveUserName()
-          })
-        });
-        if (res.ok) {
-          const loc = res.headers.get('Location') || res.headers.get('x-jsonblob') || '';
-          const newId = loc.split('/').pop();
-          if (newId) {
-            syncId = newId;
-            localStorage.setItem('ttsClubSyncId', newId);
-            endpoint = buildJsonBlobUrl(newId);
-            window.cloudSyncEndpointUrl = endpoint;
-            try {
-              const u = new URL(window.location.href);
-              u.searchParams.set('syncId', newId);
-              window.history.replaceState({}, '', u);
-            } catch (e) {}
-          }
-          window.isCloudConnected = true;
-          window.updateCloudStatusUI('connected', 'Live Cloud Sync');
-        }
-      };
+      const syncKey = window.getClubSyncId().replace(/[^a-zA-Z0-9_-]/g, '_');
+      const getUrl = `https://keyvalue.immanuel.co/api/KeyVal/GetValue/${KV_APP_TOKEN}/${syncKey}`;
+      window.cloudSyncEndpointUrl = `keyvalue.immanuel.co/${KV_APP_TOKEN}/${syncKey}`;
 
       const pullFromRest = async (silent = true) => {
         try {
-          const res = await fetch(endpoint, {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' },
-            cache: 'no-store'
-          });
+          const res = await fetch(`${getUrl}?_t=${Date.now()}`, { method: 'GET', cache: 'no-store' });
           if (res.ok) {
-            const cloudData = await res.json();
+            let rawText = await res.text();
+            // keyvalue.immanuel.co returns JSON-encoded string or raw JSON
+            if (rawText && rawText.startsWith('"')) {
+              try { rawText = JSON.parse(rawText); } catch (e) {}
+            }
             window.isCloudConnected = true;
             window.updateCloudStatusUI('connected', 'Live Cloud Sync');
-            const cloudTs = Number(cloudData?.updatedAt || 0);
-            if (cloudData?.athletes && cloudTs > lastSyncedUpdatedAt) {
-              lastSyncedUpdatedAt = cloudTs;
-              athletesData = cloudData.athletes;
-              if (Array.isArray(cloudData.auditLog)) {
-                localStorage.setItem(MODULE_AUDIT_KEY, JSON.stringify(cloudData.auditLog));
-                updateAuditBadge();
+
+            if (rawText && rawText !== 'null' && rawText !== '""') {
+              const cloudData = typeof rawText === 'string' ? JSON.parse(rawText) : rawText;
+              const cloudTs = Number(cloudData?.updatedAt || 0);
+              if (cloudData?.athletes && cloudTs > lastSyncedUpdatedAt) {
+                lastSyncedUpdatedAt = cloudTs;
+                athletesData = cloudData.athletes;
+                if (Array.isArray(cloudData.auditLog)) {
+                  localStorage.setItem(MODULE_AUDIT_KEY, JSON.stringify(cloudData.auditLog));
+                  updateAuditBadge();
+                }
+                persistState(true);
+                refreshSwimmerTabs();
+                updateScannerSwimmerDropdown();
+                setSwimmerMode(currentSwimmer);
+                if (!silent) showToast('Synced latest updates from another device!');
+              } else if (!cloudData?.athletes && Object.keys(athletesData).length > 0) {
+                await pushToRest(true);
               }
-              persistState(true);
-              refreshSwimmerTabs();
-              updateScannerSwimmerDropdown();
-              setSwimmerMode(currentSwimmer);
-              if (!silent) showToast('Synced latest updates from another device!');
-            } else if (!cloudData?.athletes && Object.keys(athletesData).length > 0) {
+            } else if (Object.keys(athletesData).length > 0) {
+              // Seed cloud record on first ever connection
               await pushToRest(true);
             }
-          } else if (res.status === 404) {
-            await createNewCloudBlob();
           }
         } catch (err) {
           if (!window.isCloudConnected) {
@@ -3042,24 +3013,19 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
           const nowTs = isInitial && lastSyncedUpdatedAt ? lastSyncedUpdatedAt : Date.now();
           lastSyncedUpdatedAt = nowTs;
           localStorage.setItem(MODULE_STORAGE_KEY + '_updatedAt', String(nowTs));
-          const res = await fetch(endpoint, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-              athletes: athletesData,
-              auditLog: getAuditLog().slice(0, 80),
-              updatedAt: nowTs,
-              updatedBy: getActiveUserName()
-            })
+
+          const payloadStr = JSON.stringify({
+            athletes: athletesData,
+            auditLog: getAuditLog().slice(0, 60),
+            updatedAt: nowTs,
+            updatedBy: getActiveUserName()
           });
+
+          const updateUrl = `https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/${KV_APP_TOKEN}/${syncKey}/${encodeURIComponent(payloadStr)}`;
+          const res = await fetch(updateUrl, { method: 'POST' });
           if (res.ok) {
             window.isCloudConnected = true;
             window.updateCloudStatusUI('connected', 'Live Cloud Sync');
-          } else if (res.status === 404) {
-            await createNewCloudBlob();
           }
         } catch (err) {
           window.updateCloudStatusUI('local', 'Local Cached');
@@ -3148,7 +3114,7 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
             localStorage.setItem(MODULE_STORAGE_KEY + '_updatedAt', String(nowTs));
             await setDoc(rosterDocRef, {
               athletes: athletesData,
-              auditLog: getAuditLog().slice(0, 80),
+              auditLog: getAuditLog().slice(0, 60),
               updatedAt: nowTs,
               updatedBy: getActiveUserName()
             }, { merge: true });
