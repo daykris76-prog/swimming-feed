@@ -2870,10 +2870,12 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
           const rawText = await res.text();
           if (!rawText || !rawText.trim()) return;
 
-          // Parse NDJSON lines from ntfy.sh and pick the newest valid roster snapshot
+          // Parse NDJSON lines from ntfy.sh (supports both single-message & multi-chunk payloads > 3.2KB)
           let newestPayload = null;
           let newestTs = lastSyncedUpdatedAt;
+          const chunkGroups = {};
           const lines = rawText.trim().split('\n');
+
           for (const line of lines) {
             try {
               const envelope = JSON.parse(line);
@@ -2883,9 +2885,36 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
                 if (candidate?.athletes && cTs > newestTs) {
                   newestTs = cTs;
                   newestPayload = candidate;
+                } else if (candidate?.batchId && typeof candidate.idx === 'number' && candidate.total) {
+                  if (!chunkGroups[candidate.batchId]) {
+                    chunkGroups[candidate.batchId] = {
+                      updatedAt: cTs,
+                      total: candidate.total,
+                      parts: {}
+                    };
+                  }
+                  chunkGroups[candidate.batchId].parts[candidate.idx] = candidate.chunk || '';
                 }
               }
             } catch (e) {}
+          }
+
+          // Reassemble any complete multi-chunk batches newer than lastSyncedUpdatedAt
+          for (const bId of Object.keys(chunkGroups)) {
+            const grp = chunkGroups[bId];
+            if (grp.updatedAt > newestTs && Object.keys(grp.parts).length === grp.total) {
+              try {
+                let fullStr = '';
+                for (let i = 0; i < grp.total; i++) {
+                  fullStr += grp.parts[i];
+                }
+                const parsedBatch = JSON.parse(fullStr);
+                if (parsedBatch?.athletes) {
+                  newestTs = grp.updatedAt;
+                  newestPayload = parsedBatch;
+                }
+              } catch (e) {}
+            }
           }
 
           if (newestPayload && newestTs > lastSyncedUpdatedAt) {
@@ -2915,17 +2944,39 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
           lastSyncedUpdatedAt = nowTs;
           localStorage.setItem(MODULE_STORAGE_KEY + '_updatedAt', String(nowTs));
 
-          const res = await fetch(publishUrl, {
-            method: 'POST',
-            headers: { 'Title': 'TTS Swim State Sync' },
-            body: JSON.stringify({
-              athletes: athletesData,
-              auditLog: getAuditLog().slice(0, 60),
-              updatedAt: nowTs,
-              updatedBy: getActiveUserName()
-            })
+          const fullJson = JSON.stringify({
+            athletes: athletesData,
+            auditLog: getAuditLog().slice(0, 40),
+            updatedAt: nowTs,
+            updatedBy: getActiveUserName()
           });
-          if (res.ok) {
+
+          // Split into <= 3,000-char chunks so ntfy.sh never truncates at its 4KB message limit
+          const CHUNK_SIZE = 3000;
+          const totalChunks = Math.ceil(fullJson.length / CHUNK_SIZE);
+          const batchId = `${nowTs}_${Math.random().toString(36).slice(2, 7)}`;
+
+          let allOk = true;
+          for (let i = 0; i < totalChunks; i++) {
+            const chunkStr = fullJson.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+            const res = await fetch(publishUrl, {
+              method: 'POST',
+              headers: { 'Title': `TTS Sync ${i + 1}/${totalChunks}` },
+              body: JSON.stringify({
+                batchId,
+                updatedAt: nowTs,
+                idx: i,
+                total: totalChunks,
+                chunk: chunkStr
+              })
+            });
+            if (!res.ok) {
+              allOk = false;
+              break;
+            }
+          }
+
+          if (allOk) {
             window.isCloudConnected = true;
             window.updateCloudStatusUI('connected', 'Live Cloud Sync');
           }
