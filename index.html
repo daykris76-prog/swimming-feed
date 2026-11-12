@@ -31,7 +31,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
 
   <script>
-    // Global cloud status UI helper hoisted to head so Firebase module can invoke it immediately
+    // Global cloud status UI helper hoisted to head so Firebase/REST module can invoke it immediately
     window.cloudSyncTimer = null;
     window.updateCloudStatusUI = function(state, customLabel) {
       const dot = document.getElementById('cloud-status-dot');
@@ -49,7 +49,7 @@
         pill.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-950/60 text-cyan-300 border border-cyan-700/50';
       } else {
         dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400';
-        text.textContent = customLabel || 'Local Storage';
+        text.textContent = customLabel || 'Local Sync Ready';
         pill.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700';
       }
     };
@@ -104,21 +104,6 @@
       box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
     }
 
-    .glass-card-monty {
-      border-top: 3px solid #00d2ff;
-    }
-    .glass-card-rupert {
-      border-top: 3px solid #f59e0b;
-    }
-
-    .glow-cyan {
-      box-shadow: 0 0 25px -4px rgba(0, 210, 255, 0.35);
-    }
-    .glow-gold {
-      box-shadow: 0 0 25px -4px rgba(245, 158, 11, 0.35);
-    }
-
-    /* Custom Scrollbars */
     ::-webkit-scrollbar {
       width: 7px;
       height: 7px;
@@ -180,7 +165,6 @@
 
         <!-- Primary & Compact Action Buttons -->
         <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          <!-- Primary Prominent Buttons -->
           <button onclick="openAddSwimmerModal()" class="px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 font-bold text-xs flex items-center gap-1.5 transition shadow-sm">
             <i class="fa-solid fa-user-plus"></i>
             <span>Add Swimmer</span>
@@ -196,7 +180,6 @@
             <span>Upload Video</span>
           </button>
 
-          <!-- Compact Icon-Only Utility Buttons with Hover Tooltips -->
           <button onclick="openRosterModal()" title="TTS Club & Family Roster (Edit DOB / Switch / Delete)" class="w-8 h-8 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 flex items-center justify-center text-xs transition">
             <i class="fa-solid fa-users"></i>
           </button>
@@ -221,9 +204,7 @@
       </div>
 
       <!-- Swimmer Profile Tabs + Head-to-Head Arena Pill -->
-      <div id="swimmer-tabs-bar" class="flex items-center gap-1.5 overflow-x-auto pb-1">
-        <!-- Dynamically populated by refreshSwimmerTabs() -->
-      </div>
+      <div id="swimmer-tabs-bar" class="flex items-center gap-1.5 overflow-x-auto pb-1"></div>
     </div>
   </header>
 
@@ -598,7 +579,6 @@
           <option value="Video Analysis">Video Analysis</option>
           <option value="OCR Scan">OCR Scan</option>
           <option value="Swimmer Added">Swimmer Added</option>
-          <option value="Habit Check">Habit Check</option>
         </select>
         <select id="audit-swimmer-filter" onchange="renderAuditLogTable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white"></select>
       </div>
@@ -665,7 +645,7 @@
             <span id="modal-cloud-badge" class="text-[10px] font-mono text-emerald-400">Active</span>
           </div>
           <p class="text-[11px] text-slate-300 leading-relaxed">
-            Your iPhone and desktop sync automatically via your shared Club Sync ID below—no login or Firebase setup needed on GitHub Pages.
+            Your iPhone and desktop sync automatically via your shared Club Sync ID below—using HTTP body storage so full rosters and video critiques sync cleanly without size limits.
           </p>
           <div class="flex items-center gap-2">
             <input type="text" id="club-sync-id-input" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 font-mono text-[11px] text-cyan-300">
@@ -673,7 +653,7 @@
               Apply ID
             </button>
           </div>
-          <div id="cloud-sync-debug-msg" class="text-[10px] font-mono text-slate-400"></div>
+          <div id="cloud-sync-debug-msg" class="text-[10px] font-mono text-slate-400 break-all"></div>
           <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
             <button onclick="copySyncShareLink()" class="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-semibold text-xs border border-cyan-500/40">
               <i class="fa-solid fa-link mr-1"></i> Copy Direct Sync Link
@@ -713,9 +693,6 @@
   <!-- JAVASCRIPT DATA & LOGIC ENGINE                                            -->
   <!-- ========================================================================= -->
   <script>
-    // ---------------------------------------------------------------------------
-    // 1. DEFAULT ATHLETE DATABASE (ALL 7 SWIMMERS) & PERSISTENCE
-    // ---------------------------------------------------------------------------
     window.STORAGE_KEY = 'ttsSwimData_v12';
     window.AUDIT_KEY = 'ttsSwimAudit_v12';
     const STORAGE_KEY = window.STORAGE_KEY;
@@ -801,11 +778,6 @@
           { step: '3. EVF Catch Mechanics', desc: 'Anchor fingertips down early without dropping the elbow on fatigue.' },
           { step: '4. Negative-Split Pacing', desc: 'Control first 50m at 92% effort; build stroke tempo on laps 3 & 4.' },
           { step: '5. Finish Lunge', desc: 'No breath inside the final 5m flags; drive head down into wall.' }
-        ],
-        habitBricks: [
-          { id: 'm_b1', text: '5 dolphin kicks off every single wall in warm-up & main set', done: true },
-          { id: 'm_b2', text: 'Zero breaths inside 5m flags on all sprint repeats', done: true },
-          { id: 'm_b3', text: '10 mins post-swim thoracic & ankle mobility', done: false }
         ]
       },
       rupert: {
@@ -860,11 +832,6 @@
           { step: '3. Head-Down Breathing', desc: 'Keep one goggle in the water on freestyle breaths to protect hip line.' },
           { step: '4. Fast Turn Transitions', desc: 'Tuck knees tight and plant feet high on the wall with zero hesitation.' },
           { step: '5. Finish Lunge', desc: 'Full arm extension into the touchpad without gliding.' }
-        ],
-        habitBricks: [
-          { id: 'r_b1', text: 'Full 2-second streamline count on every breaststroke push-off', done: true },
-          { id: 'r_b2', text: 'Keep chin tucked and eyes down on all freestyle drills', done: true },
-          { id: 'r_b3', text: '20 streamline vertical kicks after practice', done: false }
         ]
       },
       rory: {
@@ -897,19 +864,12 @@
         history: {
           '50m Freestyle': [{ meet: 'SNSC SCM', date: '2026-09-20', time: 30.95 }]
         },
-        technicalSynopsis: `
-          <p><strong>Biomechanical Strengths:</strong> Smooth shoulder roll and steady tempo in 50m/100m Backstroke with consistent stroke counts into the backstroke flags.</p>
-          <p><strong>Key Developmental Priorities:</strong> Increase underwater dolphin kick amplitude off backstroke walls and accelerate hand speed through the final catch phase.</p>
-        `,
+        technicalSynopsis: '',
         videoLog: [],
         huegillLoop: [
           { step: '1. Vision & Benchmark', desc: 'Target sub-1:14.00 100m Backstroke & sub-30.20 50m Free.' },
           { step: '2. Backstroke Flag Count', desc: 'Lock exact stroke count from backstroke flags to wall.' },
           { step: '3. Hip Rotation Drive', desc: 'Connect core rotation directly to deep pinky-first entry.' }
-        ],
-        habitBricks: [
-          { id: 'rw_b1', text: 'Count strokes from flags on every backstroke wall', done: true },
-          { id: 'rw_b2', text: '6 underwater dolphin kicks off every turn', done: false }
         ]
       },
       george: {
@@ -951,19 +911,12 @@
           '50m Breaststroke': [{ meet: 'LCM Championship', date: '2026-08-15', time: 35.46 }],
           '50m Freestyle': [{ meet: 'SNSC SCM', date: '2026-09-20', time: 31.76 }]
         },
-        technicalSynopsis: `
-          <p><strong>Biomechanical Strengths:</strong> Standout explosive power in 50m Breaststroke (35.46s LCM — AAAA National Elite tier) paired with versatile sprint speed across 50m Free (31.76s SCM) and 50m Fly (35.48s SCM).</p>
-          <p><strong>Key Developmental Priorities:</strong> Translate 50m breaststroke power into back-half endurance for the 100m Breaststroke (1:36.66 LCM) and 200m IM (3:11.70 LCM) through controlled stroke-length pacing on the opening 50m.</p>
-        `,
+        technicalSynopsis: '',
         videoLog: [],
         huegillLoop: [
           { step: '1. Vision & Benchmark', desc: 'Target sub-35.00 LCM 50m Breast & sub-1:32.00 100m Breast.' },
           { step: '2. Breaststroke Tempo Control', desc: 'Hold long glide on first 50m of 100m Breast before building rate.' },
           { step: '3. Sprint Freestyle Turnover', desc: 'Drive high-elbow catch to break 31.00s in 50m Free.' }
-        ],
-        habitBricks: [
-          { id: 'g_b1', text: 'Track stroke count per 25m on all breaststroke sets', done: true },
-          { id: 'g_b2', text: 'Fast hands shoot-forward recovery on 50m Breast sprints', done: true }
         ]
       },
       noah: {
@@ -1001,19 +954,12 @@
           '50m Breaststroke': [{ meet: 'SNSC SCM', date: '2026-09-20', time: 40.45 }],
           '100m Breaststroke': [{ meet: 'SNSC SCM', date: '2026-09-20', time: 89.55 }]
         },
-        technicalSynopsis: `
-          <p><strong>Biomechanical Strengths:</strong> Consistent breaststroke specialist who has broken the 1:30 barrier in 100m Breaststroke (1:29.55 SCM) and holds a reliable 40.45s 50m Breaststroke across 12 competitive races.</p>
-          <p><strong>Key Developmental Priorities:</strong> Maximize underwater pullout distance off each SCM wall and sharpen butterfly-to-backstroke transitions in the 100m IM (1:28.11).</p>
-        `,
+        technicalSynopsis: '',
         videoLog: [],
         huegillLoop: [
           { step: '1. Vision & Benchmark', desc: 'Target sub-39.50 50m Breast & sub-1:27.00 100m Breast.' },
           { step: '2. Tighter SCM Turns', desc: 'Two-hand touch and rapid elbow-back drop turn on breaststroke walls.' },
           { step: '3. Free Sprint Speed', desc: 'Push 50m Free under 31.80s to boost IM anchor leg.' }
-        ],
-        habitBricks: [
-          { id: 'n_b1', text: 'Two-hand touch & immediate tuck on every breaststroke wall', done: true },
-          { id: 'n_b2', text: 'Hold streamline 2 seconds past flags on pullouts', done: false }
         ]
       },
       garrick: {
@@ -1053,19 +999,12 @@
           '50m Butterfly': [{ meet: 'SNSC SCM', date: '2026-09-20', time: 36.91 }],
           '50m Breaststroke': [{ meet: 'LCM Meet', date: '2026-08-15', time: 40.43 }]
         },
-        technicalSynopsis: `
-          <p><strong>Biomechanical Strengths:</strong> Standout 10U short-axis power with AAA-level 50m Breaststroke (40.43s LCM) and AA-level 50m Butterfly (36.91s SCM), driving a strong 1:25.81 100m IM.</p>
-          <p><strong>Key Developmental Priorities:</strong> Keep chin low during butterfly breaths so hip rhythm stays flat, and transfer 50m speed into smooth negative-split 100m/200m Freestyle pacing.</p>
-        `,
+        technicalSynopsis: '',
         videoLog: [],
         huegillLoop: [
           { step: '1. Vision & Benchmark', desc: 'Target sub-35.80 50m Fly & sub-1:23.50 100m IM.' },
           { step: '2. Low Butterfly Breath', desc: 'Chin skims surface on breath; hands enter shoulder-width.' },
           { step: '3. Smooth 100m Free Rhythm', desc: 'Hold long strokes on first 50m before building kick.' }
-        ],
-        habitBricks: [
-          { id: 'gs_b1', text: 'Breath every 2nd stroke on 50m Fly with chin low', done: true },
-          { id: 'gs_b2', text: '4 dolphin kicks off every IM wall', done: true }
         ]
       },
       stellan: {
@@ -1105,19 +1044,12 @@
           '50m Breaststroke': [{ meet: 'LCM Meet', date: '2026-08-15', time: 39.48 }],
           '100m IM': [{ meet: 'SNSC SCM', date: '2026-09-20', time: 85.62 }]
         },
-        technicalSynopsis: `
-          <p><strong>Biomechanical Strengths:</strong> Well-rounded 10U medley athlete with AAA-ranked 50m Breaststroke (39.48s LCM), sub-40s 50m Backstroke (39.87s SCM), and sub-3:00 200m Freestyle (2:59.97 LCM).</p>
-          <p><strong>Key Developmental Priorities:</strong> Increase freestyle leg turnover on the final 25m of the 100m IM (1:25.62) and maintain tight streamline off backstroke-to-breaststroke crossover turns.</p>
-        `,
+        technicalSynopsis: '',
         videoLog: [],
         huegillLoop: [
           { step: '1. Vision & Benchmark', desc: 'Target sub-1:23.00 100m IM & sub-38.80 50m Breast.' },
           { step: '2. Back-to-Breast Crossover', desc: 'Commit to crisp backstroke-to-breast turn without slowing into wall.' },
           { step: '3. Freestyle Kick Finish', desc: 'Drive 6-beat kick on final 25m of IM and 100m Free.' }
-        ],
-        habitBricks: [
-          { id: 'ss_b1', text: 'Practice 3 back-to-breast IM turns after main set', done: true },
-          { id: 'ss_b2', text: 'No breathing inside 5m flags on freestyle finishes', done: false }
         ]
       }
     };
@@ -1128,7 +1060,6 @@
         if (!raw) return JSON.parse(JSON.stringify(defaultAthletesData));
         const parsed = JSON.parse(raw);
         if (!parsed || typeof parsed !== 'object') return JSON.parse(JSON.stringify(defaultAthletesData));
-        // Ensure all default swimmers exist if missing
         Object.keys(defaultAthletesData).forEach(k => {
           if (!parsed[k]) parsed[k] = JSON.parse(JSON.stringify(defaultAthletesData[k]));
         });
@@ -1141,7 +1072,6 @@
     let athletesData = loadSavedState();
     let currentSwimmer = 'monty';
     let splitChartInstance = null;
-    let h2hChartInstance = null;
 
     function persistState(skipCloud = false) {
       try {
@@ -1257,7 +1187,6 @@
 
       const isGenericPlaceholder = !ath.technicalSynopsis || ath.technicalSynopsis.includes('Ready for Meet Mobile screenshot scans');
 
-      // Only show video critique when uploaded within the last 5 days
       if (hasRecentVideo && !isGenericPlaceholder) {
         return `
           <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300 flex items-center justify-between gap-2 mb-2">
@@ -1267,7 +1196,6 @@
         `;
       }
 
-      // Otherwise synthesize rich biomechanical & pacing insights from standing PBs and race history
       const pbs = ath.pbs || [];
       if (!pbs.length) {
         return `
@@ -1276,13 +1204,11 @@
         `;
       }
 
-      // Rank PBs by motivational percentile to identify strongest strokes/events
       const sortedByPct = [...pbs].sort((a, b) => (b.pct || 0) - (a.pct || 0));
       const topEvent = sortedByPct[0];
       const secondEvent = sortedByPct[1];
       const thirdEvent = sortedByPct[2];
 
-      // Compare 50m vs 100m & 200m Freestyle speed endurance ratio if available
       const free50 = pbs.find(p => p.event.toLowerCase() === '50m freestyle' && p.course.includes('SCM')) || pbs.find(p => p.event.toLowerCase() === '50m freestyle');
       const free100 = pbs.find(p => p.event.toLowerCase() === '100m freestyle' && p.course.includes('SCM')) || pbs.find(p => p.event.toLowerCase() === '100m freestyle');
       const free200 = pbs.find(p => p.event.toLowerCase() === '200m freestyle' && p.course.includes('SCM')) || pbs.find(p => p.event.toLowerCase() === '200m freestyle');
@@ -1305,7 +1231,6 @@
         }
       }
 
-      // Compare SCM vs LCM conversion across matching events
       const coursePairs = [];
       const uniqueEvents = [...new Set(pbs.map(p => p.event))];
       uniqueEvents.forEach(ev => {
@@ -1326,7 +1251,6 @@
           : `Shows a <strong>${diffStr}</strong> differential between 25m SCM (${primaryPair.scm}) and 50m LCM (${primaryPair.lcm}) in <strong>${primaryPair.ev}</strong>, underscoring the opportunity to preserve stroke length and hip elevation through the middle 25m of 50m pools.`;
       }
 
-      // Multi-stroke versatility & IM readiness
       const strokeSet = new Set(pbs.map(p => {
         const l = p.event.toLowerCase();
         if (l.includes('free')) return 'Freestyle';
@@ -1341,7 +1265,6 @@
         ? `Competing across <strong>${strokeSet.size} stroke disciplines</strong> (${Array.from(strokeSet).join(', ')})${imPB ? ` with a benchmark <strong>${imPB.event} of ${imPB.time} (${imPB.std})</strong>` : ''}, providing strong neuromuscular balance and medley relay versatility.`
         : `Currently focused on <strong>${Array.from(strokeSet).join(' & ')}</strong> events; expanding secondary stroke racing will build balanced shoulder stability and IM readiness.`;
 
-      // Stroke-specific technical priorities based on their #1 event
       const evLow = topEvent.event.toLowerCase();
       let strokePriority = 'Focus on holding a tight streamline for 4–5 dolphin kicks off every turn wall, anchoring an Early Vertical Forearm (EVF) catch, and avoiding late breaths inside the final 5m flags.';
       if (evLow.includes('breast')) {
@@ -1486,9 +1409,6 @@
       showToast('Cleared activity log.');
     }
 
-    // ---------------------------------------------------------------------------
-    // 4. SWIMMER TABS, RENDERING, TARGET LADDER & PACING CALCULATOR
-    // ---------------------------------------------------------------------------
     function refreshSwimmerTabs() {
       const bar = document.getElementById('swimmer-tabs-bar');
       if (!bar) return;
@@ -1549,7 +1469,6 @@
     }
 
     function computeStandardSplits(distance, totalSec, isGoal = false) {
-      // Standardize splits on 50m segments across all race distances
       const splitUnit = 50;
       const numSplits = Math.max(1, Math.round(distance / splitUnit));
       const labels = [];
@@ -1561,20 +1480,16 @@
         if (numSplits === 1) {
           weights.push(1.0);
         } else if (i === 0) {
-          // Dive start advantage on opening 50m
           weights.push(isGoal ? 0.935 : 0.92);
         } else if (i === numSplits - 1 && numSplits >= 4) {
-          // Final 50m finish push
           weights.push(isGoal ? 1.015 : 1.035);
         } else {
-          // Progressive mid-race pacing
           weights.push(1 + (i * (isGoal ? 0.015 : 0.024)));
         }
       }
 
       const sumW = weights.reduce((a, b) => a + b, 0);
       const splits = weights.map(w => +((w / sumW) * totalSec).toFixed(2));
-      // Correct rounding drift on final split so sum equals exact target time
       const currentSum = splits.reduce((a, b) => a + b, 0);
       splits[splits.length - 1] = +(splits[splits.length - 1] + (totalSec - currentSum)).toFixed(2);
 
@@ -1590,8 +1505,8 @@
       const rows = pbs.map(pb => {
         const sec = parseTimeToSeconds(pb.time);
         if (!sec) return '';
-        const nextSec = sec * 0.982; // ~1.8% immediate milestone drop
-        const peakSec = sec * 0.962; // ~3.8% peak season drop
+        const nextSec = sec * 0.982;
+        const peakSec = sec * 0.962;
 
         const distMatch = pb.event.match(/(25|50|100|200|400|800|1500)\s*m?\b/i);
         const dist = distMatch ? parseInt(distMatch[1], 10) : 50;
@@ -1884,20 +1799,10 @@
         </div>
       `;
 
-      // Initialize pacing calculator with swimmer's primary event
       const defaultEv = ath.pbs?.[0]?.event || '50m Freestyle';
       const evSel = document.getElementById('calc-event-select');
       if (evSel) evSel.value = defaultEv;
       handlePacingEventChange();
-    }
-
-    function toggleHabitBrick(swimmerId, idx) {
-      const ath = athletesData[swimmerId];
-      if (!ath || !ath.habitBricks?.[idx]) return;
-      ath.habitBricks[idx].done = !ath.habitBricks[idx].done;
-      logActivity('Habit Check', ath.name, `${ath.habitBricks[idx].done ? 'Completed' : 'Unchecked'}: ${ath.habitBricks[idx].text}`);
-      persistState();
-      renderSwimmer(swimmerId);
     }
 
     function handlePacingEventChange() {
@@ -1996,7 +1901,7 @@
     }
 
     // ---------------------------------------------------------------------------
-    // 5. HEAD-TO-HEAD ARENA
+    // HEAD-TO-HEAD ARENA
     // ---------------------------------------------------------------------------
     function renderHeadToHead() {
       const container = document.getElementById('head-to-head-view');
@@ -2082,7 +1987,7 @@
     }
 
     // ---------------------------------------------------------------------------
-    // 6. MODALS: ADD SWIMMER, MANUAL PB OVERRIDE, ROSTER & EDIT DOB
+    // MODALS: ADD SWIMMER, MANUAL PB OVERRIDE, ROSTER & EDIT DOB
     // ---------------------------------------------------------------------------
     function updateScannerSwimmerDropdown() {
       const ids = ['field-swimmer', 'video-swimmer-select', 'manual-pb-swimmer'];
@@ -2150,16 +2055,12 @@
         ],
         pbs: [],
         history: {},
-        technicalSynopsis: `<p><strong>Profile Created:</strong> Ready for Meet Mobile screenshot scans, manual PB entries, or AI video analysis.</p>`,
+        technicalSynopsis: '',
         videoLog: [],
         huegillLoop: [
           { step: '1. Vision & Benchmark', desc: 'Establish official baseline PBs across 50m and 100m events.' },
           { step: '2. Tight Streamlines', desc: 'Hold streamlined dolphin kicks off every start and turn wall.' },
           { step: '3. High-Elbow Catch', desc: 'Anchor fingertips early and accelerate hand exit past the hip.' }
-        ],
-        habitBricks: [
-          { id: `${id}_b1`, text: '4 tight dolphin kicks off every wall in training', done: false },
-          { id: `${id}_b2`, text: 'Zero breaths inside final 5m flags', done: false }
         ]
       };
 
@@ -2232,7 +2133,6 @@
         else ath.pbs.unshift(entry);
       }
 
-      // Sync quickStats if matching
       const shortEv = event.toLowerCase().replace('freestyle', 'free').replace('breaststroke', 'breast').replace('butterfly', 'fly').replace('backstroke', 'back');
       (ath.quickStats || []).forEach(st => {
         if (st.label.toLowerCase().includes(shortEv)) {
@@ -2297,8 +2197,6 @@
       document.getElementById('edit-swimmer-age').value = ath.age;
       document.getElementById('edit-swimmer-club').value = ath.club || '';
       document.getElementById('edit-swimmer-specialty').value = ath.specialty || '';
-      const radio = document.querySelector(`input[name="edit-swimmer-color"][value="${ath.accent}"]`);
-      if (radio) radio.checked = true;
       document.getElementById('edit-swimmer-modal')?.classList.remove('hidden');
     }
 
@@ -2318,8 +2216,6 @@
       ath.age = parseInt(document.getElementById('edit-swimmer-age')?.value || ath.age, 10) || ath.age;
       ath.club = (document.getElementById('edit-swimmer-club')?.value || ath.club).trim();
       ath.specialty = (document.getElementById('edit-swimmer-specialty')?.value || ath.specialty).trim();
-      const col = document.querySelector('input[name="edit-swimmer-color"]:checked')?.value;
-      if (col) ath.accent = col;
 
       logActivity('Swimmer Added', ath.name, `Updated profile / DOB (${ath.dob || 'Age ' + ath.age})`);
       persistState();
@@ -2344,10 +2240,9 @@
     }
 
     // ---------------------------------------------------------------------------
-    // 7. BATCH SCREENSHOT OCR SCANNER (TESSERACT.JS)
+    // BATCH SCREENSHOT OCR SCANNER (TESSERACT.JS)
     // ---------------------------------------------------------------------------
     let batchResults = [];
-    let activeBatchIdx = 0;
 
     function openScanModal(swimmerId) {
       updateScannerSwimmerDropdown();
@@ -2413,7 +2308,6 @@
     }
 
     function selectBatchItem(idx) {
-      activeBatchIdx = idx;
       const item = batchResults[idx];
       if (!item) return;
       document.getElementById('field-event').value = item.event || '';
@@ -2421,8 +2315,6 @@
       document.getElementById('field-time').value = item.time || '';
       document.getElementById('field-splits').value = item.splits || '';
       document.getElementById('field-notes').value = item.notes || '';
-      const badge = document.getElementById('batch-counter-badge');
-      if (badge) badge.textContent = `Item ${idx + 1} of ${batchResults.length}`;
     }
 
     function commitScannedResult() {
@@ -2583,7 +2475,6 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
       let priorities = extractField('PRIORITIES');
       const summaryTag = extractField('SUMMARY_TAG');
 
-      // Fallback if user pasted free-form AI prose without the structured tags
       if (!strengths && !priorities) {
         const cleanLines = raw.split('\n').map(l => l.trim()).filter(Boolean);
         strengths = cleanLines.slice(0, 2).join(' ');
@@ -2653,7 +2544,6 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
       const ath = athletesData[swimmerId];
       if (!ath) return;
 
-      // Ensure latest pasted content is parsed
       parseExternalAIOutput(false);
 
       const rawRaceEvent = (document.getElementById('video-race-event')?.value || (parsedExternalAI?.detectedEvent || '')).trim();
@@ -2789,7 +2679,7 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
     function saveClubSyncId() {
       const raw = (document.getElementById('club-sync-id-input')?.value || '').trim();
       if (!raw) {
-        showToast('Enter a valid Club Sync ID or Blob URL.', 'warning');
+        showToast('Enter a valid Club Sync ID.', 'warning');
         return;
       }
       localStorage.setItem('ttsClubSyncId', raw);
@@ -2919,11 +2809,7 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
   </script>
 
   <!-- ========================================================================= -->
-  <!-- REAL-TIME CROSS-DEVICE CLOUD SYNC MODULE (FIREBASE FIRESTORE)             -->
-  <!-- ========================================================================= -->
-  <!-- ZERO-SETUP CROSS-DEVICE CLOUD SYNC ENGINE (GITHUB PAGES + CANVAS)         -->
-  <!-- ========================================================================= -->
-  <!-- REAL-TIME CROSS-DEVICE CLOUD SYNC MODULE (FIREBASE + ZERO-CONFIG REST)    -->
+  <!-- REAL-TIME CROSS-DEVICE CLOUD SYNC MODULE (TWO-TIER HTTP BODY + FIREBASE)  -->
   <!-- ========================================================================= -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
@@ -2932,8 +2818,9 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
 
     const MODULE_STORAGE_KEY = window.STORAGE_KEY || 'ttsSwimData_v12';
     const MODULE_AUDIT_KEY = window.AUDIT_KEY || 'ttsSwimAudit_v12';
-    const DEFAULT_CLUB_SYNC_KEY = 'tts-swim-daykris76-club-v12';
+    const DEFAULT_CLUB_SYNC_KEY = 'tts-swim-daykris76-ptr-v12';
     const KV_APP_TOKEN = 'ttsswimdaykris76';
+    const JSONBLOB_API = 'https://jsonblob.com/api/jsonBlob';
 
     window.getClubSyncId = function() {
       try {
@@ -2945,8 +2832,7 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
         }
       } catch (e) {}
       const saved = localStorage.getItem('ttsClubSyncId');
-      // Migrate away from old placeholder blob ID automatically
-      if (!saved || saved === '019a7c8e-4b21-7d90-a3f1-88c4e9120b77') {
+      if (!saved || saved === '019a7c8e-4b21-7d90-a3f1-88c4e9120b77' || saved === 'tts-swim-daykris76-club-v12') {
         localStorage.setItem('ttsClubSyncId', DEFAULT_CLUB_SYNC_KEY);
         return DEFAULT_CLUB_SYNC_KEY;
       }
@@ -2959,44 +2845,89 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
     let rosterDocRef = null;
     let lastSyncedUpdatedAt = Number(localStorage.getItem(MODULE_STORAGE_KEY + '_updatedAt') || 0);
 
-    // Zero-Config Deterministic Key-Value Cloud Sync (works natively on GitHub Pages across iPhone & Desktop)
+    // Two-Tier Zero-Config Cloud Sync:
+    // 1) Stores only a tiny 36-char pointer ID in keyvalue.immanuel.co (avoids URL length limits)
+    // 2) Stores the full 12+ KB athlete roster in jsonblob.com via HTTP PUT body
     async function initZeroConfigRestSync() {
       const syncKey = window.getClubSyncId().replace(/[^a-zA-Z0-9_-]/g, '_');
-      const getUrl = `https://keyvalue.immanuel.co/api/KeyVal/GetValue/${KV_APP_TOKEN}/${syncKey}`;
-      window.cloudSyncEndpointUrl = `keyvalue.immanuel.co/${KV_APP_TOKEN}/${syncKey}`;
+      const ptrGetUrl = `https://keyvalue.immanuel.co/api/KeyVal/GetValue/${KV_APP_TOKEN}/${syncKey}`;
+      let activeBlobId = localStorage.getItem('ttsResolvedBlobId_' + syncKey) || '';
+
+      const resolveSharedBlobId = async () => {
+        if (activeBlobId && activeBlobId.length >= 16) return activeBlobId;
+        try {
+          const res = await fetch(`${ptrGetUrl}?_t=${Date.now()}`, { method: 'GET', cache: 'no-store' });
+          if (res.ok) {
+            let txt = await res.text();
+            if (txt && txt.startsWith('"')) {
+              try { txt = JSON.parse(txt); } catch (e) {}
+            }
+            if (txt && txt !== 'null' && txt !== '""' && txt.trim().length >= 16 && txt.trim().length < 80) {
+              activeBlobId = txt.trim();
+              localStorage.setItem('ttsResolvedBlobId_' + syncKey, activeBlobId);
+              return activeBlobId;
+            }
+          }
+        } catch (e) {}
+
+        // Provision a brand-new JSONBlob via HTTP POST body and register its tiny 36-char ID pointer
+        try {
+          const initPayload = JSON.stringify({
+            athletes: athletesData,
+            auditLog: getAuditLog().slice(0, 60),
+            updatedAt: lastSyncedUpdatedAt || Date.now(),
+            updatedBy: getActiveUserName()
+          });
+          const createRes = await fetch('https://jsonblob.com/api/jsonBlob', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: initPayload
+          });
+          if (createRes.ok) {
+            const loc = createRes.headers.get('Location') || createRes.headers.get('x-jsonblob') || '';
+            const idMatch = loc.match(/([a-zA-Z0-9-]+)$/);
+            if (idMatch && idMatch[1]) {
+              activeBlobId = idMatch[1];
+              localStorage.setItem('ttsResolvedBlobId_' + syncKey, activeBlobId);
+              await fetch(`https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/${KV_APP_TOKEN}/${syncKey}/${encodeURIComponent(activeBlobId)}`, { method: 'POST' });
+              return activeBlobId;
+            }
+          }
+        } catch (e) {}
+        return '';
+      };
 
       const pullFromRest = async (silent = true) => {
         try {
-          const res = await fetch(`${getUrl}?_t=${Date.now()}`, { method: 'GET', cache: 'no-store' });
+          const blobId = await resolveSharedBlobId();
+          if (!blobId) return;
+          const blobUrl = `https://jsonblob.com/api/jsonBlob/${blobId}`;
+          window.cloudSyncEndpointUrl = blobUrl;
+
+          const res = await fetch(`${blobUrl}?_t=${Date.now()}`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            cache: 'no-store'
+          });
           if (res.ok) {
-            let rawText = await res.text();
-            // keyvalue.immanuel.co returns JSON-encoded string or raw JSON
-            if (rawText && rawText.startsWith('"')) {
-              try { rawText = JSON.parse(rawText); } catch (e) {}
-            }
+            const cloudData = await res.json();
             window.isCloudConnected = true;
             window.updateCloudStatusUI('connected', 'Live Cloud Sync');
 
-            if (rawText && rawText !== 'null' && rawText !== '""') {
-              const cloudData = typeof rawText === 'string' ? JSON.parse(rawText) : rawText;
-              const cloudTs = Number(cloudData?.updatedAt || 0);
-              if (cloudData?.athletes && cloudTs > lastSyncedUpdatedAt) {
-                lastSyncedUpdatedAt = cloudTs;
-                athletesData = cloudData.athletes;
-                if (Array.isArray(cloudData.auditLog)) {
-                  localStorage.setItem(MODULE_AUDIT_KEY, JSON.stringify(cloudData.auditLog));
-                  updateAuditBadge();
-                }
-                persistState(true);
-                refreshSwimmerTabs();
-                updateScannerSwimmerDropdown();
-                setSwimmerMode(currentSwimmer);
-                if (!silent) showToast('Synced latest updates from another device!');
-              } else if (!cloudData?.athletes && Object.keys(athletesData).length > 0) {
-                await pushToRest(true);
+            const cloudTs = Number(cloudData?.updatedAt || 0);
+            if (cloudData?.athletes && cloudTs > lastSyncedUpdatedAt) {
+              lastSyncedUpdatedAt = cloudTs;
+              athletesData = cloudData.athletes;
+              if (Array.isArray(cloudData.auditLog)) {
+                localStorage.setItem(MODULE_AUDIT_KEY, JSON.stringify(cloudData.auditLog));
+                updateAuditBadge();
               }
-            } else if (Object.keys(athletesData).length > 0) {
-              // Seed cloud record on first ever connection
+              persistState(true);
+              refreshSwimmerTabs();
+              updateScannerSwimmerDropdown();
+              setSwimmerMode(currentSwimmer);
+              if (!silent) showToast('Synced latest updates from another device!');
+            } else if (!cloudData?.athletes && Object.keys(athletesData).length > 0) {
               await pushToRest(true);
             }
           }
@@ -3009,20 +2940,26 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
 
       const pushToRest = async (isInitial = false) => {
         try {
+          const blobId = await resolveSharedBlobId();
+          if (!blobId) return;
+          const blobUrl = `https://jsonblob.com/api/jsonBlob/${blobId}`;
+          window.cloudSyncEndpointUrl = blobUrl;
+
           window.updateCloudStatusUI('syncing', 'Syncing...');
           const nowTs = isInitial && lastSyncedUpdatedAt ? lastSyncedUpdatedAt : Date.now();
           lastSyncedUpdatedAt = nowTs;
           localStorage.setItem(MODULE_STORAGE_KEY + '_updatedAt', String(nowTs));
 
-          const payloadStr = JSON.stringify({
-            athletes: athletesData,
-            auditLog: getAuditLog().slice(0, 60),
-            updatedAt: nowTs,
-            updatedBy: getActiveUserName()
+          const res = await fetch(blobUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+              athletes: athletesData,
+              auditLog: getAuditLog().slice(0, 60),
+              updatedAt: nowTs,
+              updatedBy: getActiveUserName()
+            })
           });
-
-          const updateUrl = `https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/${KV_APP_TOKEN}/${syncKey}/${encodeURIComponent(payloadStr)}`;
-          const res = await fetch(updateUrl, { method: 'POST' });
           if (res.ok) {
             window.isCloudConnected = true;
             window.updateCloudStatusUI('connected', 'Live Cloud Sync');
@@ -3049,7 +2986,6 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
           if (typeof __app_id !== 'undefined' && __app_id) appId = __app_id;
         }
 
-        // On GitHub Pages (where __firebase_config is undefined), launch zero-config automatic sync
         if (!firebaseConfig || !firebaseConfig.apiKey) {
           await initZeroConfigRestSync();
           return;
