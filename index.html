@@ -30,7 +30,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
 
   <script>
-    // Embedded Firebase Project Configuration (Real-Time Cross-Device Sync)
+    // Embedded Firebase Project Configuration (Option A: Seamless Real-Time Cross-Device Sync)
     window.EMBEDDED_FIREBASE_CONFIG = {
       apiKey: "AIzaSyBpkCLBODMYa9d5fy13f5yLDfc9A-eS230",
       authDomain: "swim-app-2b43e.firebaseapp.com",
@@ -1163,6 +1163,48 @@
       return { std: 'B', pct: 61 };
     }
 
+    function syncQuickStatsFromPBs(ath) {
+      if (!ath || !Array.isArray(ath.pbs) || !Array.isArray(ath.quickStats)) return;
+      const strokeMap = [
+        { key: '50m free', match: (e) => e === '50m freestyle' },
+        { key: '100m free', match: (e) => e === '100m freestyle' },
+        { key: '200m free', match: (e) => e === '200m freestyle' },
+        { key: '50m breast', match: (e) => e === '50m breaststroke' },
+        { key: '100m breast', match: (e) => e === '100m breaststroke' },
+        { key: '50m fly', match: (e) => e === '50m butterfly' },
+        { key: '100m fly', match: (e) => e === '100m butterfly' },
+        { key: '50m back', match: (e) => e === '50m backstroke' },
+        { key: '100m back', match: (e) => e === '100m backstroke' },
+        { key: '100m im', match: (e) => e === '100m im' },
+        { key: '200m im', match: (e) => e === '200m im' }
+      ];
+
+      ath.quickStats.forEach(st => {
+        const lbl = (st.label || '').toLowerCase();
+        const wantLCM = lbl.includes('lcm');
+        const wantSCM = lbl.includes('scm');
+        const mapping = strokeMap.find(m => lbl.includes(m.key));
+        if (!mapping) return;
+
+        let candidates = ath.pbs.filter(p => mapping.match(normalizeEventName(p.event).toLowerCase()));
+        if (wantLCM) {
+          const lcmOnly = candidates.filter(p => (p.course || '').toUpperCase().includes('LCM'));
+          if (lcmOnly.length) candidates = lcmOnly;
+        } else if (wantSCM) {
+          const scmOnly = candidates.filter(p => (p.course || '').toUpperCase().includes('SCM'));
+          if (scmOnly.length) candidates = scmOnly;
+        }
+
+        if (!candidates.length) return;
+        candidates.sort((a, b) => (parseTimeToSeconds(a.time) || 9999) - (parseTimeToSeconds(b.time) || 9999));
+        const best = candidates[0];
+        if (best && best.time) {
+          st.val = best.time;
+          st.sub = `${best.std} Standard${best.note && best.note.includes('PB') ? ' (New PB!)' : ''}`;
+        }
+      });
+    }
+
     function getDOBNarrative(ath) {
       if (!ath || !ath.dob) return `Age ${ath?.age || 11} Competitive Swimmer`;
       const parts = ath.dob.split('-');
@@ -1584,6 +1626,7 @@
       const ath = athletesData[swimmerId];
       if (!container || !ath) return;
 
+      syncQuickStatsFromPBs(ath);
       const accent = ath.accent || '#00d2ff';
       const dobNarrative = getDOBNarrative(ath);
 
@@ -2142,14 +2185,7 @@
         else ath.pbs.unshift(entry);
       }
 
-      const shortEv = event.toLowerCase().replace('freestyle', 'free').replace('breaststroke', 'breast').replace('butterfly', 'fly').replace('backstroke', 'back');
-      (ath.quickStats || []).forEach(st => {
-        if (st.label.toLowerCase().includes(shortEv)) {
-          st.val = time;
-          st.sub = `${stdObj.std} Standard`;
-        }
-      });
-
+      syncQuickStatsFromPBs(ath);
       logActivity('PB Updated', ath.name, `Manual override ${event} (${course}): ${time}`);
       persistState();
       closeManualPBModal();
@@ -2163,6 +2199,7 @@
       const ath = athletesData[swimmerId];
       if (!ath || idx < 0 || !ath.pbs[idx]) return;
       const removed = ath.pbs.splice(idx, 1)[0];
+      syncQuickStatsFromPBs(ath);
       logActivity('PB Updated', ath.name, `Removed ${removed.event} (${removed.time})`);
       persistState();
       closeManualPBModal();
@@ -2354,6 +2391,7 @@
       if (idx >= 0) ath.pbs[idx] = entry;
       else ath.pbs.unshift(entry);
 
+      syncQuickStatsFromPBs(ath);
       logActivity('OCR Scan', ath.name, `Committed ${event} (${course}): ${time}`);
       persistState();
       closeScanModal();
@@ -2555,11 +2593,29 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
 
       parseExternalAIOutput(false);
 
-      const rawRaceEvent = (document.getElementById('video-race-event')?.value || (parsedExternalAI?.detectedEvent || '')).trim();
-      const raceEvent = normalizeEventName(rawRaceEvent);
-      const raceCourse = document.getElementById('video-race-course')?.value || '25m SCM';
-      const raceTimeStr = (document.getElementById('video-race-time')?.value || '').trim();
+      const rawPasteText = (document.getElementById('external-ai-paste-box')?.value || '').trim();
       const additionalNotes = (document.getElementById('video-additional-notes')?.value || '').trim();
+      const combinedContext = `${rawPasteText}\n${additionalNotes}`;
+
+      // Resolve Event (Input box -> Parsed AI field -> Fallback regex scan of pasted text/notes)
+      let rawRaceEvent = (document.getElementById('video-race-event')?.value || (parsedExternalAI?.detectedEvent || '')).trim();
+      if (!rawRaceEvent) {
+        const evFallback = combinedContext.match(/\b(25|50|100|200|400|800|1500)\s*(?:m|meter|metre)?\s*(Free(?:style)?|Breast(?:stroke)?|Fly|Butterfly|Back(?:stroke)?|IM|Medley)\b/i);
+        if (evFallback) rawRaceEvent = `${evFallback[1]}m ${evFallback[2]}`;
+      }
+      const raceEvent = normalizeEventName(rawRaceEvent);
+
+      // Resolve Course
+      let raceCourse = document.getElementById('video-race-course')?.value || '25m SCM';
+      if (/\b50m\s*LCM\b|\bLCM\b/i.test(combinedContext)) raceCourse = '50m LCM';
+      else if (/\b25y\s*SCY\b|\bSCY\b/i.test(combinedContext)) raceCourse = '25y SCY';
+
+      // Resolve Race Time (Input box -> Fallback regex scan of pasted text/notes)
+      let raceTimeStr = (document.getElementById('video-race-time')?.value || '').trim();
+      if (!raceTimeStr || /^n\/?a$/i.test(raceTimeStr)) {
+        const timeLineMatch = rawPasteText.match(/(?:TIME|FINAL\s*TIME|RESULT)\s*:\s*(\d{1,2}:\d{2}\.\d{2}|\d{2}\.\d{2})/i);
+        if (timeLineMatch) raceTimeStr = timeLineMatch[1];
+      }
 
       if (!parsedExternalAI && !raceEvent && !additionalNotes) {
         showToast('Paste the AI output or enter a race event before saving.', 'warning');
@@ -2617,23 +2673,11 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
             date: new Date().toISOString().slice(0, 10),
             time: newSec
           });
-
-          const shortEv = raceEvent.toLowerCase()
-            .replace('freestyle', 'free')
-            .replace('breaststroke', 'breast')
-            .replace('butterfly', 'fly')
-            .replace('backstroke', 'back');
-          (ath.quickStats || []).forEach(st => {
-            if (st.label.toLowerCase().includes(shortEv)) {
-              const curStatSec = parseTimeToSeconds(st.val);
-              if (!curStatSec || newSec <= curStatSec) {
-                st.val = raceTimeStr;
-                st.sub = `${stdObj.std} Standard (Video PB!)`;
-              }
-            }
-          });
         }
       }
+
+      // Synchronize the 4 header bricks at the top with standing PBs
+      syncQuickStatsFromPBs(ath);
 
       const customNotesHTML = additionalNotes
         ? `<p class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-700/80 text-slate-200 text-xs"><strong class="text-cyan-400"><i class="fa-solid fa-eye mr-1"></i>Clip &amp; Lane Context:</strong> ${additionalNotes.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`
