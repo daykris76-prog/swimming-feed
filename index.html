@@ -799,7 +799,7 @@
         accent: '#f59e0b',
         quickStats: [
           { label: '50m Free (SCM)', val: '32.82', sub: 'A Standard (New PB!)' },
-          { label: '50m Breast (SCM)', val: '44.58', sub: 'A Standard' },
+          { label: '50m Breast (SCM)', val: '43.59', sub: 'AA Standard (New PB!)' },
           { label: '50m Fly (SCM)', val: '42.98', sub: 'BB Standard' },
           { label: '100m Free (SCM)', val: '1:14.84', sub: 'BB Standard' }
         ],
@@ -809,7 +809,7 @@
           { event: '100m Freestyle', course: '25m SCM', time: '1:14.84', std: 'BB', pct: 70, note: '35.10 / 39.74 split' },
           { event: '100m Freestyle', course: '50m LCM', time: '1:17.20', std: 'BB', pct: 68, note: '36.40 / 40.80 split' },
           { event: '200m Freestyle', course: '25m SCM', time: '2:46.50', std: 'BB', pct: 67, note: 'Aerobic endurance builder' },
-          { event: '50m Breaststroke', course: '25m SCM', time: '44.58', std: 'A', pct: 75, note: 'Strong heel recovery & glide' },
+          { event: '50m Breaststroke', course: '25m SCM', time: '43.59', std: 'AA', pct: 79, note: 'Strong heel recovery & glide PB' },
           { event: '50m Breaststroke', course: '50m LCM', time: '46.10', std: 'BB', pct: 72, note: 'Long Course Breast PB' },
           { event: '100m Breaststroke', course: '25m SCM', time: '1:38.90', std: 'BB', pct: 70, note: '46.80 / 52.10 split' },
           { event: '50m Butterfly', course: '25m SCM', time: '42.98', std: 'BB', pct: 68, note: 'Two-beat rhythm timing' },
@@ -825,18 +825,19 @@
           ],
           '50m Breaststroke': [
             { meet: 'SNAG Qualifier', date: '2026-03-14', time: 45.90 },
-            { meet: '12th SNSC SCM', date: '2026-09-20', time: 44.58 }
+            { meet: '12th SNSC SCM', date: '2026-09-20', time: 44.58 },
+            { meet: 'TTS Meet PB', date: '2026-11-10', time: 43.59 }
           ]
         },
         technicalSynopsis: `
-          <p><strong>Biomechanical Strengths:</strong> Explosive reaction off the blocks and clean breaststroke pullout timing. Shows sharp improvement in 50m Free tempo (32.82s) with low head position during breaths.</p>
+          <p><strong>Biomechanical Strengths:</strong> Explosive reaction off the blocks and clean breaststroke pullout timing. Shows sharp improvement in 50m Free tempo (32.82s) and 50m Breaststroke (43.59s) with low head position during breaths.</p>
           <p><strong>Key Developmental Priorities:</strong> Narrow knee separation on breaststroke kick catch and sustain continuous 6-beat flutter kick through the final 15m of 50m/100m Freestyle.</p>
         `,
         videoLog: [
           { title: '12th SNSC 50m Free Sprint (32.82)', date: '2026-09-20', note: 'Clean streamline breakout; fast final 10m' }
         ],
         huegillLoop: [
-          { step: '1. Vision & Benchmark', desc: 'Break 32.00s in 50m Free and 43.50s in 50m Breaststroke.' },
+          { step: '1. Vision & Benchmark', desc: 'Break 32.00s in 50m Free and 43.00s in 50m Breaststroke.' },
           { step: '2. Breaststroke Pullout', desc: 'Hold full 2-second streamline glide after underwater pull-down.' },
           { step: '3. Head-Down Breathing', desc: 'Keep one goggle in the water on freestyle breaths to protect hip line.' },
           { step: '4. Fast Turn Transitions', desc: 'Tuck knees tight and plant feet high on the wall with zero hesitation.' },
@@ -1181,24 +1182,22 @@
 
       ath.quickStats.forEach(st => {
         const lbl = (st.label || '').toLowerCase();
-        const wantLCM = lbl.includes('lcm');
-        const wantSCM = lbl.includes('scm');
         const mapping = strokeMap.find(m => lbl.includes(m.key));
         if (!mapping) return;
 
-        let candidates = ath.pbs.filter(p => mapping.match(normalizeEventName(p.event).toLowerCase()));
-        if (wantLCM) {
-          const lcmOnly = candidates.filter(p => (p.course || '').toUpperCase().includes('LCM'));
-          if (lcmOnly.length) candidates = lcmOnly;
-        } else if (wantSCM) {
-          const scmOnly = candidates.filter(p => (p.course || '').toUpperCase().includes('SCM'));
-          if (scmOnly.length) candidates = scmOnly;
-        }
-
+        const candidates = ath.pbs.filter(p => mapping.match(normalizeEventName(p.event).toLowerCase()));
         if (!candidates.length) return;
+
         candidates.sort((a, b) => (parseTimeToSeconds(a.time) || 9999) - (parseTimeToSeconds(b.time) || 9999));
         const best = candidates[0];
         if (best && best.time) {
+          const rawCourse = (best.course || '').toUpperCase();
+          const courseTag = rawCourse.includes('LCM') ? 'LCM' : rawCourse.includes('SCY') ? 'SCY' : 'SCM';
+          if (/\((SCM|LCM|SCY)\)/i.test(st.label)) {
+            st.label = st.label.replace(/\((SCM|LCM|SCY)\)/i, `(${courseTag})`);
+          } else {
+            st.label = `${st.label} (${courseTag})`;
+          }
           st.val = best.time;
           st.sub = `${best.std} Standard${best.note && best.note.includes('PB') ? ' (New PB!)' : ''}`;
         }
@@ -2947,6 +2946,7 @@ SUMMARY_TAG: [Short 6-8 word headline for the training log]`;
               if (cloudData.athletes && cloudTs > lastSyncedUpdatedAt) {
                 lastSyncedUpdatedAt = cloudTs;
                 athletesData = cloudData.athletes;
+                Object.values(athletesData).forEach(ath => syncQuickStatsFromPBs(ath));
                 if (Array.isArray(cloudData.auditLog)) {
                   localStorage.setItem(MODULE_AUDIT_KEY, JSON.stringify(cloudData.auditLog));
                   updateAuditBadge();
